@@ -56,6 +56,11 @@ window.ENGLISH_DESK_DATA = {
             "说自己：你喜欢下雨天吗？因为什么？",
           ],
           frame: "I like / don't like ____ days because ____.",
+          demos: [
+            { role: "boyChild", text: "I like rainy days." },
+            { role: "girlChild", text: "I don't like rainy days." },
+            { role: "boyChild", text: "I like rainy days because I can read at home." },
+          ],
         },
         {
           id: "here-comes",
@@ -66,6 +71,11 @@ window.ENGLISH_DESK_DATA = {
             "说自己：用 Here comes… 说眼前刚发生的一件事",
           ],
           frame: "Here comes ____.",
+          demos: [
+            { role: "adultFemale", text: "Here comes the rain." },
+            { role: "adultMale", text: "Here comes the wind." },
+            { role: "boyChild", text: "Here comes my dad." },
+          ],
         },
         {
           id: "gets",
@@ -76,14 +86,42 @@ window.ENGLISH_DESK_DATA = {
             "说自己：今天什么事让你 get ____？",
           ],
           frame: "I get / feel ____ when ____.",
+          demos: [
+            { role: "boyChild", text: "Yoyo is not happy." },
+            { role: "boyChild", text: "Yoyo gets angry." },
+            { role: "girlChild", text: "I feel happy when the sun comes out." },
+          ],
         },
       ],
       questions: [
-        "Do you like rainy days? Why?",
-        "How do you feel when it rains?",
-        "What do you do with your friend on a rainy day?",
+        {
+          ask: "Do you like rainy days? Why?",
+          asker: "adultFemale",
+          sample: { role: "boyChild", text: "Yes. I like rainy days because I can read books at home." },
+        },
+        {
+          ask: "How do you feel when it rains?",
+          asker: "adultMale",
+          sample: { role: "girlChild", text: "I feel a little sad, but I feel warm at home." },
+        },
+        {
+          ask: "What do you do with your friend on a rainy day?",
+          asker: "adultFemale",
+          sample: { role: "boyChild", text: "We read a story together." },
+        },
       ],
       roleplay: "下雨了，一个朋友不高兴；你安慰他，并提议一起做一件室内的事。",
+      dialogues: [
+        { role: "boyChild", name: "Yoyo", text: "Oh no. Here comes the rain. I don't like rainy days." },
+        { role: "boyChild", name: "Joe", text: "Don't be sad, Yoyo. I have an idea." },
+        { role: "boyChild", name: "Joe", text: "Let's read a book together." },
+        { role: "boyChild", name: "Yoyo", text: "Thank you, Joe!" },
+      ],
+      readPrompts: [
+        { role: "adultFemale", text: "Who is in the story?" },
+        { role: "adultFemale", text: "What happened?" },
+        { role: "adultMale", text: "How does Yoyo feel?" },
+      ],
     },
     {
       id: "u2",
@@ -116,6 +154,11 @@ window.ENGLISH_DESK_DATA = {
             "说自己：现在正在做什么",
           ],
           frame: "I'm ____ing.",
+          demos: [
+            { role: "adultFemale", text: "What are you doing?" },
+            { role: "boyChild", text: "I'm reading." },
+            { role: "girlChild", text: "I'm helping Mum." },
+          ],
         },
         {
           id: "can",
@@ -126,6 +169,10 @@ window.ENGLISH_DESK_DATA = {
             "说自己：邀请家人一起做一事",
           ],
           frame: "Can I ____ with you?",
+          demos: [
+            { role: "girlChild", text: "Can I read it with you?" },
+            { role: "boyChild", text: "Sure. We can read it together." },
+          ],
         },
         {
           id: "should",
@@ -136,14 +183,40 @@ window.ENGLISH_DESK_DATA = {
             "说自己：给家人一条善意建议",
           ],
           frame: "You should ____.",
+          demos: [
+            { role: "adultFemale", text: "You should have a good rest." },
+            { role: "adultMale", text: "You should drink some water." },
+          ],
         },
       ],
       questions: [
-        "What are you doing now?",
-        "Can I read / play with you?",
-        "What should a good friend do?",
+        {
+          ask: "What are you doing now?",
+          asker: "adultFemale",
+          sample: { role: "boyChild", text: "I'm reading a storybook." },
+        },
+        {
+          ask: "Can I read / play with you?",
+          asker: "girlChild",
+          sample: { role: "boyChild", text: "Sure. Let's play together." },
+        },
+        {
+          ask: "What should a good friend do?",
+          asker: "adultMale",
+          sample: { role: "girlChild", text: "A good friend should help you." },
+        },
       ],
       roleplay: "朋友生病了，你打电话关心并给出建议。",
+      dialogues: [
+        { role: "girlChild", name: "You", text: "Hello. How do you feel today?" },
+        { role: "boyChild", name: "Friend", text: "I'm ill. I feel tired." },
+        { role: "girlChild", name: "You", text: "Oh. You should have a good rest." },
+        { role: "adultFemale", name: "Mum", text: "Please drink a lot of water." },
+      ],
+      readPrompts: [
+        { role: "adultFemale", text: "Who are the friends?" },
+        { role: "adultFemale", text: "What should the friend do?" },
+      ],
     },
     {
       id: "u3",
@@ -174,6 +247,10 @@ window.ENGLISH_DESK_DATA = {
             "说自己：向家人礼貌求助一件事",
           ],
           frame: "Can you ____, please?",
+          demos: [
+            { role: "girlChild", text: "Can you help me, please?" },
+            { role: "adultMale", text: "Sure. Let me help you." },
+          ],
         },
         {
           id: "sorry",
@@ -184,6 +261,10 @@ window.ENGLISH_DESK_DATA = {
             "说自己：今天有没有想道歉的小事",
           ],
           frame: "I'm sorry ____.",
+          demos: [
+            { role: "boyChild", text: "I'm sorry." },
+            { role: "boyChild", text: "I'm sorry I'm late." },
+          ],
         },
         {
           id: "could",
@@ -194,14 +275,40 @@ window.ENGLISH_DESK_DATA = {
             "说自己：礼貌要一样东西",
           ],
           frame: "Could I have ____, please?",
+          demos: [
+            { role: "girlChild", text: "Could I have a banana, please?" },
+            { role: "adultFemale", text: "Yes, of course." },
+          ],
         },
       ],
       questions: [
-        "Can you help me, please?",
-        "When do you say sorry?",
-        "Could I have a banana / pencil, please?",
+        {
+          ask: "Can you help me, please?",
+          asker: "girlChild",
+          sample: { role: "adultMale", text: "Yes. What can I do for you?" },
+        },
+        {
+          ask: "When do you say sorry?",
+          asker: "adultFemale",
+          sample: { role: "boyChild", text: "I say sorry when I make a mistake." },
+        },
+        {
+          ask: "Could I have a banana / pencil, please?",
+          asker: "boyChild",
+          sample: { role: "adultFemale", text: "Yes, please. Here you are." },
+        },
       ],
       roleplay: "在家里礼貌点一份食物或借一支笔。",
+      dialogues: [
+        { role: "boyChild", name: "You", text: "Excuse me. Could I have a pencil, please?" },
+        { role: "adultFemale", name: "Mum", text: "Yes. Here you are." },
+        { role: "boyChild", name: "You", text: "Thank you." },
+        { role: "adultFemale", name: "Mum", text: "You're welcome." },
+      ],
+      readPrompts: [
+        { role: "adultFemale", text: "What does the child ask for?" },
+        { role: "adultMale", text: "Is the child polite?" },
+      ],
     },
     {
       id: "u5",
@@ -234,6 +341,11 @@ window.ENGLISH_DESK_DATA = {
             "说自己：今晚想吃什么",
           ],
           frame: "I'd like ____.",
+          demos: [
+            { role: "adultFemale", text: "What would you like to have?" },
+            { role: "boyChild", text: "I'd like some chicken." },
+            { role: "girlChild", text: "I'd like some fruit salad." },
+          ],
         },
         {
           id: "wouldyou",
@@ -244,6 +356,11 @@ window.ENGLISH_DESK_DATA = {
             "说自己：招待家人喝点什么",
           ],
           frame: "Would you like ____?",
+          demos: [
+            { role: "adultMale", text: "Would you like some water?" },
+            { role: "girlChild", text: "Yes, please." },
+            { role: "boyChild", text: "No, thank you." },
+          ],
         },
         {
           id: "table",
@@ -254,14 +371,40 @@ window.ENGLISH_DESK_DATA = {
             "说自己：你家饭桌有什么规矩",
           ],
           frame: "Please ____. / Keep ____ clean.",
+          demos: [
+            { role: "adultFemale", text: "Please don't play with the chopsticks." },
+            { role: "adultMale", text: "Keep the table clean." },
+          ],
         },
       ],
       questions: [
-        "What would you like to have?",
-        "Would you like some water?",
-        "How do you keep the table clean?",
+        {
+          ask: "What would you like to have?",
+          asker: "adultFemale",
+          sample: { role: "boyChild", text: "I'd like some noodles, please." },
+        },
+        {
+          ask: "Would you like some water?",
+          asker: "adultMale",
+          sample: { role: "girlChild", text: "Yes, please. Thank you." },
+        },
+        {
+          ask: "How do you keep the table clean?",
+          asker: "adultFemale",
+          sample: { role: "boyChild", text: "I don't play with the chopsticks." },
+        },
       ],
       roleplay: "假装在餐厅点餐，完成 4 个来回。",
+      dialogues: [
+        { role: "adultFemale", name: "Waiter", text: "What would you like to have?" },
+        { role: "boyChild", name: "You", text: "I'd like some chicken, please." },
+        { role: "adultFemale", name: "Waiter", text: "Would you like some juice?" },
+        { role: "boyChild", name: "You", text: "Yes, please." },
+      ],
+      readPrompts: [
+        { role: "adultFemale", text: "What food do they order?" },
+        { role: "adultMale", text: "How do they keep the table clean?" },
+      ],
     },
     {
       id: "u6",
@@ -294,6 +437,10 @@ window.ENGLISH_DESK_DATA = {
             "说自己：你觉得什么最不能缺少",
           ],
           frame: "We can't live without ____.",
+          demos: [
+            { role: "adultMale", text: "We can't live without water." },
+            { role: "adultFemale", text: "We can't live without nature." },
+          ],
         },
         {
           id: "see",
@@ -304,6 +451,10 @@ window.ENGLISH_DESK_DATA = {
             "说自己：最近一次户外看见了什么",
           ],
           frame: "I can see ____.",
+          demos: [
+            { role: "boyChild", text: "I can see a river." },
+            { role: "girlChild", text: "I can see many trees." },
+          ],
         },
         {
           id: "like",
@@ -314,14 +465,40 @@ window.ENGLISH_DESK_DATA = {
             "说自己：喜欢自然里的哪一样",
           ],
           frame: "I like ____ because ____.",
+          demos: [
+            { role: "boyChild", text: "I love this trip." },
+            { role: "girlChild", text: "I like the farm because I can see animals." },
+          ],
         },
       ],
       questions: [
-        "What can you see in nature?",
-        "What can't we live without?",
-        "Do you like the farm / snow? Why?",
+        {
+          ask: "What can you see in nature?",
+          asker: "adultFemale",
+          sample: { role: "boyChild", text: "I can see trees, birds and a river." },
+        },
+        {
+          ask: "What can't we live without?",
+          asker: "adultMale",
+          sample: { role: "girlChild", text: "We can't live without water." },
+        },
+        {
+          ask: "Do you like the farm / snow? Why?",
+          asker: "adultFemale",
+          sample: { role: "boyChild", text: "I like the farm because I can see animals." },
+        },
       ],
       roleplay: "介绍一次去公园或农场，说看到了什么。",
+      dialogues: [
+        { role: "adultMale", name: "Dad", text: "What can you see on the farm?" },
+        { role: "girlChild", name: "You", text: "I can see cows and trees." },
+        { role: "adultFemale", name: "Mum", text: "Do you like this trip?" },
+        { role: "girlChild", name: "You", text: "Yes. I love this trip." },
+      ],
+      readPrompts: [
+        { role: "adultFemale", text: "What can you see?" },
+        { role: "adultMale", text: "Why do you like nature?" },
+      ],
     },
     {
       id: "u7",
@@ -354,6 +531,11 @@ window.ENGLISH_DESK_DATA = {
             "说自己：给家人一句节日祝福",
           ],
           frame: "Happy ____!",
+          demos: [
+            { role: "adultMale", text: "Happy New Year!" },
+            { role: "adultFemale", text: "Happy Spring Festival!" },
+            { role: "girlChild", text: "Happy birthday!" },
+          ],
         },
         {
           id: "wish",
@@ -364,6 +546,10 @@ window.ENGLISH_DESK_DATA = {
             "说自己：你的一个小愿望",
           ],
           frame: "I wish ____.",
+          demos: [
+            { role: "boyChild", text: "I make a wish." },
+            { role: "girlChild", text: "I wish I can read more books." },
+          ],
         },
         {
           id: "festival",
@@ -374,14 +560,40 @@ window.ENGLISH_DESK_DATA = {
             "说自己：你家过节的一件事",
           ],
           frame: "At ____, we ____.",
+          demos: [
+            { role: "adultFemale", text: "What do you do at Spring Festival?" },
+            { role: "boyChild", text: "At Spring Festival, we visit our family." },
+          ],
         },
       ],
       questions: [
-        "What festival is coming?",
-        "What do you do at Spring Festival?",
-        "What is your wish?",
+        {
+          ask: "What festival is coming?",
+          asker: "adultFemale",
+          sample: { role: "boyChild", text: "Spring Festival is coming." },
+        },
+        {
+          ask: "What do you do at Spring Festival?",
+          asker: "adultMale",
+          sample: { role: "girlChild", text: "We eat together and visit our family." },
+        },
+        {
+          ask: "What is your wish?",
+          asker: "adultFemale",
+          sample: { role: "boyChild", text: "I wish I can be a good friend." },
+        },
       ],
       roleplay: "介绍你们家过节的一天，说三件事。",
+      dialogues: [
+        { role: "adultMale", name: "Dad", text: "Happy Spring Festival!" },
+        { role: "girlChild", name: "You", text: "Happy Spring Festival, Dad!" },
+        { role: "adultFemale", name: "Mum", text: "What is your wish?" },
+        { role: "girlChild", name: "You", text: "I wish we can be together." },
+      ],
+      readPrompts: [
+        { role: "adultFemale", text: "What festival is it?" },
+        { role: "adultMale", text: "What is the wish?" },
+      ],
     },
   ],
 };

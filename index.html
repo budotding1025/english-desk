@@ -75,6 +75,37 @@
     .btn:hover { background: var(--ink); color: var(--bg); }
     .btn.primary:hover { filter: brightness(1.08); }
     .btn.ghost { border-color: var(--line); color: var(--muted); }
+    .btn.speak {
+      border-color: var(--accent);
+      color: var(--accent);
+      min-width: 40px;
+    }
+    .btn.speak:hover { background: var(--accent); color: #f7f3ea; }
+    .cast-map {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px 10px;
+      margin: 0 0 12px;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .cast-map strong { color: var(--ink); }
+    .dialogue-line {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      padding: 8px 0;
+      border-bottom: 1px dashed var(--line);
+    }
+    .dialogue-line:last-child { border-bottom: 0; }
+    .dialogue-role {
+      flex: 0 0 auto;
+      font-size: 0.75rem;
+      border: 1px solid var(--line);
+      padding: 2px 6px;
+      color: var(--muted);
+    }
+    .dialogue-text { flex: 1; line-height: 1.45; }
     .timer {
       font-variant-numeric: tabular-nums;
       font-weight: 700;
@@ -245,6 +276,11 @@
       <select id="unitSelect" aria-label="选择单元"></select>
       <button type="button" class="chip active" data-mode="full" id="modeFull">20 分钟</button>
       <button type="button" class="chip" data-mode="short" id="modeShort">15 分钟</button>
+      <select id="accentSelect" aria-label="口音" title="标准英语口音">
+        <option value="en-US">美式</option>
+        <option value="en-GB">英式</option>
+      </select>
+      <button type="button" class="chip active" id="btnVoiceToggle" title="开关语音">语音开</button>
       <span class="timer" id="timer">05:00</span>
       <button type="button" class="btn" id="btnTimer">开始本块计时</button>
     </div>
@@ -253,6 +289,16 @@
   <main>
     <p class="hint" id="weekHint"></p>
     <p class="hint" id="kaixinHint" style="background:#f7efe6;border-left-color:var(--warn)"></p>
+    <div class="panel" style="padding:12px 14px;margin-bottom:14px">
+      <div class="row" style="margin-bottom:8px;justify-content:space-between">
+        <strong>四角色英语语音</strong>
+        <button type="button" class="btn speak" id="btnVoicePreview">试听四角色</button>
+      </div>
+      <div class="cast-map" id="castMap"></div>
+      <p class="footer-note" style="margin:0">
+        问句多用女/男成年老师腔；示范答和角色戏用男小孩 / 女小孩腔。音色来自本机系统英语语音（优先自然音色），童声若无专用会略提音调近似。
+      </p>
+    </div>
 
     <div class="steps" id="stepNav">
       <button type="button" class="step-pill active" data-step="check">
@@ -288,6 +334,8 @@
         <p class="meta" id="wordMeta"></p>
         <p class="answer hidden" id="wordAnswer"></p>
         <div class="row" style="justify-content:center;margin-top:12px">
+          <button type="button" class="btn speak" id="btnSpeakPrompt">听提示</button>
+          <button type="button" class="btn speak" id="btnSpeakAnswer">听答案</button>
           <button type="button" class="btn" id="btnReveal">显示答案</button>
           <button type="button" class="btn primary" id="btnOk">会了</button>
           <button type="button" class="btn" id="btnBad">不会 · 明日再测</button>
@@ -298,6 +346,7 @@
         <div class="row" style="margin-bottom:8px">
           <strong>句型三步</strong>
           <select id="patternSelect"></select>
+          <button type="button" class="btn speak" id="btnSpeakPattern">听示范句</button>
         </div>
         <p class="meta" id="patternFrame"></p>
         <ol id="patternSteps"></ol>
@@ -322,8 +371,13 @@
     <!-- ORAL -->
     <section class="panel hidden" id="panelOral">
       <h2>口头问答</h2>
-      <p class="sub">家长照着问，孩子说完整句。先判断听懂没有；听懂了再示范更好的一句让孩子再说。</p>
+      <p class="sub">先听老师/家长问句（成年腔），再听小孩示范答；然后孩子自己说完整句。</p>
       <p class="hint" id="roleplayHint" style="margin-bottom:12px"></p>
+      <div class="row" style="margin-bottom:10px">
+        <button type="button" class="btn speak" id="btnSpeakDialogue">听角色戏对话</button>
+        <button type="button" class="btn ghost" id="btnStopVoice">停止朗读</button>
+      </div>
+      <div class="qa-box" id="dialogueBox" style="margin-bottom:12px"></div>
       <div class="qa-box" id="qaBox"></div>
       <div class="row">
         <button type="button" class="btn primary" id="btnSaveOral">保存本块问答记录</button>
@@ -333,7 +387,11 @@
     <!-- READ -->
     <section class="panel hidden" id="panelRead">
       <h2>课外阅读</h2>
-      <p class="sub">牛津树 / 大猫等入门分级。开心单词书不替代这一块。读完合书说一句大意。</p>
+      <p class="sub">牛津树 / 大猫等入门分级。读前可听理解提问；读后若大意是英文，可点朗读核对语音。</p>
+      <div class="row" style="margin-bottom:10px">
+        <button type="button" class="btn speak" id="btnSpeakReadPrompts">听阅读提问</button>
+        <button type="button" class="btn speak" id="btnSpeakSummary">朗读我的大意</button>
+      </div>
       <div class="read-box">
         <label>书名 / 级别<br /><input id="readTitle" placeholder="例如：Oxford Reading Tree L2 · Kipper" /></label>
         <label style="display:block;margin-top:10px">页码或册名<br /><input id="readPages" placeholder="例如：p.1–8 或 The Big Box" /></label>
@@ -354,12 +412,13 @@
     </section>
 
     <p class="footer-note">
-      京版云与晨读负责听读、背课文、背单词。本页只做检测、口头问答、课外阅读。
+      京版云与晨读负责听读、背课文、背单词。本页只做检测、口头问答、课外阅读，并提供四角色标准英语语音示范。
       语法书卡点时周末另查；作文书四年级暂不进这 15–20 分钟。
     </p>
   </main>
 
   <script src="./data.js"></script>
+  <script src="./voice.js"></script>
   <script>
     (function () {
       const DATA = window.ENGLISH_DESK_DATA;
@@ -379,7 +438,11 @@
         timerLeft: 0,
         timerId: null,
         retry: [],
+        speakPromptText: "",
+        speakAnswerText: "",
       };
+
+      const V = window.EnglishVoice;
 
       function loadStore() {
         try {
@@ -402,6 +465,27 @@
       }
       function modeCfg() {
         return DATA.modes[state.mode];
+      }
+      function normalizeQuestion(q) {
+        if (typeof q === "string") {
+          return {
+            ask: q,
+            asker: "adultFemale",
+            sample: { role: "boyChild", text: "" },
+          };
+        }
+        return {
+          ask: q.ask,
+          asker: q.asker || "adultFemale",
+          sample: q.sample || { role: "boyChild", text: "" },
+        };
+      }
+      function renderCastMap() {
+        if (!V || !$("castMap")) return;
+        V.refresh();
+        $("castMap").innerHTML = V.castMap()
+          .map((c) => "<div><strong>" + c.label + "</strong><br/>" + c.voice + "</div>")
+          .join("");
       }
       function shuffle(arr) {
         const a = arr.slice();
@@ -510,6 +594,27 @@
         state.patternId = u.patterns[0].id;
         renderPattern();
         renderQuestions();
+        renderDialogue();
+      }
+
+      function renderDialogue() {
+        const box = $("dialogueBox");
+        if (!box) return;
+        const lines = unit().dialogues || [];
+        if (!lines.length) {
+          box.innerHTML = "<p class='meta'>本单元暂无角色戏台词。</p>";
+          return;
+        }
+        box.innerHTML = "<strong style='display:block;margin-bottom:8px'>角色戏台词</strong>" + lines.map((line) => {
+          const label = (V && V.ROLES[V.normRole(line.role)] || {}).label || line.role;
+          return (
+            '<div class="dialogue-line">' +
+              '<span class="dialogue-role">' + (line.name || label) + " · " + label + "</span>" +
+              '<span class="dialogue-text">' + line.text + "</span>" +
+              '<button type="button" class="btn speak" data-say="' + encodeURIComponent(line.text) + '" data-role="' + line.role + '">听</button>' +
+            "</div>"
+          );
+        }).join("");
       }
 
       function renderPattern() {
@@ -529,9 +634,17 @@
 
       function renderQuestions() {
         const u = unit();
-        $("qaBox").innerHTML = u.questions.map((q, i) => (
+        const qs = (u.questions || []).map(normalizeQuestion);
+        $("qaBox").innerHTML = qs.map((q, i) => (
           '<div class="qa-item">' +
-            '<div class="q">Q' + (i + 1) + ". " + q + "</div>" +
+            '<div class="q">Q' + (i + 1) + ". " + q.ask + "</div>" +
+            '<div class="row">' +
+              '<button type="button" class="btn speak" data-ask="' + i + '">听提问</button>' +
+              '<button type="button" class="btn speak" data-sample="' + i + '"' + (q.sample && q.sample.text ? "" : " disabled") + ">听示范答</button>" +
+            "</div>" +
+            (q.sample && q.sample.text
+              ? '<p class="meta">示范（' + ((V && V.ROLES[V.normRole(q.sample.role)] || {}).label || "小孩") + "）：" + q.sample.text + "</p>"
+              : "") +
             '<textarea rows="2" data-qi="' + i + '" placeholder="孩子口头答完后，家长可记关键词（可选）"></textarea>' +
             '<div class="row">' +
               '<button type="button" class="btn" data-qmark="' + i + '" data-val="ok">流畅</button>' +
@@ -565,24 +678,62 @@
           $("wordPrompt").textContent = "点「抽 5 词」开始";
           $("wordMeta").textContent = "";
           $("wordAnswer").classList.add("hidden");
+          state.speakPromptText = "";
+          state.speakAnswerText = "";
           return;
         }
         const w = state.words[state.index];
         const quiz = state.quiz;
         let prompt = w.zh;
         let answer = w.en;
-        if (quiz === "en2zh") { prompt = w.en; answer = w.zh; }
-        if (quiz === "dictation") { prompt = "家长读：" + w.en + "（孩子书写）"; answer = w.en + " · " + w.zh; }
-        if (quiz === "frame") {
+        let speakPrompt = w.en;
+        let speakAnswer = w.en;
+        let promptRole = "adultFemale";
+        let answerRole = "adultMale";
+
+        if (quiz === "zh2en") {
+          prompt = w.zh;
+          answer = w.en;
+          speakPrompt = ""; // Chinese meaning: don't force English TTS
+          speakAnswer = w.en;
+          promptRole = "adultFemale";
+          answerRole = "adultFemale";
+        } else if (quiz === "en2zh") {
+          prompt = w.en;
+          answer = w.zh;
+          speakPrompt = w.en;
+          speakAnswer = w.en;
+        } else if (quiz === "dictation") {
+          prompt = "听写：请听英语，然后写下来";
+          answer = w.en + " · " + w.zh;
+          speakPrompt = w.en;
+          speakAnswer = w.en;
+          promptRole = "adultMale";
+        } else if (quiz === "frame") {
           const frame = (unit().patterns[0] && unit().patterns[0].frame) || "I can see ____.";
+          const filled = frame.replace("____", w.en);
           prompt = "把「" + w.en + "」填进句框：" + frame;
-          answer = frame.replace("____", w.en) + "（意思：" + w.zh + "）";
+          answer = filled + "（意思：" + w.zh + "）";
+          speakPrompt = w.en;
+          speakAnswer = filled;
+          answerRole = "boyChild";
         }
+
+        state.speakPromptText = speakPrompt;
+        state.speakAnswerText = speakAnswer;
+        state.speakPromptRole = promptRole;
+        state.speakAnswerRole = answerRole;
+
         $("wordPrompt").textContent = prompt;
-        $("wordMeta").innerHTML = '<span class="tag ' + (w.src === "课本" ? "book" : "") + '">' + (w.src || "词") + "</span>" +
+        $("wordMeta").innerHTML = '<span class="tag ' + (String(w.src || "").indexOf("课") >= 0 ? "book" : "") + '">' + (w.src || "词") + "</span>" +
           "第 " + (state.index + 1) + " / " + state.words.length + " 词";
         $("wordAnswer").textContent = answer;
         $("wordAnswer").classList.add("hidden");
+
+        // 听写模式：抽词后自动用男成年腔读一遍
+        if (quiz === "dictation" && V && speakPrompt) {
+          setTimeout(() => V.speak(speakPrompt, promptRole), 180);
+        }
       }
 
       function markWord(ok) {
@@ -640,8 +791,12 @@
           return '<option value="' + u.id + '">' + u.name + extra + "</option>";
         }).join("");
         const store = loadStore();
-        state.unitId = "u1";
-        saveStore({ unitId: "u1" });
+        if (store.unitId && DATA.units.some((u) => u.id === store.unitId)) {
+          state.unitId = store.unitId;
+        } else {
+          state.unitId = "u1";
+          saveStore({ unitId: "u1" });
+        }
         $("unitSelect").value = state.unitId;
         if (store.mode === "short" || store.mode === "full") {
           state.mode = store.mode;
@@ -654,6 +809,17 @@
         $("durOral").textContent = modeCfg().oral + " 分钟";
         $("durRead").textContent = modeCfg().read + " 分钟";
         if (store.readTitle) $("readTitle").value = store.readTitle;
+
+        if (V) {
+          if (store.accent === "en-GB" || store.accent === "en-US") {
+            V.setAccent(store.accent);
+            $("accentSelect").value = store.accent;
+          }
+          const on = store.voiceOn !== false;
+          V.setEnabled(on);
+          $("btnVoiceToggle").textContent = on ? "语音开" : "语音关";
+          $("btnVoiceToggle").classList.toggle("active", on);
+        }
       }
 
       // events
@@ -695,9 +861,102 @@
       });
 
       $("btnDrawWords").addEventListener("click", drawWords);
-      $("btnReveal").addEventListener("click", () => $("wordAnswer").classList.remove("hidden"));
+      $("btnReveal").addEventListener("click", () => {
+        $("wordAnswer").classList.remove("hidden");
+        if (V && state.speakAnswerText) V.speak(state.speakAnswerText, state.speakAnswerRole || "adultFemale");
+      });
+      $("btnSpeakPrompt").addEventListener("click", () => {
+        if (!V) return;
+        if (state.speakPromptText) V.speak(state.speakPromptText, state.speakPromptRole || "adultFemale");
+        else if (state.words[state.index]) V.speak(state.words[state.index].en, "adultFemale");
+      });
+      $("btnSpeakAnswer").addEventListener("click", () => {
+        if (!V) return;
+        $("wordAnswer").classList.remove("hidden");
+        if (state.speakAnswerText) V.speak(state.speakAnswerText, state.speakAnswerRole || "adultFemale");
+      });
+      $("btnSpeakPattern").addEventListener("click", () => {
+        if (!V) return;
+        const p = unit().patterns.find((x) => x.id === state.patternId) || unit().patterns[0];
+        const demos = p.demos || [];
+        if (demos.length) V.speakSequence(demos);
+        else V.speak(p.label, "adultFemale");
+      });
       $("btnOk").addEventListener("click", () => markWord(true));
       $("btnBad").addEventListener("click", () => markWord(false));
+
+      $("accentSelect").addEventListener("change", () => {
+        if (!V) return;
+        V.setAccent($("accentSelect").value);
+        saveStore({ accent: $("accentSelect").value });
+        renderCastMap();
+      });
+      $("btnVoiceToggle").addEventListener("click", () => {
+        if (!V) return;
+        const on = !V.isEnabled();
+        V.setEnabled(on);
+        saveStore({ voiceOn: on });
+        $("btnVoiceToggle").textContent = on ? "语音开" : "语音关";
+        $("btnVoiceToggle").classList.toggle("active", on);
+      });
+      $("btnVoicePreview").addEventListener("click", () => {
+        if (!V) return;
+        V.speakSequence([
+          { role: "adultMale", text: "Hello. I am Dad." },
+          { role: "adultFemale", text: "Hello. I am Mum." },
+          { role: "boyChild", text: "Hi! I am a boy." },
+          { role: "girlChild", text: "Hi! I am a girl." },
+        ]);
+      });
+      $("btnSpeakDialogue").addEventListener("click", () => {
+        if (!V) return;
+        const lines = unit().dialogues || [];
+        if (!lines.length) return;
+        V.speakSequence(lines.map((l) => ({ role: l.role, text: l.text })));
+      });
+      $("btnStopVoice").addEventListener("click", () => { if (V) V.stop(); });
+      $("btnSpeakReadPrompts").addEventListener("click", () => {
+        if (!V) return;
+        const prompts = unit().readPrompts || [
+          { role: "adultFemale", text: "Who is in the story?" },
+          { role: "adultFemale", text: "What happened?" },
+        ];
+        V.speakSequence(prompts);
+      });
+      $("btnSpeakSummary").addEventListener("click", () => {
+        if (!V) return;
+        const t = $("readSummary").value.trim();
+        if (!t) {
+          alert("先写一句英文大意再朗读。");
+          return;
+        }
+        V.speak(t, "boyChild");
+      });
+
+      $("dialogueBox").addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-say]");
+        if (!btn || !V) return;
+        V.speak(decodeURIComponent(btn.dataset.say), btn.dataset.role || "adultFemale");
+      });
+
+      $("qaBox").addEventListener("click", (e) => {
+        const askBtn = e.target.closest("[data-ask]");
+        const sampleBtn = e.target.closest("[data-sample]");
+        const markBtn = e.target.closest("[data-qmark]");
+        if (askBtn && V) {
+          const q = normalizeQuestion(unit().questions[Number(askBtn.dataset.ask)]);
+          V.speak(q.ask, q.asker || "adultFemale");
+          return;
+        }
+        if (sampleBtn && V) {
+          const q = normalizeQuestion(unit().questions[Number(sampleBtn.dataset.sample)]);
+          if (q.sample && q.sample.text) V.speak(q.sample.text, q.sample.role || "boyChild");
+          return;
+        }
+        if (!markBtn) return;
+        markBtn.parentElement.querySelectorAll("button").forEach((b) => b.classList.remove("primary"));
+        markBtn.classList.add("primary");
+      });
 
       $("patternSelect").addEventListener("change", () => {
         state.patternId = $("patternSelect").value;
@@ -729,13 +988,6 @@
         $("customWordEn").value = "";
         $("customWordZh").value = "";
         alert("已加入本单元词池。");
-      });
-
-      $("qaBox").addEventListener("click", (e) => {
-        const btn = e.target.closest("[data-qmark]");
-        if (!btn) return;
-        btn.parentElement.querySelectorAll("button").forEach((b) => b.classList.remove("primary"));
-        btn.classList.add("primary");
       });
 
       $("btnSaveOral").addEventListener("click", () => {
@@ -790,9 +1042,19 @@
       initUnits();
       renderWeekHint();
       renderUnitMeta();
+      renderCastMap();
       renderLogs();
       setTimerForStep();
       showStep("check");
+      if (V) {
+        setTimeout(renderCastMap, 500);
+        if (window.speechSynthesis) {
+          window.speechSynthesis.onvoiceschanged = function () {
+            V.refresh();
+            renderCastMap();
+          };
+        }
+      }
     })();
   </script>
 </body>
