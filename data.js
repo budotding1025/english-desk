@@ -1,126 +1,345 @@
-/* 北京版四年级上册 · 家侧检测 / 问答题库
- * 词表为常用教学词，可按学校进度在页面增删；不替代课本 Word List。
+/* 北京版四年级上册 · 家侧检测
+ * Unit 1 按「第一单元练习卷」考点与丢分点设计：
+ * 新增词（情绪/天气/动作）· 听力长句 because · 口语/仿写 I'm…because/when… + 冠词
+ * 其余单元保留作滚动复习。
  */
 window.ENGLISH_DESK_DATA = {
-  title: "英语家侧 · 15–20 分钟",
+  title: "翻翻英语 · 先稳 95 再冲汇文南",
   book: "北京版四年级上册",
+  phaseNote:
+    "阶段 A：兴趣 + 听力长句 + 口语完整句 + 词能进句，校内稳住约 95。过关后再开汇文南提高。",
+  /** 每周 3 场：工作日①词听 · 工作日②口头 · 周末综合 */
+  sessions: {
+    weekdayListen: {
+      id: "weekdayListen",
+      label: "工作日① 词听",
+      minutes: 18,
+      blurb: "5 词检测 + 听力长句/应答 + 句型 1–2 步",
+      steps: ["check"],
+      showListen: true,
+      showSort: false,
+      showWrite: false,
+      patternMaxStep: 2,
+    },
+    weekdayOral: {
+      id: "weekdayOral",
+      label: "工作日② 口头",
+      minutes: 18,
+      blurb: "错词轻测 + 口头 3 问（完整句）+ 短角色戏",
+      steps: ["oral"],
+      showListen: false,
+      showSort: false,
+      showWrite: false,
+      patternMaxStep: 3,
+    },
+    weekend: {
+      id: "weekend",
+      label: "周末综合",
+      minutes: 30,
+      blurb: "分类 + 拼读提示 + 仿写冠词 + 角色戏 + 小书",
+      steps: ["check", "oral", "read"],
+      showListen: true,
+      showSort: true,
+      showWrite: true,
+      patternMaxStep: 3,
+    },
+  },
+  /** 兼容旧字段：按场次拆给三块倒计时 */
   modes: {
-    full: { label: "20 分钟", check: 5, oral: 5, read: 10 },
-    short: { label: "15 分钟", check: 5, oral: 5, read: 5 },
+    weekdayListen: { label: "工作日① 18′", check: 18, oral: 0, read: 0 },
+    weekdayOral: { label: "工作日② 18′", check: 0, oral: 18, read: 0 },
+    weekend: { label: "周末 30′", check: 10, oral: 10, read: 10 },
   },
   weekHints: [
-    { day: 1, check: "新课 5 词 · 汉→英", oral: "本周题卡 3 问", note: "开周" },
-    { day: 2, check: "错词 + 新词 · 听写", oral: "同一题卡 · 逼说自己", note: "巩固" },
-    { day: 3, check: "词填进句", oral: "看情景即兴 3 问", note: "活用" },
-    { day: 4, check: "句型三步为主", oral: "短角色戏", note: "开口" },
-    { day: 5, check: "本周 3 + 旧单元 2", oral: "今日一句", note: "滚动" },
-    { day: 6, check: "错词复测 3′", oral: "可选 / 主题三句", note: "周末拉长阅读" },
-    { day: 0, check: "错词复测 3′", oral: "可选 / 主题三句", note: "周末拉长阅读" },
+    { day: 1, session: "weekdayListen", note: "建议开周做词听" },
+    { day: 2, session: "weekdayOral", note: "建议做口头" },
+    { day: 3, session: "weekdayListen", note: "可再做一场词听" },
+    { day: 4, session: "weekdayOral", note: "可再做一场口头" },
+    { day: 5, session: "weekdayListen", note: "轻量词听收尾" },
+    { day: 6, session: "weekend", note: "周末综合 30′" },
+    { day: 0, session: "weekend", note: "周末综合 30′" },
   ],
   units: [
     {
       id: "u1",
       name: "Unit 1 Share and Care",
+      examFocus: true,
       currentLesson: 4,
-      lessonTitle: "Lesson 4 Yoyo and Joe",
-      themes: "天气与情绪 · 朋友陪伴 · Letters and Sounds",
-      kaixinHint: "开心单词书：情绪 / 天气 / 朋友陪伴情景",
+      lessonTitle: "对标第一单元练习卷",
+      themes: "情绪 · 天气 · because/when · What's the matter · 找东西",
+      kaixinHint: "卷面重点：happy/sad/angry/excited/worried + sunny/rainy/cloudy/windy；丢分在听力长句与仿写冠词",
       words: [
-        { en: "his", zh: "他的", src: "第4课", lesson: 4 },
-        { en: "mouse", zh: "老鼠", src: "第4课", lesson: 4 },
-        { en: "come", zh: "来", src: "第4课", lesson: 4 },
-        { en: "have", zh: "有", src: "第4课", lesson: 4 },
-        { en: "idea", zh: "主意", src: "第4课", lesson: 4 },
-        { en: "stop", zh: "停止", src: "第4课", lesson: 4 },
-        { en: "but", zh: "但是", src: "第4课", lesson: 4 },
-        { en: "rainy", zh: "下雨的", src: "第4课", lesson: 4 },
-        { en: "sunny", zh: "晴朗的", src: "第4课", lesson: 4 },
-        { en: "wind", zh: "风", src: "第4课", lesson: 4 },
-        { en: "rain", zh: "雨", src: "第4课", lesson: 4 },
-        { en: "angry", zh: "生气的", src: "第3–4课", lesson: 3 },
-        { en: "happy", zh: "高兴的", src: "第1–4课", lesson: 1 },
-        { en: "sad", zh: "难过的", src: "第1–3课", lesson: 1 },
-        { en: "worried", zh: "担心的", src: "第1–3课", lesson: 1 },
-        { en: "excited", zh: "兴奋的", src: "第1–3课", lesson: 1 },
-        { en: "feel", zh: "感觉", src: "第1课", lesson: 1 },
-        { en: "matter", zh: "麻烦；问题", src: "第2课", lesson: 2 },
-        { en: "together", zh: "一起", src: "第2–3课", lesson: 2 },
+        { en: "happy", zh: "高兴的", src: "卷·情绪", lesson: 1, cat: "emotion", priority: "high" },
+        { en: "sad", zh: "难过的", src: "卷·情绪", lesson: 1, cat: "emotion", priority: "high" },
+        { en: "angry", zh: "生气的", src: "卷·情绪", lesson: 3, cat: "emotion", priority: "high" },
+        { en: "excited", zh: "兴奋的", src: "卷·情绪", lesson: 2, cat: "emotion", priority: "high" },
+        { en: "worried", zh: "担心的", src: "卷·情绪", lesson: 2, cat: "emotion", priority: "high" },
+        { en: "better", zh: "更好的；（感觉）好些", src: "卷·情绪", lesson: 2, cat: "emotion", priority: "mid" },
+        { en: "feel", zh: "感觉", src: "卷·核心", lesson: 1, cat: "verb", priority: "high" },
+        { en: "matter", zh: "麻烦；问题（What's the matter?）", src: "卷·核心", lesson: 2, cat: "verb", priority: "high" },
+        { en: "look", zh: "看；看起来", src: "卷·动词", lesson: 2, cat: "verb", priority: "high" },
+        { en: "find", zh: "找到", src: "卷·动词", lesson: 2, cat: "verb", priority: "high" },
+        { en: "help", zh: "帮助", src: "卷·动词", lesson: 2, cat: "verb", priority: "mid" },
+        { en: "play", zh: "玩", src: "卷·动词", lesson: 1, cat: "verb", priority: "mid" },
+        { en: "sunny", zh: "晴朗的", src: "卷·天气", lesson: 4, cat: "weather", priority: "high" },
+        { en: "rainy", zh: "下雨的", src: "卷·天气", lesson: 4, cat: "weather", priority: "high" },
+        { en: "cloudy", zh: "多云的", src: "卷·天气", lesson: 4, cat: "weather", priority: "high" },
+        { en: "windy", zh: "有风的", src: "卷·天气", lesson: 4, cat: "weather", priority: "high" },
+        { en: "hot", zh: "热的", src: "卷·天气", lesson: 4, cat: "weather", priority: "mid" },
+        { en: "rain", zh: "雨；下雨", src: "第4课", lesson: 4, cat: "weather", priority: "mid" },
+        { en: "wind", zh: "风", src: "第4课", lesson: 4, cat: "weather", priority: "mid" },
+        { en: "together", zh: "一起", src: "卷·对话", lesson: 2, cat: "other", priority: "high" },
+        { en: "idea", zh: "主意", src: "第4课", lesson: 4, cat: "other", priority: "mid" },
+        { en: "come", zh: "来", src: "第4课", lesson: 4, cat: "other", priority: "mid" },
+        { en: "stop", zh: "停止", src: "第4课", lesson: 4, cat: "other", priority: "low" },
+        { en: "his", zh: "他的", src: "第4课", lesson: 4, cat: "other", priority: "low" },
+        { en: "mouse", zh: "老鼠", src: "第4课", lesson: 4, cat: "other", priority: "low" },
+        { en: "but", zh: "但是", src: "第4课", lesson: 4, cat: "other", priority: "low" },
+        { en: "have", zh: "有", src: "第4课", lesson: 4, cat: "other", priority: "mid" },
       ],
+      wordSort: {
+        title: "词分类（卷 VI）",
+        hint: "把词拖进三类：情绪 / 动作 / 天气。和卷子同一考法。",
+        groups: [
+          { id: "emotion", label: "情绪类（如 happy）", answers: ["worried", "sad", "angry", "excited", "better"] },
+          { id: "verb", label: "动作类（如 look）", answers: ["feel", "look", "find", "help", "play"] },
+          { id: "weather", label: "天气类（如 windy）", answers: ["sunny", "cloudy", "hot", "rainy", "windy"] },
+        ],
+        bank: ["worried", "sad", "angry", "excited", "better", "feel", "look", "find", "help", "play", "sunny", "cloudy", "hot", "rainy", "windy"],
+      },
+      listen: {
+        title: "听力强化（卷面丢分点）",
+        hint: "单图听力已会。这里练「听整句原因」和「听问句选应答」。点播放，孩子听完再选。",
+        judge: [
+          {
+            id: "j1",
+            role: "boyChild",
+            speak: "I am happy because I can play with friends and read interesting books at school.",
+            show: "判断：我开心，因为能和朋友玩，还能在学校读有趣的书。",
+            answer: true,
+            tip: "卷 IV 易错：because 后面有两件事，都要听到。",
+          },
+          {
+            id: "j2",
+            role: "girlChild",
+            speak: "I am sad because it is rainy and I can't play outside.",
+            show: "判断：我难过，因为下雨了，不能出去玩。",
+            answer: true,
+            tip: "抓住 because + can't。",
+          },
+          {
+            id: "j3",
+            role: "adultMale",
+            speak: "Tom is angry because his friend broke his pencil.",
+            show: "判断：Tom 很高兴，因为他交到了新朋友。",
+            answer: false,
+            tip: "情绪词 angry ≠ happy；听清原因。",
+          },
+          {
+            id: "j4",
+            role: "adultFemale",
+            speak: "Mum is worried because Grandma is ill.",
+            show: "判断：妈妈担心，因为奶奶生病了。",
+            answer: true,
+            tip: "worried + ill 常一起出现。",
+          },
+          {
+            id: "j5",
+            role: "boyChild",
+            speak: "I feel excited when it is sunny. I can ride a bike.",
+            show: "判断：晴天我很兴奋，可以骑自行车。",
+            answer: true,
+            tip: "when 引导的条件/时间，和 because 一样要听完整。",
+          },
+        ],
+        reply: [
+          {
+            id: "r1",
+            role: "adultFemale",
+            speak: "What's the matter?",
+            prompt: "听到问句，选最佳应答",
+            choices: [
+              { id: "a", text: "I can't find my watch." },
+              { id: "b", text: "I'm fine, thank you." },
+              { id: "c", text: "It's sunny today." },
+            ],
+            answer: "a",
+            tip: "What's the matter? → 说问题/麻烦。",
+          },
+          {
+            id: "r2",
+            role: "adultMale",
+            speak: "How do you feel?",
+            prompt: "听到问句，选最佳应答",
+            choices: [
+              { id: "a", text: "I feel happy." },
+              { id: "b", text: "It's under the desk." },
+              { id: "c", text: "Yes, please." },
+            ],
+            answer: "a",
+            tip: "How do you feel? → I feel + 情绪词。",
+          },
+          {
+            id: "r3",
+            role: "boyChild",
+            speak: "I'm angry because he broke my pencil.",
+            prompt: "听到陈述，选合适回应",
+            choices: [
+              { id: "a", text: "Don't be angry. I can help you." },
+              { id: "b", text: "Happy birthday!" },
+              { id: "c", text: "It's rainy." },
+            ],
+            answer: "a",
+            tip: "安慰 + 提议帮助，是卷面常见应答。",
+          },
+          {
+            id: "r4",
+            role: "girlChild",
+            speak: "Can you look for it together?",
+            prompt: "听到问句，选最佳应答",
+            choices: [
+              { id: "a", text: "Sure. Let's look for it together." },
+              { id: "b", text: "I am sad." },
+              { id: "c", text: "It's black." },
+            ],
+            answer: "a",
+            tip: "一起找东西：Sure / OK + together。",
+          },
+        ],
+      },
       patterns: [
+        {
+          id: "because",
+          label: "I'm … because …（卷核心）",
+          steps: [
+            "原句：I'm happy because I can play with friends.",
+            "换词：happy→sad/angry/worried；because 后换原因",
+            "说自己：今天真实的心情 + 原因（完整一句）",
+          ],
+          frame: "I'm ____ because ____.",
+          demos: [
+            { role: "boyChild", text: "I'm happy because I can play with friends." },
+            { role: "girlChild", text: "I'm sad because it is rainy." },
+            { role: "boyChild", text: "I'm worried because I can't find my book." },
+          ],
+        },
+        {
+          id: "when",
+          label: "I'm happy when …（仿写考点）",
+          steps: [
+            "原句：I'm happy when I read a good book.",
+            "换词：read a good book → play catch / go to the park / help Mum",
+            "说自己：两句；注意 a / the（go to a park / the park）",
+          ],
+          frame: "I'm happy when I ____.",
+          demos: [
+            { role: "girlChild", text: "I'm happy when I read a good book." },
+            { role: "boyChild", text: "I'm happy when I play catch." },
+            { role: "girlChild", text: "I'm happy when I go to the park." },
+          ],
+        },
+        {
+          id: "matter",
+          label: "What's the matter?",
+          steps: [
+            "原句：What's the matter? → I can't find my watch.",
+            "换词：watch → bag / pencil / scarf",
+            "说自己：假装丢了一样东西，问答各一句",
+          ],
+          frame: "What's the matter? / I can't find ____.",
+          demos: [
+            { role: "adultFemale", text: "What's the matter?" },
+            { role: "boyChild", text: "I can't find my watch." },
+            { role: "adultMale", text: "Let's look for it together." },
+          ],
+        },
         {
           id: "like-rain",
           label: "I like / don't like rainy days",
           steps: [
             "原句：I like rainy days. / I don't like rainy days.",
-            "换词：rainy → sunny / windy；或换成 foods / sports",
-            "说自己：你喜欢下雨天吗？因为什么？",
+            "换词：rainy → sunny / windy / cloudy",
+            "说自己：喜欢哪种天气？because…",
           ],
           frame: "I like / don't like ____ days because ____.",
           demos: [
             { role: "boyChild", text: "I like rainy days." },
             { role: "girlChild", text: "I don't like rainy days." },
-            { role: "boyChild", text: "I like rainy days because I can read at home." },
-          ],
-        },
-        {
-          id: "here-comes",
-          label: "Here comes the rain / wind",
-          steps: [
-            "原句：Here comes the rain. / Here comes the wind.",
-            "换词：rain → bus / my dad / the wind",
-            "说自己：用 Here comes… 说眼前刚发生的一件事",
-          ],
-          frame: "Here comes ____.",
-          demos: [
-            { role: "adultFemale", text: "Here comes the rain." },
-            { role: "adultMale", text: "Here comes the wind." },
-            { role: "boyChild", text: "Here comes my dad." },
-          ],
-        },
-        {
-          id: "gets",
-          label: "Yoyo gets angry / is not happy",
-          steps: [
-            "原句：Yoyo is not happy. / Yoyo gets angry.",
-            "换词：Yoyo → I / Tom；angry → happy / excited / sad",
-            "说自己：今天什么事让你 get ____？",
-          ],
-          frame: "I get / feel ____ when ____.",
-          demos: [
-            { role: "boyChild", text: "Yoyo is not happy." },
-            { role: "boyChild", text: "Yoyo gets angry." },
-            { role: "girlChild", text: "I feel happy when the sun comes out." },
+            { role: "boyChild", text: "I like sunny days because I can ride a bike." },
           ],
         },
       ],
       questions: [
         {
-          ask: "Do you like rainy days? Why?",
+          ask: "How do you feel today? Why?",
           asker: "adultFemale",
-          sample: { role: "boyChild", text: "Yes. I like rainy days because I can read books at home." },
+          sample: { role: "boyChild", text: "I feel happy because I can play with my friends." },
+          tip: "必须说出 because / when 原因，不要只说 happy。",
         },
         {
-          ask: "How do you feel when it rains?",
+          ask: "What's the matter?",
           asker: "adultMale",
-          sample: { role: "girlChild", text: "I feel a little sad, but I feel warm at home." },
+          sample: { role: "girlChild", text: "I can't find my red scarf." },
+          tip: "答问题本身，不要答天气。",
         },
         {
-          ask: "What do you do with your friend on a rainy day?",
+          ask: "I'm happy when I read a good book. What about you?",
           asker: "adultFemale",
-          sample: { role: "boyChild", text: "We read a story together." },
+          sample: { role: "boyChild", text: "I'm happy when I go to the park." },
+          tip: "仿写口说；park 前要有 a/the。",
+        },
+        {
+          ask: "Do you like rainy days? Why?",
+          asker: "adultMale",
+          sample: { role: "girlChild", text: "No. I don't like rainy days because I can't play outside." },
+          tip: "Yes/No + because。",
         },
       ],
-      roleplay: "下雨了，一个朋友不高兴；你安慰他，并提议一起做一件室内的事。",
+      roleplay: "你看起来难过；朋友问 What's the matter？你说找不到手表，两人一起找，最后在帽子下面找到。",
       dialogues: [
-        { role: "boyChild", name: "Yoyo", text: "Oh no. Here comes the rain. I don't like rainy days." },
-        { role: "boyChild", name: "Joe", text: "Don't be sad, Yoyo. I have an idea." },
-        { role: "boyChild", name: "Joe", text: "Let's read a book together." },
-        { role: "boyChild", name: "Yoyo", text: "Thank you, Joe!" },
+        { role: "adultFemale", name: "Mum", text: "You look sad. What's the matter?" },
+        { role: "boyChild", name: "You", text: "I can't find my watch." },
+        { role: "girlChild", name: "Friend", text: "Don't worry. Let's look for it together." },
+        { role: "boyChild", name: "You", text: "It's round in shape and black in colour." },
+        { role: "girlChild", name: "Friend", text: "Look! It's under your cap." },
+        { role: "boyChild", name: "You", text: "Thank you! I feel happy now." },
       ],
+      reading: {
+        title: "I'm Happy（卷面短文风格）",
+        narratorRole: "boyChild",
+        passage:
+          "I am happy when it is sunny. I can play with my friends. We ride bikes, fly kites and play catch.\n" +
+          "I am happy when I am with my family. We eat dinner and listen to stories.\n" +
+          "I am happy when I read a good book. I can go on adventures with the characters.\n" +
+          "I am happy when I help others. Helping makes me feel warm.",
+        prompts: [
+          { role: "adultFemale", text: "When is the writer happy?" },
+          { role: "adultMale", text: "What do the friends do on a sunny day?" },
+          { role: "adultFemale", text: "How does helping others make him feel?" },
+        ],
+        writeModel: "I'm happy when I read a good book.",
+        writeHints: [
+          "仿两句：I'm happy when I ____.",
+          "活动短语：play catch / ride a bike / fly a kite / go to the park / help Mum",
+          "冠词自查：go to a park / go to the park（不要写成 go to park）",
+          "读完可对照：a good book、the park、my friends",
+        ],
+        articleTips: [
+          { wrong: "go to park", right: "go to a park / go to the park", note: "卷面 −2 点：地点前常要 a/the" },
+          { wrong: "read book", right: "read a book / read a good book", note: "可数名词单数要冠词" },
+          { wrong: "play the catch", right: "play catch", note: "球类/捉人游戏前常常不用 the" },
+        ],
+      },
       readPrompts: [
-        { role: "adultFemale", text: "Who is in the story?" },
-        { role: "adultFemale", text: "What happened?" },
-        { role: "adultMale", text: "How does Yoyo feel?" },
+        { role: "adultFemale", text: "When are you happy?" },
+        { role: "adultMale", text: "What do you do with your friends?" },
+        { role: "adultFemale", text: "Can you make a sentence with because?" },
+      ],
+      phonics: [
+        { a: "cake", b: "make", same: true, note: "a_e → /eɪ/" },
+        { a: "cat", b: "angry", same: true, note: "a → /æ/" },
+        { a: "he", b: "she", same: true, note: "e → /iː/" },
+        { a: "bed", b: "me", same: false, note: "/e/ vs /iː/" },
       ],
     },
     {
@@ -597,3 +816,227 @@ window.ENGLISH_DESK_DATA = {
     },
   ],
 };
+
+/** 多邻国式课流：按场次生成一屏一题卡序 */
+(function (g) {
+  const DATA = g.ENGLISH_DESK_DATA;
+  if (!DATA) return;
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function todaySessionId() {
+    const day = new Date().getDay();
+    const hint = (DATA.weekHints || []).find((h) => h.day === day);
+    return (hint && hint.session) || "weekdayListen";
+  }
+
+  function sessionMeta(id) {
+    return (DATA.sessions && DATA.sessions[id]) || DATA.sessions.weekdayListen;
+  }
+
+  function pickWords(unit, store, n, preferRetry) {
+    const custom = (store.customWords && store.customWords[unit.id]) || [];
+    const retry = ((store.retryWords || []).filter((w) => w.unitId === unit.id) || []).map((r) => ({
+      en: r.en,
+      zh: r.zh,
+      src: "错词",
+      priority: "high",
+    }));
+    const pool = (unit.words || []).concat(custom);
+    const high = shuffle(pool.filter((w) => w.priority === "high"));
+    const rest = shuffle(pool.filter((w) => w.priority !== "high"));
+    let picked = [];
+    if (preferRetry && retry.length) {
+      picked = picked.concat(shuffle(retry).slice(0, Math.min(preferRetry, retry.length)));
+    }
+    const merged = high.concat(rest);
+    while (picked.length < n && merged.length) {
+      const w = merged.shift();
+      if (!picked.some((p) => p.en === w.en)) picked.push(w);
+    }
+    return picked.slice(0, n);
+  }
+
+  function wordCard(w, mode) {
+    const dictation = mode === "dictation";
+    return {
+      type: "word",
+      mode: dictation ? "dictation" : "zh2en",
+      title: dictation ? "听写" : "认词",
+      prompt: dictation ? "听「翻翻龟」读，写出英文" : w.zh,
+      answer: w.en,
+      zh: w.zh,
+      en: w.en,
+      speakText: w.en,
+      speakRole: dictation ? "boyChild" : "adultMale",
+      coach: dictation ? "turtle" : null,
+      autoPlay: dictation,
+      retryWord: { en: w.en, zh: w.zh },
+    };
+  }
+
+  function listenCard(item, kind) {
+    const isJudge = kind === "judge";
+    return {
+      type: "listen",
+      kind: kind,
+      title: isJudge ? "听力判断" : "听应答",
+      prompt: item.show || item.prompt || "听完再选",
+      speakText: item.speak,
+      speakRole: isJudge ? "girlChild" : item.role || "adultFemale",
+      coach: isJudge ? "bee" : null,
+      autoPlay: true,
+      answer: item.answer,
+      tip: item.tip || "",
+      choices:
+        isJudge
+          ? [
+              { id: true, label: "对 √" },
+              { id: false, label: "错 ×" },
+            ]
+          : (item.choices || []).map((c) => ({ id: c.id, label: c.text })),
+    };
+  }
+
+  function patternCard(unit) {
+    const p = (unit.patterns && unit.patterns[0]) || null;
+    if (!p) return null;
+    const demos = (p.demos || []).map((d) => ({
+      role: "girlChild",
+      text: d.text,
+    }));
+    return {
+      type: "pattern",
+      title: "跟说句型",
+      prompt: p.label + "\n" + (p.frame || ""),
+      demos: demos,
+      speakText: demos[0] ? demos[0].text : p.label,
+      speakRole: "girlChild",
+      coach: "bee",
+      tip: (p.steps && p.steps[2]) || "用自己的话再说一遍",
+      autoPlay: true,
+    };
+  }
+
+  function oralCard(q, i) {
+    return {
+      type: "oral",
+      title: "口头问答 " + (i + 1),
+      prompt: q.ask,
+      speakText: q.ask,
+      speakRole: q.asker || "adultFemale",
+      sampleText: (q.sample && q.sample.text) || "",
+      sampleRole: (q.sample && q.sample.role) || "boyChild",
+      tip: q.tip || "请说完整句（because / when）",
+      autoPlay: true,
+    };
+  }
+
+  function dialogueCard(unit) {
+    const lines = unit.dialogues || [];
+    if (!lines.length) return null;
+    return {
+      type: "dialogue",
+      title: "听角色戏",
+      prompt: unit.roleplay || "听完整对话",
+      lines: lines,
+      tip: "听完试着跟说一两句",
+    };
+  }
+
+  function sortCard(unit) {
+    const S = unit.wordSort;
+    if (!S) return null;
+    const sample = shuffle(S.bank || []).slice(0, 6);
+    return {
+      type: "sort",
+      title: "词分类",
+      prompt: "把词点进正确类别",
+      bank: sample,
+      groups: S.groups || [],
+    };
+  }
+
+  function writeCard(unit) {
+    const R = unit.reading;
+    if (!R) return null;
+    return {
+      type: "write",
+      title: "仿写",
+      prompt: R.writeModel || "I'm happy when I …",
+      passage: R.passage || "",
+      narratorRole: R.narratorRole || "boyChild",
+      hints: R.writeHints || [],
+      articleTips: R.articleTips || [],
+    };
+  }
+
+  function readCard(unit) {
+    const prompts = (unit.reading && unit.reading.prompts) || unit.readPrompts || [];
+    const q = prompts[0] || { role: "adultFemale", text: "What happened?" };
+    return {
+      type: "read",
+      title: "读后一句",
+      prompt: q.text,
+      speakText: q.text,
+      speakRole: q.role || "adultFemale",
+      tip: "用一句英文或中文说大意，然后点会了",
+      autoPlay: true,
+    };
+  }
+
+  function eggLine(unit) {
+    const L = unit.listen;
+    if (L && L.judge && L.judge[0]) return L.judge[0].speak;
+    const q = (unit.questions || [])[0];
+    if (q && q.sample && q.sample.text) return q.sample.text;
+    return "I'm happy when I learn English.";
+  }
+
+  function buildCards(unit, sessionId, store) {
+    store = store || {};
+    const cards = [];
+    if (sessionId === "weekdayListen") {
+      pickWords(unit, store, 5, 1).forEach((w, i) => {
+        cards.push(wordCard(w, i % 2 === 0 ? "dictation" : "zh2en"));
+      });
+      const judges = shuffle((unit.listen && unit.listen.judge) || []).slice(0, 1);
+      const replies = shuffle((unit.listen && unit.listen.reply) || []).slice(0, 1);
+      judges.forEach((j) => cards.push(listenCard(j, "judge")));
+      replies.forEach((r) => cards.push(listenCard(r, "reply")));
+      const pat = patternCard(unit);
+      if (pat) cards.push(pat);
+    } else if (sessionId === "weekdayOral") {
+      pickWords(unit, store, 2, 2).forEach((w) => cards.push(wordCard(w, "zh2en")));
+      (unit.questions || []).slice(0, 3).forEach((q, i) => cards.push(oralCard(q, i)));
+      const d = dialogueCard(unit);
+      if (d) cards.push(d);
+    } else {
+      const s = sortCard(unit);
+      if (s) cards.push(s);
+      const w = writeCard(unit);
+      if (w) cards.push(w);
+      const j = ((unit.listen && unit.listen.judge) || [])[0];
+      if (j) cards.push(listenCard(j, "judge"));
+      const q = (unit.questions || [])[0];
+      if (q) cards.push(oralCard(q, 0));
+      cards.push(readCard(unit));
+    }
+    return cards;
+  }
+
+  g.EnglishDeskLesson = {
+    todaySessionId,
+    sessionMeta,
+    buildCards,
+    eggLine,
+    shuffle,
+  };
+})(window);

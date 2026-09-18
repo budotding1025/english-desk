@@ -2,454 +2,123 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>英语家侧 · 15–20 分钟</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>翻翻英语</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,500;0,9..40,700;1,9..40,500&family=Noto+Serif+SC:wght@500;700&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg: #f3efe6;
-      --ink: #1c1914;
-      --muted: #6e675c;
-      --line: #d4cbb8;
-      --card: #fffdf8;
-      --accent: #1f5c4a;
-      --accent-soft: rgba(31, 92, 74, 0.12);
-      --warn: #9a4a1c;
-      --ok: #1f5c4a;
-      --bad: #8b2e2e;
-      --ease: cubic-bezier(0.22, 1, 0.36, 1);
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: "DM Sans", "Noto Serif SC", "Microsoft YaHei", sans-serif;
-      color: var(--ink);
-      background:
-        radial-gradient(circle at 10% 0%, rgba(31,92,74,0.08), transparent 40%),
-        radial-gradient(circle at 90% 100%, rgba(154,74,28,0.07), transparent 42%),
-        var(--bg);
-      padding-bottom: 48px;
-    }
-    button, select, input, textarea {
-      font: inherit;
-      color: inherit;
-    }
-    button { cursor: pointer; }
-    .bar {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px 14px;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--line);
-      background: rgba(243, 239, 230, 0.94);
-      backdrop-filter: blur(8px);
-    }
-    .brand strong { font-family: "Noto Serif SC", serif; letter-spacing: 0.04em; }
-    .brand span { color: var(--muted); font-size: 0.85rem; margin-left: 8px; }
-    .bar-controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-    }
-    .chip, .btn, select {
-      border: 1px solid var(--ink);
-      background: transparent;
-      padding: 6px 10px;
-      border-radius: 0;
-      min-height: 36px;
-    }
-    .chip.active, .btn.primary {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #f7f3ea;
-    }
-    .btn:hover { background: var(--ink); color: var(--bg); }
-    .btn.primary:hover { filter: brightness(1.08); }
-    .btn.ghost { border-color: var(--line); color: var(--muted); }
-    .btn.speak {
-      border-color: var(--accent);
-      color: var(--accent);
-      min-width: 40px;
-    }
-    .btn.speak:hover { background: var(--accent); color: #f7f3ea; }
-    .cast-map {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 6px 10px;
-      margin: 0 0 12px;
-      font-size: 0.82rem;
-      color: var(--muted);
-    }
-    .cast-map strong { color: var(--ink); }
-    .dialogue-line {
-      display: flex;
-      gap: 8px;
-      align-items: flex-start;
-      padding: 8px 0;
-      border-bottom: 1px dashed var(--line);
-    }
-    .dialogue-line:last-child { border-bottom: 0; }
-    .dialogue-role {
-      flex: 0 0 auto;
-      font-size: 0.75rem;
-      border: 1px solid var(--line);
-      padding: 2px 6px;
-      color: var(--muted);
-    }
-    .dialogue-text { flex: 1; line-height: 1.45; }
-    .timer {
-      font-variant-numeric: tabular-nums;
-      font-weight: 700;
-      min-width: 4.5rem;
-      text-align: center;
-    }
-    .timer.warn { color: var(--warn); }
-    main {
-      max-width: 920px;
-      margin: 0 auto;
-      padding: 18px 16px 28px;
-    }
-    .hint {
-      margin: 0 0 14px;
-      padding: 12px 14px;
-      background: var(--accent-soft);
-      border-left: 3px solid var(--accent);
-      color: var(--ink);
-      line-height: 1.55;
-      font-size: 0.95rem;
-    }
-    .steps {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-    .step-pill {
-      border: 1px solid var(--line);
-      background: var(--card);
-      padding: 10px 12px;
-      text-align: left;
-    }
-    .step-pill.active {
-      border-color: var(--accent);
-      box-shadow: inset 3px 0 0 var(--accent);
-    }
-    .step-pill.done { opacity: 0.72; }
-    .step-pill small { display: block; color: var(--muted); margin-top: 2px; }
-    .panel {
-      background: var(--card);
-      border: 1px solid var(--line);
-      padding: 16px;
-      margin-bottom: 14px;
-    }
-    .panel h2 {
-      margin: 0 0 6px;
-      font-family: "Noto Serif SC", serif;
-      font-size: 1.2rem;
-    }
-    .panel .sub {
-      margin: 0 0 14px;
-      color: var(--muted);
-      font-size: 0.9rem;
-      line-height: 1.45;
-    }
-    .row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-    .word-card {
-      border: 1px solid var(--line);
-      padding: 18px 16px;
-      text-align: center;
-      margin-bottom: 12px;
-      background: #faf7f0;
-    }
-    .word-card .prompt {
-      font-size: 1.55rem;
-      font-weight: 700;
-      margin: 0 0 8px;
-      font-family: "Noto Serif SC", serif;
-    }
-    .word-card .meta { color: var(--muted); font-size: 0.85rem; }
-    .word-card .answer {
-      margin-top: 10px;
-      font-size: 1.2rem;
-      color: var(--accent);
-      min-height: 1.4em;
-    }
-    .progress-dots {
-      display: flex;
-      gap: 6px;
-      justify-content: center;
-      margin: 8px 0 14px;
-    }
-    .dot {
-      width: 10px;
-      height: 10px;
-      border: 1px solid var(--ink);
-      background: transparent;
-    }
-    .dot.ok { background: var(--ok); border-color: var(--ok); }
-    .dot.bad { background: var(--bad); border-color: var(--bad); }
-    .dot.now { outline: 2px solid var(--accent); outline-offset: 2px; }
-    .pattern-box, .qa-box, .read-box {
-      border: 1px solid var(--line);
-      padding: 12px;
-      margin-bottom: 10px;
-      background: #faf7f0;
-    }
-    .pattern-box ol { margin: 8px 0 0; padding-left: 1.2rem; line-height: 1.55; }
-    .qa-item {
-      display: grid;
-      gap: 6px;
-      margin-bottom: 12px;
-      padding-bottom: 12px;
-      border-bottom: 1px dashed var(--line);
-    }
-    .qa-item:last-child { border-bottom: 0; margin-bottom: 0; padding-bottom: 0; }
-    .qa-item .q {
-      font-weight: 700;
-      font-size: 1.05rem;
-    }
-    .qa-item textarea, .read-box input, .read-box textarea, #customWordEn, #customWordZh {
-      width: 100%;
-      border: 1px solid var(--line);
-      background: #fff;
-      padding: 8px 10px;
-      resize: vertical;
-    }
-    .tag {
-      display: inline-block;
-      font-size: 0.75rem;
-      padding: 2px 7px;
-      border: 1px solid var(--line);
-      color: var(--muted);
-      margin-right: 4px;
-    }
-    .tag.book { border-color: var(--accent); color: var(--accent); }
-    .log-list {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      display: grid;
-      gap: 8px;
-    }
-    .log-list li {
-      border: 1px solid var(--line);
-      padding: 10px 12px;
-      background: #faf7f0;
-      font-size: 0.9rem;
-      line-height: 1.45;
-    }
-    .hidden { display: none !important; }
-    .footer-note {
-      margin-top: 8px;
-      color: var(--muted);
-      font-size: 0.82rem;
-      line-height: 1.45;
-    }
-    @media (max-width: 720px) {
-      .steps { grid-template-columns: 1fr; }
-      .brand span { display: none; }
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Noto+Sans+SC:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./theme-duo.css?v=12" />
+  <script src="./assets/vendor/lottie.min.js"></script>
 </head>
 <body>
-  <header class="bar">
-    <div class="brand">
-      <strong>英语家侧</strong>
-      <span id="bookLabel">北京版四年级上册</span>
+  <div class="screen" id="screenHome">
+    <div class="top">
+      <div class="brand">翻翻英语</div>
+      <button type="button" class="icon-btn" id="btnSettings" aria-label="设置">⚙</button>
     </div>
-    <div class="bar-controls">
-      <select id="unitSelect" aria-label="选择单元"></select>
-      <button type="button" class="chip active" data-mode="full" id="modeFull">20 分钟</button>
-      <button type="button" class="chip" data-mode="short" id="modeShort">15 分钟</button>
-      <select id="accentSelect" aria-label="口音" title="标准英语口音">
-        <option value="en-US">美式</option>
-        <option value="en-GB">英式</option>
-      </select>
-      <button type="button" class="chip active" id="btnVoiceToggle" title="开关语音">语音开</button>
-      <span class="timer" id="timer">05:00</span>
-      <button type="button" class="btn" id="btnTimer">开始本块计时</button>
-    </div>
-  </header>
-
-  <main>
-    <p class="hint" id="weekHint"></p>
-    <p class="hint" id="kaixinHint" style="background:#f7efe6;border-left-color:var(--warn)"></p>
-    <div class="panel" style="padding:12px 14px;margin-bottom:14px">
-      <div class="row" style="margin-bottom:8px;justify-content:space-between">
-        <strong>四角色英语语音</strong>
-        <button type="button" class="btn speak" id="btnVoicePreview">试听四角色</button>
+    <div class="home-main">
+      <div class="mascot-stage">
+        <div class="mascot-wrap" aria-label="翻翻英语：乌龟坚持，蜜蜂开口">
+          <div class="mascot mascot-turtle is-on" id="lottieTurtle" role="img" aria-label="翻翻龟">
+            <img class="mascot-fallback" src="./assets/turtle.png" alt="翻翻龟" width="148" height="148" />
+          </div>
+          <div class="mascot mascot-bee" id="lottieBee" role="img" aria-label="翻翻蜂">
+            <img class="mascot-fallback" src="./assets/bee.png" alt="翻翻蜂" width="148" height="148" />
+          </div>
+          <i class="spark s1"></i>
+          <i class="spark s2"></i>
+          <i class="spark s3"></i>
+        </div>
       </div>
-      <div class="cast-map" id="castMap"></div>
-      <p class="footer-note" style="margin:0">
-        现已改用预生成的微软神经语音：男成年 Guy/Ryan，女成年 Jenny/Sonia，女小孩 Ana/Maisie（真童声），男小孩 Andrew/Thomas（独立年轻男声，不再把女声提调假扮）。点「试听四角色」可立刻对比。
-      </p>
+      <p class="mascot-line" id="mascotLine">每天进步一点点，有一天比兔子跑得还远。</p>
+      <p class="streak" id="streakLine">连续 <strong>0</strong> 天</p>
+      <div class="today-card">
+        <p class="eyebrow" id="sessionEyebrow">今天</p>
+        <h1 id="sessionTitle">词听练习</h1>
+        <p class="meta" id="sessionMeta">约 18 分钟 · Agent 带练</p>
+        <button type="button" class="btn-start" id="btnStart">开始</button>
+      </div>
+      <p class="unit-line" id="unitLine">Unit 1</p>
     </div>
+  </div>
 
-    <div class="steps" id="stepNav">
-      <button type="button" class="step-pill active" data-step="check">
-        1 · 词句检测
-        <small id="durCheck">5 分钟</small>
-      </button>
-      <button type="button" class="step-pill" data-step="oral">
-        2 · 口头问答
-        <small id="durOral">5 分钟</small>
-      </button>
-      <button type="button" class="step-pill" data-step="read">
-        3 · 课外阅读
-        <small id="durRead">10 分钟</small>
-      </button>
+  <!-- LESSON -->
+  <div class="screen hidden" id="screenLesson">
+    <div class="lesson-top">
+      <button type="button" class="icon-btn" id="btnCloseLesson" aria-label="关闭">×</button>
+      <div class="progress" aria-hidden="true"><i id="progressFill"></i></div>
+      <button type="button" class="icon-btn" id="btnMute" aria-label="静音" title="语音开闭">♪</button>
     </div>
+    <div class="lesson-body">
+      <p class="card-type" id="cardType">词</p>
+      <p class="card-prompt" id="cardPrompt">—</p>
+      <p class="card-sub" id="cardSub"></p>
+      <div id="cardExtra"></div>
+      <div class="lesson-actions" id="cardActions"></div>
+    </div>
+  </div>
 
-    <!-- CHECK -->
-    <section class="panel" id="panelCheck">
-      <h2>词句检测</h2>
-      <p class="sub">晨读已背过。这里测「会不会用」：合书、换词、说自己。不要求再默整表。</p>
+  <!-- DONE -->
+  <div class="screen hidden" id="screenDone">
+    <div class="done-main">
+      <h1>今日完成</h1>
+      <p class="meta" id="doneScore" style="color:var(--muted)">—</p>
+      <div class="egg" id="doneEgg"></div>
+      <div id="donePractice" class="done-practice"></div>
+      <button type="button" class="btn-start hidden" id="btnHome">回首页</button>
+    </div>
+  </div>
 
+  <!-- SETTINGS -->
+  <div class="overlay hidden" id="settingsOverlay" aria-hidden="true">
+    <div class="sheet" role="dialog" aria-labelledby="settingsTitle">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2 id="settingsTitle">设置</h2>
+        <button type="button" class="icon-btn" id="btnCloseSettings" aria-label="关闭">×</button>
+      </div>
+      <label for="unitSelect">单元</label>
+      <select id="unitSelect"></select>
+      <label>口音</label>
       <div class="row">
-        <button type="button" class="btn primary" id="btnDrawWords">抽 5 词</button>
-        <button type="button" class="chip active" data-quiz="zh2en">汉→英</button>
-        <button type="button" class="chip" data-quiz="en2zh">英→汉</button>
-        <button type="button" class="chip" data-quiz="dictation">听写（家长读英）</button>
-        <button type="button" class="chip" data-quiz="frame">填进句</button>
+        <button type="button" class="chip active" data-accent="en-US">美式</button>
+        <button type="button" class="chip" data-accent="en-GB">英式</button>
       </div>
-
-      <div class="progress-dots" id="wordDots"></div>
-      <div class="word-card" id="wordCard">
-        <p class="prompt" id="wordPrompt">点「抽 5 词」开始</p>
-        <p class="meta" id="wordMeta"></p>
-        <p class="answer hidden" id="wordAnswer"></p>
-        <div class="row" style="justify-content:center;margin-top:12px">
-          <button type="button" class="btn speak" id="btnSpeakPrompt">听提示</button>
-          <button type="button" class="btn speak" id="btnSpeakAnswer">听答案</button>
-          <button type="button" class="btn" id="btnReveal">显示答案</button>
-          <button type="button" class="btn primary" id="btnOk">会了</button>
-          <button type="button" class="btn" id="btnBad">不会 · 明日再测</button>
-        </div>
-      </div>
-
-      <div class="pattern-box">
-        <div class="row" style="margin-bottom:8px">
-          <strong>句型三步</strong>
-          <select id="patternSelect"></select>
-          <button type="button" class="btn speak" id="btnSpeakPattern">听示范句</button>
-        </div>
-        <p class="meta" id="patternFrame"></p>
-        <ol id="patternSteps"></ol>
-        <div class="row" style="margin-top:10px">
-          <button type="button" class="btn" data-pstep="1">走到第 1 步</button>
-          <button type="button" class="btn" data-pstep="2">走到第 2 步</button>
-          <button type="button" class="btn primary" data-pstep="3">走到第 3 步 · 说自己</button>
-        </div>
-        <p class="footer-note" id="patternProgress">句型进度：未开始</p>
-      </div>
-
-      <details>
-        <summary>增补本周词（可选）</summary>
-        <div class="row" style="margin-top:10px">
-          <input id="customWordEn" placeholder="English" />
-          <input id="customWordZh" placeholder="中文" />
-          <button type="button" class="btn" id="btnAddWord">加入词池</button>
-        </div>
-      </details>
-    </section>
-
-    <!-- ORAL -->
-    <section class="panel hidden" id="panelOral">
-      <h2>口头问答</h2>
-      <p class="sub">先听老师/家长问句（成年腔），再听小孩示范答；然后孩子自己说完整句。</p>
-      <p class="hint" id="roleplayHint" style="margin-bottom:12px"></p>
-      <div class="row" style="margin-bottom:10px">
-        <button type="button" class="btn speak" id="btnSpeakDialogue">听角色戏对话</button>
-        <button type="button" class="btn ghost" id="btnStopVoice">停止朗读</button>
-      </div>
-      <div class="qa-box" id="dialogueBox" style="margin-bottom:12px"></div>
-      <div class="qa-box" id="qaBox"></div>
+      <label>语音</label>
       <div class="row">
-        <button type="button" class="btn primary" id="btnSaveOral">保存本块问答记录</button>
+        <button type="button" class="chip active" id="btnVoiceOn">开</button>
+        <button type="button" class="chip" id="btnVoiceOff">关</button>
+        <button type="button" class="chip" id="btnVoicePreview">试听四角色</button>
       </div>
-    </section>
-
-    <!-- READ -->
-    <section class="panel hidden" id="panelRead">
-      <h2>课外阅读</h2>
-      <p class="sub">牛津树 / 大猫等入门分级。读前可听理解提问；读后若大意是英文，可点朗读核对语音。</p>
-      <div class="row" style="margin-bottom:10px">
-        <button type="button" class="btn speak" id="btnSpeakReadPrompts">听阅读提问</button>
-        <button type="button" class="btn speak" id="btnSpeakSummary">朗读我的大意</button>
-      </div>
-      <div class="read-box">
-        <label>书名 / 级别<br /><input id="readTitle" placeholder="例如：Oxford Reading Tree L2 · Kipper" /></label>
-        <label style="display:block;margin-top:10px">页码或册名<br /><input id="readPages" placeholder="例如：p.1–8 或 The Big Box" /></label>
-        <label style="display:block;margin-top:10px">Who? What happened?（一句即可）<br />
-          <textarea id="readSummary" rows="3" placeholder="中英文均可。例：Kipper lost his hat."></textarea>
-        </label>
-      </div>
-      <div class="row">
-        <button type="button" class="btn primary" id="btnSaveRead">保存阅读并完成今日</button>
-        <button type="button" class="btn ghost" id="btnExport">导出近 14 天记录</button>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>近几日记录</h2>
-      <p class="sub">保存在本机浏览器（localStorage），不上传。</p>
-      <ul class="log-list" id="logList"></ul>
-    </section>
-
-    <p class="footer-note">
-      京版云与晨读负责听读、背课文、背单词。本页只做检测、口头问答、课外阅读，并提供四角色标准英语语音示范。
-      语法书卡点时周末另查；作文书四年级暂不进这 15–20 分钟。
-    </p>
-  </main>
+      <div class="cast-mini" id="castMap"></div>
+    </div>
+  </div>
 
   <script src="./data.js"></script>
   <script src="./voice.js"></script>
   <script>
     (function () {
       const DATA = window.ENGLISH_DESK_DATA;
-      const STORE_KEY = "english-desk-v1";
+      const Lesson = window.EnglishDeskLesson;
+      const V = window.EnglishVoice;
+      const STORE_KEY = "english-desk-v3";
 
       const $ = (id) => document.getElementById(id);
       const state = {
-        mode: "full",
-        step: "check",
-        unitId: DATA.units[0].id,
-        quiz: "zh2en",
-        words: [],
+        view: "home",
+        unitId: "u1",
+        sessionId: "weekdayListen",
+        cards: [],
         index: 0,
         results: [],
-        patternStep: 0,
-        patternId: null,
-        timerLeft: 0,
-        timerId: null,
-        retry: [],
-        speakPromptText: "",
-        speakAnswerText: "",
+        revealed: false,
+        listenLocked: false,
+        sortAssign: {},
+        sortActive: null,
       };
 
-      const V = window.EnglishVoice;
-
       function loadStore() {
-        try {
-          return JSON.parse(localStorage.getItem(STORE_KEY) || "{}");
-        } catch (e) {
-          return {};
-        }
+        try { return JSON.parse(localStorage.getItem(STORE_KEY) || "{}"); }
+        catch (e) { return {}; }
       }
       function saveStore(partial) {
         const next = Object.assign({}, loadStore(), partial);
@@ -457,604 +126,982 @@
         return next;
       }
       function todayKey() {
-        const d = new Date();
-        return d.toISOString().slice(0, 10);
+        return new Date().toISOString().slice(0, 10);
       }
       function unit() {
         return DATA.units.find((u) => u.id === state.unitId) || DATA.units[0];
       }
-      function modeCfg() {
-        return DATA.modes[state.mode];
-      }
-      function normalizeQuestion(q) {
-        if (typeof q === "string") {
-          return {
-            ask: q,
-            asker: "adultFemale",
-            sample: { role: "boyChild", text: "" },
-          };
-        }
-        return {
-          ask: q.ask,
-          asker: q.asker || "adultFemale",
-          sample: q.sample || { role: "boyChild", text: "" },
-        };
-      }
-      function renderCastMap() {
-        if (!V || !$("castMap")) return;
-        V.refresh();
-        $("castMap").innerHTML = V.castMap()
-          .map((c) => "<div><strong>" + c.label + "</strong><br/>" + c.voice + "</div>")
-          .join("");
-      }
-      function shuffle(arr) {
-        const a = arr.slice();
-        for (let i = a.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [a[i], a[j]] = [a[j], a[i]];
-        }
-        return a;
-      }
-      function wordPool() {
-        const store = loadStore();
-        const custom = (store.customWords && store.customWords[state.unitId]) || [];
-        const retry = (store.retryWords || []).filter((w) => w.unitId === state.unitId);
-        return unit().words.concat(custom).concat(retry.map((r) => ({ en: r.en, zh: r.zh, src: "明日再测" })));
+      function card() {
+        return state.cards[state.index] || null;
       }
 
-      function drawWords() {
+      function streakDays() {
+        const logs = loadStore().logs || {};
+        const keys = Object.keys(logs).filter((k) => logs[k] && logs[k].done).sort().reverse();
+        if (!keys.length) return 0;
+        let n = 0;
+        const d = new Date();
+        for (;;) {
+          const key = d.toISOString().slice(0, 10);
+          if (logs[key] && logs[key].done) {
+            n += 1;
+            d.setDate(d.getDate() - 1);
+          } else if (n === 0 && key === todayKey()) {
+            d.setDate(d.getDate() - 1);
+          } else break;
+        }
+        return n;
+      }
+
+      let homeAudio = null;
+      let homeAudioDone = null;
+      let cancelHomeIntro = function () {};
+      function stopHomeAudio() {
+        const done = homeAudioDone;
+        homeAudioDone = null;
+        if (homeAudio) {
+          try {
+            homeAudio.onended = null;
+            homeAudio.onerror = null;
+            homeAudio.pause();
+            homeAudio.src = "";
+          } catch (e) {}
+          homeAudio = null;
+        }
+        if (done) done();
+        fetch("http://127.0.0.1:8731/api/stop", { cache: "no-store" }).catch(function () {});
+      }
+
+      function showView(name) {
+        state.view = name;
+        $("screenHome").classList.toggle("hidden", name !== "home");
+        $("screenLesson").classList.toggle("hidden", name !== "lesson");
+        $("screenDone").classList.toggle("hidden", name !== "done");
+        if (name !== "home") {
+          cancelHomeIntro();
+          stopHomeAudio();
+        }
+        if (name !== "lesson" && V) V.stop();
+      }
+
+      function renderHome() {
+        state.sessionId = Lesson.todaySessionId();
+        const sess = Lesson.sessionMeta(state.sessionId);
         const u = unit();
+        $("sessionEyebrow").textContent = "今天 · 自动安排";
+        $("sessionTitle").textContent = sess.label.replace(/^工作日① |^工作日② /, "") || sess.label;
+        $("sessionMeta").textContent = "约 " + sess.minutes + " 分钟 · Agent 提问与听写";
+        $("unitLine").textContent = u.name + (u.lessonTitle ? " · " + u.lessonTitle : "");
+        $("streakLine").innerHTML = "连续 <strong>" + streakDays() + "</strong> 天";
+      }
+
+      function startLesson() {
         const store = loadStore();
-        const retry = (store.retryWords || []).filter((w) => w.unitId === state.unitId);
-        const focusLesson = u.currentLesson || null;
-        const pool = wordPool();
-        const focus = shuffle(pool.filter((w) => focusLesson && w.lesson === focusLesson));
-        const review = shuffle(pool.filter((w) => !focusLesson || w.lesson !== focusLesson));
-        let picked = [];
-        if (retry.length) {
-          picked = picked.concat(shuffle(retry).slice(0, Math.min(1, retry.length)).map((r) => ({
-            en: r.en, zh: r.zh, src: "明日再测",
-          })));
-        }
-        while (picked.length < 3 && focus.length) {
-          const w = focus.shift();
-          if (!picked.some((p) => p.en === w.en)) picked.push(w);
-        }
-        const rest = focus.concat(review);
-        while (picked.length < 5 && rest.length) {
-          const w = rest.shift();
-          if (!picked.some((p) => p.en === w.en)) picked.push(w);
-        }
-        state.words = picked.slice(0, 5);
+        state.cards = Lesson.buildCards(unit(), state.sessionId, store);
         state.index = 0;
-        state.results = new Array(state.words.length).fill(null);
-        renderWord();
-      }
-
-      function formatTime(sec) {
-        const m = Math.floor(sec / 60);
-        const s = sec % 60;
-        return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
-      }
-
-      function setTimerForStep() {
-        stopTimer();
-        const cfg = modeCfg();
-        const mins = state.step === "check" ? cfg.check : state.step === "oral" ? cfg.oral : cfg.read;
-        state.timerLeft = mins * 60;
-        $("timer").textContent = formatTime(state.timerLeft);
-        $("timer").classList.remove("warn");
-        $("btnTimer").textContent = "开始本块计时";
-      }
-
-      function stopTimer() {
-        if (state.timerId) {
-          clearInterval(state.timerId);
-          state.timerId = null;
-        }
-      }
-
-      function startTimer() {
-        if (state.timerId) {
-          stopTimer();
-          $("btnTimer").textContent = "开始本块计时";
+        state.results = [];
+        state.revealed = false;
+        state.listenLocked = false;
+        if (!state.cards.length) {
+          alert("本单元暂无练习内容。");
           return;
         }
-        if (state.timerLeft <= 0) setTimerForStep();
-        $("btnTimer").textContent = "暂停";
-        state.timerId = setInterval(() => {
-          state.timerLeft -= 1;
-          $("timer").textContent = formatTime(Math.max(0, state.timerLeft));
-          if (state.timerLeft <= 30) $("timer").classList.add("warn");
-          if (state.timerLeft <= 0) {
-            stopTimer();
-            $("btnTimer").textContent = "本块到时 · 点下一步";
-            alert("本块时间到。可以进入下一块，或再加 1 分钟收尾。");
-          }
-        }, 1000);
+        showView("lesson");
+        renderCard(true);
       }
 
-      function renderWeekHint() {
-        const day = new Date().getDay();
-        const hint = DATA.weekHints.find((h) => h.day === day) || DATA.weekHints[0];
-        $("weekHint").textContent =
-          "今日侧重（" + hint.note + "）：检测「" + hint.check + "」· 问答「" + hint.oral +
-          "」。京版云 / 晨读不占用这 " + modeCfg().label + "。";
+      function progressPct() {
+        if (!state.cards.length) return 0;
+        return Math.round((state.index / state.cards.length) * 100);
       }
 
-      function renderUnitMeta() {
-        const u = unit();
-        const lessonLine = u.lessonTitle
-          ? ("当前课：" + u.lessonTitle + " · ")
-          : "";
-        $("kaixinHint").textContent = lessonLine + u.kaixinHint + " · 主题：" + u.themes;
-        $("roleplayHint").textContent = "角色戏提示：" + u.roleplay;
-        const sel = $("patternSelect");
-        sel.innerHTML = u.patterns.map((p) => '<option value="' + p.id + '">' + p.label + "</option>").join("");
-        state.patternId = u.patterns[0].id;
-        renderPattern();
-        renderQuestions();
-        renderDialogue();
-      }
-
-      function renderDialogue() {
-        const box = $("dialogueBox");
-        if (!box) return;
-        const lines = unit().dialogues || [];
-        if (!lines.length) {
-          box.innerHTML = "<p class='meta'>本单元暂无角色戏台词。</p>";
+      function renderCard(autoSpeak) {
+        const c = card();
+        if (!c) {
+          finishLesson();
           return;
         }
-        box.innerHTML = "<strong style='display:block;margin-bottom:8px'>角色戏台词</strong>" + lines.map((line) => {
-          const label = (V && V.ROLES[V.normRole(line.role)] || {}).label || line.role;
-          return (
-            '<div class="dialogue-line">' +
-              '<span class="dialogue-role">' + (line.name || label) + " · " + label + "</span>" +
-              '<span class="dialogue-text">' + line.text + "</span>" +
-              '<button type="button" class="btn speak" data-say="' + encodeURIComponent(line.text) + '" data-role="' + line.role + '">听</button>' +
-            "</div>"
-          );
-        }).join("");
+        state.revealed = false;
+        state.listenLocked = false;
+        state.sortAssign = {};
+        state.sortActive = null;
+        $("progressFill").style.width = progressPct() + "%";
+        $("cardType").textContent = c.title || c.type;
+        $("cardPrompt").textContent = c.prompt || "";
+        $("cardSub").textContent = c.tip || c.sub || "";
+        $("cardExtra").innerHTML = "";
+        $("cardActions").innerHTML = "";
+
+        if (c.type === "word") renderWordCard(c);
+        else if (c.type === "listen") renderListenCard(c);
+        else if (c.type === "pattern") renderPatternCard(c);
+        else if (c.type === "oral") renderOralCard(c);
+        else if (c.type === "dialogue") renderDialogueCard(c);
+        else if (c.type === "sort") renderSortCard(c);
+        else if (c.type === "write") renderWriteCard(c);
+        else if (c.type === "read") renderReadCard(c);
+        else renderOkBad(c);
+
+        if (autoSpeak && c.autoPlay) {
+          setTimeout(() => {
+            if (V && V.isEnabled()) speakCard(c);
+          }, 280);
+        }
       }
 
-      function renderPattern() {
-        const u = unit();
-        const p = u.patterns.find((x) => x.id === state.patternId) || u.patterns[0];
-        state.patternId = p.id;
-        $("patternFrame").textContent = "句框：" + p.frame;
-        $("patternSteps").innerHTML = p.steps.map((s, i) => {
-          const mark = state.patternStep > i ? " ✓" : "";
-          return "<li>" + s + mark + "</li>";
-        }).join("");
-        $("patternProgress").textContent =
-          state.patternStep === 0 ? "句型进度：未开始" :
-          state.patternStep >= 3 ? "句型进度：第 3 步过关（说自己）" :
-          "句型进度：已到第 " + state.patternStep + " 步";
-      }
-
-      function renderQuestions() {
-        const u = unit();
-        const qs = (u.questions || []).map(normalizeQuestion);
-        $("qaBox").innerHTML = qs.map((q, i) => (
-          '<div class="qa-item">' +
-            '<div class="q">Q' + (i + 1) + ". " + q.ask + "</div>" +
-            '<div class="row">' +
-              '<button type="button" class="btn speak" data-ask="' + i + '">听提问</button>' +
-              '<button type="button" class="btn speak" data-sample="' + i + '"' + (q.sample && q.sample.text ? "" : " disabled") + ">听示范答</button>" +
-            "</div>" +
-            (q.sample && q.sample.text
-              ? '<p class="meta">示范（' + ((V && V.ROLES[V.normRole(q.sample.role)] || {}).label || "小孩") + "）：" + q.sample.text + "</p>"
-              : "") +
-            '<textarea rows="2" data-qi="' + i + '" placeholder="孩子口头答完后，家长可记关键词（可选）"></textarea>' +
-            '<div class="row">' +
-              '<button type="button" class="btn" data-qmark="' + i + '" data-val="ok">流畅</button>' +
-              '<button type="button" class="btn" data-qmark="' + i + '" data-val="help">有提示</button>' +
-              '<button type="button" class="btn" data-qmark="' + i + '" data-val="stuck">卡住</button>' +
-            "</div>" +
-          "</div>"
-        )).join("");
-      }
-
-      function showStep(step) {
-        state.step = step;
-        $("panelCheck").classList.toggle("hidden", step !== "check");
-        $("panelOral").classList.toggle("hidden", step !== "oral");
-        $("panelRead").classList.toggle("hidden", step !== "read");
-        document.querySelectorAll(".step-pill").forEach((el) => {
-          el.classList.toggle("active", el.dataset.step === step);
+      function setCoachTalking(on) {
+        document.querySelectorAll(".coach-avatar").forEach((el) => {
+          el.classList.toggle("is-talking", !!on);
+          el.classList.toggle("is-idle", !on);
         });
-        setTimerForStep();
       }
 
-      function renderWord() {
-        const dots = $("wordDots");
-        dots.innerHTML = state.words.map((_, i) => {
-          const r = state.results[i];
-          const cls = "dot" + (i === state.index ? " now" : "") + (r === true ? " ok" : r === false ? " bad" : "");
-          return '<span class="' + cls + '"></span>';
-        }).join("") || "";
+      function speakCard(c) {
+        if (!V || !c) return;
+        setCoachTalking(true);
+        const done = () => setTimeout(() => setCoachTalking(false), 200);
+        let p;
+        if (c.type === "dialogue" && c.lines) {
+          p = V.speakSequence(c.lines.map((l) => ({ role: l.role, text: l.text })));
+        } else if (c.type === "pattern" && c.demos && c.demos.length) {
+          p = V.speakSequence(c.demos.map((d) => ({ role: "girlChild", text: d.text })));
+        } else if (c.type === "write" && c.passage) {
+          const parts = c.passage.split(/\n+/).map((s) => s.trim()).filter(Boolean);
+          p = V.speakSequence(parts.map((text) => ({ role: c.narratorRole || "boyChild", text: text })));
+        } else if (c.speakText) {
+          p = V.speak(c.speakText, c.speakRole || "adultFemale");
+        }
+        if (p && p.then) p.then(done).catch(done);
+        else done();
+      }
 
-        if (!state.words.length) {
-          $("wordPrompt").textContent = "点「抽 5 词」开始";
-          $("wordMeta").textContent = "";
-          $("wordAnswer").classList.add("hidden");
-          state.speakPromptText = "";
-          state.speakAnswerText = "";
+      function normalizeAnswer(s) {
+        return String(s || "")
+          .trim()
+          .toLowerCase()
+          .replace(/[’']/g, "'")
+          .replace(/\s+/g, " ");
+      }
+
+      const LOTTIE = {
+        turtle: "./assets/lottie/turtle.json?v=2",
+        bee: "./assets/lottie/bee.json?v=2",
+      };
+      const PNG = {
+        turtle: "./assets/turtle.png",
+        bee: "./assets/bee.png",
+      };
+      const lottieAnims = {};
+
+      function ensurePng(el, kind) {
+        if (!el) return;
+        let img = el.querySelector(".mascot-fallback, img");
+        if (!img) {
+          img = document.createElement("img");
+          img.className = "mascot-fallback";
+          img.alt = kind === "bee" ? "翻翻蜂" : "翻翻龟";
+          el.appendChild(img);
+        }
+        img.src = PNG[kind] || PNG.turtle;
+        img.style.display = "";
+      }
+
+      function mountLottie(el, kind, loop) {
+        if (!el) return null;
+        ensurePng(el, kind);
+        if (!window.lottie) return null;
+        if (location.protocol === "file:") return null;
+        const host = document.createElement("div");
+        host.className = "lottie-host";
+        host.style.cssText = "position:absolute;inset:0;opacity:0;pointer-events:none;";
+        el.appendChild(host);
+        try {
+          const anim = window.lottie.loadAnimation({
+            container: host,
+            renderer: "svg",
+            loop: loop !== false,
+            autoplay: true,
+            path: LOTTIE[kind] || LOTTIE.turtle,
+          });
+          anim.addEventListener("DOMLoaded", () => {
+            const fb = el.querySelector(".mascot-fallback, img.mascot-fallback");
+            if (fb) fb.style.display = "none";
+            host.style.opacity = "1";
+            host.style.pointerEvents = "none";
+          });
+          anim.addEventListener("data_failed", () => {
+            host.remove();
+            ensurePng(el, kind);
+          });
+          return anim;
+        } catch (e) {
+          host.remove();
+          ensurePng(el, kind);
+          return null;
+        }
+      }
+
+      function coachAvatar(kind) {
+        const wrap = document.createElement("div");
+        wrap.className = "coach-avatar coach-" + kind + " is-idle";
+        const box = document.createElement("div");
+        box.className = "coach-lottie";
+        wrap.appendChild(box);
+        ensurePng(box, kind);
+        mountLottie(box, kind, true);
+        return wrap;
+      }
+
+      function coachBanner(kind, title) {
+        const row = document.createElement("div");
+        row.className = "coach-banner";
+        row.appendChild(coachAvatar(kind));
+        const text = document.createElement("div");
+        text.className = "coach-copy";
+        const name = document.createElement("strong");
+        name.textContent = kind === "bee" ? "翻翻蜂" : "翻翻龟";
+        const tip = document.createElement("span");
+        tip.textContent = title;
+        text.appendChild(name);
+        text.appendChild(tip);
+        row.appendChild(text);
+        return row;
+      }
+
+      function actionSpeak(label, fn, secondary) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "btn-speak" + (secondary ? " secondary" : "");
+        b.textContent = label;
+        b.addEventListener("click", fn);
+        $("cardActions").appendChild(b);
+      }
+      function actionOkBad(onOk, onBad) {
+        const row = document.createElement("div");
+        row.className = "row2";
+        const ok = document.createElement("button");
+        ok.type = "button";
+        ok.className = "btn-ok";
+        ok.textContent = "会了";
+        ok.addEventListener("click", onOk);
+        const bad = document.createElement("button");
+        bad.type = "button";
+        bad.className = "btn-bad";
+        bad.textContent = "不会";
+        bad.addEventListener("click", onBad);
+        row.appendChild(bad);
+        row.appendChild(ok);
+        $("cardActions").appendChild(row);
+      }
+      function renderOkBad(c) {
+        actionSpeak("听 Agent", () => speakCard(c));
+        actionOkBad(() => advance(true), () => advance(false));
+      }
+
+      function startFollowRead(c, onDone) {
+        let count = 0;
+        $("cardActions").innerHTML = "";
+        const tip = document.createElement("p");
+        tip.className = "follow-tip";
+        tip.id = "followTip";
+        tip.textContent = "跟「翻翻龟」读 3 遍，点一下跟读一遍";
+        $("cardExtra").appendChild(tip);
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "btn-ok";
+        btn.textContent = "跟读（0 / 3）";
+        btn.addEventListener("click", () => {
+          if (!V) return;
+          count += 1;
+          btn.textContent = "跟读（" + count + " / 3）";
+          V.speak(c.en, "boyChild");
+          if (count >= 3) {
+            btn.disabled = true;
+            tip.textContent = "跟读完成，继续下一题";
+            setTimeout(() => onDone(), 700);
+          }
+        });
+        $("cardActions").appendChild(btn);
+        if (V) V.speak(c.en, "boyChild");
+      }
+
+      function renderWordCard(c) {
+        if (c.mode === "zh2en") {
+          actionSpeak("听答案", () => {
+            state.revealed = true;
+            $("cardExtra").innerHTML = '<div class="answer-peek">' + c.en + "</div>";
+            if (V) V.speak(c.en, "adultMale");
+          });
+          actionOkBad(() => advance(true, c), () => advance(false, c));
           return;
         }
-        const w = state.words[state.index];
-        const quiz = state.quiz;
-        let prompt = w.zh;
-        let answer = w.en;
-        let speakPrompt = w.en;
-        let speakAnswer = w.en;
-        let promptRole = "adultFemale";
-        let answerRole = "adultMale";
 
-        if (quiz === "zh2en") {
-          prompt = w.zh;
-          answer = w.en;
-          speakPrompt = ""; // Chinese meaning: don't force English TTS
-          speakAnswer = w.en;
-          promptRole = "adultFemale";
-          answerRole = "adultFemale";
-        } else if (quiz === "en2zh") {
-          prompt = w.en;
-          answer = w.zh;
-          speakPrompt = w.en;
-          speakAnswer = w.en;
-        } else if (quiz === "dictation") {
-          prompt = "听写：请听英语，然后写下来";
-          answer = w.en + " · " + w.zh;
-          speakPrompt = w.en;
-          speakAnswer = w.en;
-          promptRole = "adultMale";
-        } else if (quiz === "frame") {
-          const frame = (unit().patterns[0] && unit().patterns[0].frame) || "I can see ____.";
-          const filled = frame.replace("____", w.en);
-          prompt = "把「" + w.en + "」填进句框：" + frame;
-          answer = filled + "（意思：" + w.zh + "）";
-          speakPrompt = w.en;
-          speakAnswer = filled;
-          answerRole = "boyChild";
-        }
+        $("cardPrompt").textContent = "";
+        $("cardSub").textContent = c.zh ? "中文意思：" + c.zh : "";
+        const extra = $("cardExtra");
+        extra.appendChild(coachBanner("turtle", "听「翻翻龟」读，写出英文"));
 
-        state.speakPromptText = speakPrompt;
-        state.speakAnswerText = speakAnswer;
-        state.speakPromptRole = promptRole;
-        state.speakAnswerRole = answerRole;
+        const field = document.createElement("div");
+        field.className = "dictation-box";
+        field.innerHTML =
+          '<input id="dictInput" class="dict-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="在这里输入英文" />';
+        extra.appendChild(field);
 
-        $("wordPrompt").textContent = prompt;
-        $("wordMeta").innerHTML = '<span class="tag ' + (String(w.src || "").indexOf("课") >= 0 ? "book" : "") + '">' + (w.src || "词") + "</span>" +
-          "第 " + (state.index + 1) + " / " + state.words.length + " 词";
-        $("wordAnswer").textContent = answer;
-        $("wordAnswer").classList.add("hidden");
+        const confirm = document.createElement("button");
+        confirm.type = "button";
+        confirm.className = "btn-ok";
+        confirm.id = "dictConfirm";
+        confirm.textContent = "确定";
+        confirm.addEventListener("click", () => {
+          const input = $("dictInput");
+          const typed = normalizeAnswer(input && input.value);
+          const right = normalizeAnswer(c.en);
+          if (!typed) {
+            if (input) input.focus();
+            return;
+          }
+          if (typed === right) {
+            state.revealed = true;
+            const peek = document.createElement("div");
+            peek.className = "answer-peek ok";
+            peek.textContent = "对了！ " + c.en;
+            extra.appendChild(peek);
+            confirm.disabled = true;
+            if (input) input.disabled = true;
+            if (V) V.speak(c.en, "boyChild");
+            setTimeout(() => advance(true, c), 800);
+            return;
+          }
+          state.revealed = true;
+          if (input) input.disabled = true;
+          confirm.disabled = true;
+          const peek = document.createElement("div");
+          peek.className = "answer-peek";
+          peek.textContent = "正确答案：" + c.en;
+          extra.appendChild(peek);
+          $("cardSub").textContent = "先听翻翻龟领读，再跟读 3 遍";
+          $("cardActions").innerHTML = "";
+          startFollowRead(c, () => advance(false, c));
+        });
+        $("cardActions").appendChild(confirm);
+        actionSpeak("再听一遍", () => {
+          if (V) V.speak(c.en, "boyChild");
+        }, true);
 
-        // 听写模式：抽词后自动用男成年腔读一遍
-        if (quiz === "dictation" && V && speakPrompt) {
-          setTimeout(() => V.speak(speakPrompt, promptRole), 180);
+        const input = $("dictInput");
+        if (input) {
+          input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") confirm.click();
+          });
+          setTimeout(() => input.focus(), 120);
         }
       }
 
-      function markWord(ok) {
-        if (!state.words.length) return;
-        const w = state.words[state.index];
-        state.results[state.index] = ok;
+      function renderListenCard(c) {
+        const extra = $("cardExtra");
+        if (c.coach === "bee") {
+          $("cardPrompt").textContent = c.prompt || "";
+          $("cardSub").textContent = (c.tip ? c.tip + " · " : "") + "听「翻翻蜂」读完再选";
+          extra.appendChild(coachBanner("bee", "听「翻翻蜂」读，再判断对错"));
+        }
+        const box = document.createElement("div");
+        box.className = "choices";
+        box.id = "listenChoices";
+        (c.choices || []).forEach((ch) => {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "choice";
+          b.textContent = ch.label;
+          b.addEventListener("click", () => {
+            if (state.listenLocked) return;
+            state.listenLocked = true;
+            const ok = String(ch.id) === String(c.answer);
+            box.querySelectorAll(".choice").forEach((el) => {
+              el.disabled = true;
+            });
+            b.classList.add(ok ? "correct" : "wrong");
+            box.querySelectorAll(".choice").forEach((el, i) => {
+              if (String(c.choices[i].id) === String(c.answer)) el.classList.add("correct");
+            });
+            if (c.tip) $("cardSub").textContent = (ok ? "对了。 " : "再听会更准。 ") + c.tip;
+            setTimeout(() => advance(ok), 700);
+          });
+          box.appendChild(b);
+        });
+        extra.appendChild(box);
+        actionSpeak(c.coach === "bee" ? "再听翻翻蜂" : "听 Agent", () => speakCard(c));
+      }
+
+      function renderPatternCard(c) {
+        $("cardExtra").appendChild(coachBanner("bee", "跟「翻翻蜂」读句型，再自己说一遍"));
+        actionSpeak("再听翻翻蜂", () => speakCard(c));
+        actionOkBad(() => advance(true), () => advance(false));
+      }
+
+      function renderOralCard(c) {
+        actionSpeak("听提问", () => {
+          if (V) V.speak(c.speakText, c.speakRole || "adultFemale");
+        });
+        if (c.sampleText) {
+          actionSpeak("听示范答", () => {
+            if (V) V.speak(c.sampleText, c.sampleRole || "boyChild");
+          }, true);
+        }
+        actionOkBad(() => advance(true), () => advance(false));
+      }
+
+      function renderDialogueCard(c) {
+        const list = document.createElement("div");
+        list.className = "card-sub";
+        list.style.whiteSpace = "pre-wrap";
+        list.textContent = (c.lines || [])
+          .map((l) => (l.name || "") + ": " + l.text)
+          .join("\n");
+        $("cardExtra").appendChild(list);
+        actionSpeak("听对话", () => speakCard(c));
+        actionOkBad(() => advance(true), () => advance(false));
+      }
+
+      function renderSortCard(c) {
+        const wrap = document.createElement("div");
+        wrap.className = "sort-wrap";
+        const bank = document.createElement("div");
+        bank.className = "sort-bank";
+        bank.id = "sortBank";
+        (c.bank || []).forEach((w) => {
+          const chip = document.createElement("button");
+          chip.type = "button";
+          chip.className = "sort-chip";
+          chip.textContent = w;
+          chip.dataset.word = w;
+          chip.addEventListener("click", () => {
+            state.sortActive = w;
+            bank.querySelectorAll(".sort-chip").forEach((el) => {
+              el.classList.toggle("picked", el.dataset.word === w);
+            });
+          });
+          bank.appendChild(chip);
+        });
+        const bins = document.createElement("div");
+        bins.className = "sort-bins";
+        (c.groups || []).forEach((g) => {
+          const bin = document.createElement("div");
+          bin.className = "sort-bin";
+          bin.dataset.bin = g.id;
+          bin.innerHTML = "<strong>" + g.label + "</strong><div class=\"bin-words\"></div>";
+          bin.addEventListener("click", () => {
+            if (!state.sortActive) return;
+            state.sortAssign[state.sortActive] = g.id;
+            state.sortActive = null;
+            refreshSortUI(c, bank, bins);
+          });
+          bins.appendChild(bin);
+        });
+        wrap.appendChild(bank);
+        wrap.appendChild(bins);
+        $("cardExtra").appendChild(wrap);
+        actionSpeak("听提示", () => {
+          if (V) V.speak("Put the words into groups.", "adultFemale");
+        });
+        actionOkBad(
+          () => {
+            let ok = 0, total = 0;
+            (c.groups || []).forEach((g) => {
+              (g.answers || []).forEach((w) => {
+                if ((c.bank || []).indexOf(w) < 0) return;
+                total += 1;
+                if (state.sortAssign[w] === g.id) ok += 1;
+              });
+            });
+            advance(total ? ok >= Math.ceil(total * 0.6) : true);
+          },
+          () => advance(false)
+        );
+      }
+
+      function refreshSortUI(c, bank, bins) {
+        bank.querySelectorAll(".sort-chip").forEach((el) => {
+          el.classList.toggle("used", !!state.sortAssign[el.dataset.word]);
+          el.classList.remove("picked");
+        });
+        bins.querySelectorAll(".sort-bin").forEach((bin) => {
+          const id = bin.dataset.bin;
+          const words = Object.keys(state.sortAssign).filter((w) => state.sortAssign[w] === id);
+          bin.querySelector(".bin-words").textContent = words.join(" · ");
+        });
+      }
+
+      function renderWriteCard(c) {
+        if (c.passage) {
+          const p = document.createElement("div");
+          p.className = "passage-mini";
+          p.textContent = c.passage;
+          $("cardExtra").appendChild(p);
+        }
+        const fields = document.createElement("div");
+        fields.className = "write-fields";
+        fields.innerHTML =
+          '<label>仿写 1<input id="write1" maxlength="120" placeholder="I\'m happy when I …" /></label>' +
+          '<label>仿写 2<input id="write2" maxlength="120" placeholder="I\'m happy when I …" /></label>';
+        $("cardExtra").appendChild(fields);
+        actionSpeak("听短文", () => speakCard(c));
+        actionOkBad(
+          () => {
+            const t = (($("write1") && $("write1").value) || "") + " " + (($("write2") && $("write2").value) || "");
+            const hasArticleBug = /go\s+to\s+park\b/i.test(t);
+            if (hasArticleBug) $("cardSub").textContent = "提醒：go to a park / the park";
+            saveStore({
+              lastWrite: { w1: ($("write1") && $("write1").value) || "", w2: ($("write2") && $("write2").value) || "" },
+            });
+            advance(!hasArticleBug);
+          },
+          () => advance(false)
+        );
+      }
+
+      function renderReadCard(c) {
+        actionSpeak("听提问", () => speakCard(c));
+        actionOkBad(() => advance(true), () => advance(false));
+      }
+
+      function pushRetry(c) {
+        if (!c || !c.retryWord) return;
         const store = loadStore();
         let retry = store.retryWords || [];
-        retry = retry.filter((r) => !(r.unitId === state.unitId && r.en === w.en));
-        if (!ok) {
-          retry.push({ unitId: state.unitId, en: w.en, zh: w.zh, date: todayKey() });
-        }
+        retry = retry.filter((r) => !(r.unitId === state.unitId && r.en === c.retryWord.en));
+        retry.push({
+          unitId: state.unitId,
+          en: c.retryWord.en,
+          zh: c.retryWord.zh,
+          date: todayKey(),
+        });
         saveStore({ retryWords: retry });
-        if (state.index < state.words.length - 1) {
-          state.index += 1;
-          renderWord();
-        } else {
-          renderWord();
-          const correct = state.results.filter((x) => x === true).length;
-          alert("本轮词测结束：" + correct + " / " + state.words.length + "。不会的已进「明日再测」。可以继续句型三步。");
-        }
       }
 
-      function saveTodayPartial(partial) {
-        const store = loadStore();
-        const logs = store.logs || {};
-        const key = todayKey();
-        logs[key] = Object.assign({}, logs[key] || {}, partial, {
-          date: key,
+      function advance(ok, c) {
+        const cur = c || card();
+        state.results.push(!!ok);
+        if (!ok && cur && cur.retryWord) pushRetry(cur);
+        if (V) V.stop();
+        state.index += 1;
+        if (state.index >= state.cards.length) finishLesson();
+        else renderCard(true);
+      }
+
+      function finishLesson() {
+        const ok = state.results.filter(Boolean).length;
+        const total = state.results.length;
+        const egg = Lesson.eggLine(unit());
+        const logs = loadStore().logs || {};
+        logs[todayKey()] = Object.assign({}, logs[todayKey()] || {}, {
+          date: todayKey(),
           unitId: state.unitId,
           unitName: unit().name,
-          mode: state.mode,
+          session: state.sessionId,
+          wordScore: ok + "/" + total,
+          done: true,
         });
-        saveStore({ logs: logs });
-        renderLogs();
+        saveStore({ logs: logs, unitId: state.unitId });
+        $("doneScore").textContent = "做对 " + ok + " / " + total + " · " + (Lesson.sessionMeta(state.sessionId).label || "");
+        $("doneEgg").textContent = "";
+        $("btnHome").classList.add("hidden");
+        $("progressFill").style.width = "100%";
+        showView("done");
+        startDonePractice(egg);
       }
 
-      function renderLogs() {
-        const logs = loadStore().logs || {};
-        const keys = Object.keys(logs).sort().reverse().slice(0, 10);
-        $("logList").innerHTML = keys.length ? keys.map((k) => {
-          const L = logs[k];
-          const word = L.wordScore != null ? ("词 " + L.wordScore) : "词 —";
-          const pat = L.patternStep != null ? ("句型步 " + L.patternStep) : "句型 —";
-          const oral = L.oral || "问答 —";
-          const read = L.readTitle ? ("读《" + L.readTitle + "》 " + (L.readSummary || "")) : "阅读 —";
-          return "<li><strong>" + k + "</strong> · " + (L.unitName || "") + "<br/>" +
-            word + " · " + pat + " · " + oral + "<br/>" + read + "</li>";
-        }).join("") : "<li>还没有记录。完成一块保存一次即可。</li>";
+      function scoreSpeech(heard, target) {
+        const a = normalizeAnswer(heard);
+        const b = normalizeAnswer(target);
+        if (!a) return { ok: false, reason: "没听清，再说一次" };
+        if (a === b) return { ok: true, reason: "说得很好！" };
+        const aw = a.replace(/[^a-z'\s]/g, " ").split(/\s+/).filter(Boolean);
+        const bw = b.replace(/[^a-z'\s]/g, " ").split(/\s+/).filter(Boolean);
+        const setB = {};
+        bw.forEach((w) => { setB[w] = true; });
+        const hit = aw.filter((w) => setB[w]).length;
+        const cover = bw.length ? hit / bw.length : 0;
+        const patternOk = /\bi\s*(am|'m|feel)\b/.test(a) && /\b(because|when)\b/.test(a) && aw.length >= 5;
+        if (cover >= 0.55 || (patternOk && cover >= 0.3)) {
+          return { ok: true, reason: cover >= 0.55 ? "跟原句很像，真棒！" : "造句结构对了，很好！" };
+        }
+        return { ok: false, reason: "再试试：I'm … because / when …" };
       }
 
-      function initUnits() {
-        $("unitSelect").innerHTML = DATA.units.map((u) => {
-          const extra = u.lessonTitle ? " · 现至 " + u.lessonTitle.replace("Lesson ", "L") : "";
-          return '<option value="' + u.id + '">' + u.name + extra + "</option>";
-        }).join("");
+      function listenOnceEnglish() {
+        return new Promise((resolve) => {
+          const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+          if (!SR) {
+            resolve({ ok: false, text: "", error: "nosupport" });
+            return;
+          }
+          const rec = new SR();
+          rec.lang = (V && V.getAccent && V.getAccent() === "en-GB") ? "en-GB" : "en-US";
+          rec.interimResults = false;
+          rec.maxAlternatives = 3;
+          let settled = false;
+          const finish = (payload) => {
+            if (settled) return;
+            settled = true;
+            try { rec.stop(); } catch (e) {}
+            resolve(payload);
+          };
+          rec.onresult = (ev) => {
+            let best = "";
+            for (let i = 0; i < ev.results.length; i++) {
+              const alt = ev.results[i][0];
+              if (alt && alt.transcript) best = (best ? best + " " : "") + alt.transcript;
+            }
+            finish({ ok: true, text: best.trim(), error: null });
+          };
+          rec.onerror = () => finish({ ok: false, text: "", error: "error" });
+          rec.onend = () => {
+            if (!settled) finish({ ok: false, text: "", error: "empty" });
+          };
+          try {
+            rec.start();
+          } catch (e) {
+            finish({ ok: false, text: "", error: "error" });
+          }
+        });
+      }
+
+      function startDonePractice(egg) {
+        const box = $("donePractice");
+        const home = $("btnHome");
+        if (!box) return;
+        box.innerHTML = "";
+        home.classList.add("hidden");
+
+        const sentence = document.createElement("div");
+        sentence.className = "egg-line";
+        sentence.textContent = egg;
+        box.appendChild(sentence);
+
+        const banner = coachBanner("turtle", "今日一句 · 翻翻龟领读");
+        box.appendChild(banner);
+
+        const tip = document.createElement("p");
+        tip.className = "follow-tip";
+        tip.textContent = "先听翻翻龟，再跟读 3 遍";
+        box.appendChild(tip);
+
+        const actions = document.createElement("div");
+        actions.className = "done-actions";
+        box.appendChild(actions);
+
+        let follow = 0;
+        const leadBtn = document.createElement("button");
+        leadBtn.type = "button";
+        leadBtn.className = "btn-speak";
+        leadBtn.textContent = "听翻翻龟领读";
+        const followBtn = document.createElement("button");
+        followBtn.type = "button";
+        followBtn.className = "btn-ok";
+        followBtn.textContent = "跟读（0 / 3）";
+        followBtn.disabled = true;
+
+        function playLead() {
+          if (V) V.speak(egg, "boyChild");
+          followBtn.disabled = false;
+          tip.textContent = "跟「翻翻龟」读 3 遍，点一下跟读一遍";
+        }
+
+        leadBtn.addEventListener("click", playLead);
+        followBtn.addEventListener("click", () => {
+          if (V) V.speak(egg, "boyChild");
+          follow += 1;
+          followBtn.textContent = "跟读（" + follow + " / 3）";
+          if (follow >= 3) {
+            followBtn.disabled = true;
+            leadBtn.disabled = true;
+            tip.textContent = "跟读完成！试着模仿造句，自己说一遍";
+            startSayStep();
+          }
+        });
+        actions.appendChild(leadBtn);
+        actions.appendChild(followBtn);
+        setTimeout(playLead, 200);
+
+        function startSayStep() {
+          actions.innerHTML = "";
+          banner.replaceWith(coachBanner("bee", "翻翻蜂来听你造句"));
+          const heard = document.createElement("p");
+          heard.className = "heard-line";
+          heard.textContent = "点下方按钮后开始说";
+          box.appendChild(heard);
+
+          const mic = document.createElement("button");
+          mic.type = "button";
+          mic.className = "btn-ok";
+          mic.textContent = "点我说一句";
+          actions.appendChild(mic);
+
+          let busy = false;
+          mic.addEventListener("click", () => {
+            if (busy) return;
+            busy = true;
+            if (V) V.stop();
+            mic.textContent = "正在听…请说英文";
+            mic.disabled = true;
+            tip.textContent = "模仿今日一句，用 I'm … because / when … 说一遍";
+            listenOnceEnglish().then((res) => {
+              busy = false;
+              mic.disabled = false;
+              mic.textContent = "再说一次";
+              if (res.error === "nosupport") {
+                heard.textContent = "这台浏览器不支持语音识别，请用 Chrome 打开";
+                tip.textContent = "也可以先回首页，下次再用 Chrome";
+                home.classList.remove("hidden");
+                return;
+              }
+              if (!res.text) {
+                heard.textContent = "没听清，再试一次";
+                tip.textContent = "靠近麦克风，说完整一句";
+                return;
+              }
+              heard.textContent = "你说了：" + res.text;
+              const judge = scoreSpeech(res.text, egg);
+              tip.textContent = judge.reason;
+              tip.className = "follow-tip " + (judge.ok ? "ok" : "bad");
+              if (judge.ok) {
+                mic.disabled = true;
+                mic.textContent = "过关啦";
+                home.classList.remove("hidden");
+                if (V) V.speak("Great job!", "girlChild");
+              } else if (V) {
+                V.speak("Try again.", "girlChild");
+              }
+            });
+          });
+        }
+      }
+
+      function openSettings(open) {
+        $("settingsOverlay").classList.toggle("hidden", !open);
+        $("settingsOverlay").setAttribute("aria-hidden", open ? "false" : "true");
+      }
+
+      function renderSettings() {
+        $("unitSelect").innerHTML = DATA.units
+          .map((u) => '<option value="' + u.id + '">' + u.name + "</option>")
+          .join("");
+        $("unitSelect").value = state.unitId;
+        if (V) {
+          const acc = V.getAccent();
+          document.querySelectorAll("[data-accent]").forEach((el) => {
+            el.classList.toggle("active", el.dataset.accent === acc);
+          });
+          const on = V.isEnabled();
+          $("btnVoiceOn").classList.toggle("active", on);
+          $("btnVoiceOff").classList.toggle("active", !on);
+          $("castMap").innerHTML = V.castMap()
+            .map((c) => "<div><strong>" + c.label + "</strong> · " + c.voice + "</div>")
+            .join("");
+        }
+      }
+
+      function init() {
         const store = loadStore();
         if (store.unitId && DATA.units.some((u) => u.id === store.unitId)) {
           state.unitId = store.unitId;
-        } else {
-          state.unitId = "u1";
-          saveStore({ unitId: "u1" });
         }
-        $("unitSelect").value = state.unitId;
-        if (store.mode === "short" || store.mode === "full") {
-          state.mode = store.mode;
-        }
-        document.querySelectorAll(".chip[data-mode]").forEach((el) => {
-          el.classList.toggle("active", el.dataset.mode === state.mode);
-        });
-        $("bookLabel").textContent = DATA.book;
-        $("durCheck").textContent = modeCfg().check + " 分钟";
-        $("durOral").textContent = modeCfg().oral + " 分钟";
-        $("durRead").textContent = modeCfg().read + " 分钟";
-        if (store.readTitle) $("readTitle").value = store.readTitle;
-
         if (V) {
-          if (store.accent === "en-GB" || store.accent === "en-US") {
-            V.setAccent(store.accent);
-            $("accentSelect").value = store.accent;
+          if (store.accent === "en-GB" || store.accent === "en-US") V.setAccent(store.accent);
+          V.setEnabled(store.voiceOn !== false);
+        }
+        $("btnStart").addEventListener("click", startLesson);
+        $("btnHome").addEventListener("click", () => {
+          showView("home");
+          renderHome();
+        });
+        $("btnCloseLesson").addEventListener("click", () => {
+          if (V) V.stop();
+          if (confirm("结束今天的练习？进度不保存为完成。")) {
+            showView("home");
+            renderHome();
           }
-          const on = store.voiceOn !== false;
+        });
+        $("btnMute").addEventListener("click", () => {
+          if (!V) return;
+          const on = !V.isEnabled();
           V.setEnabled(on);
-          $("btnVoiceToggle").textContent = on ? "语音开" : "语音关";
-          $("btnVoiceToggle").classList.toggle("active", on);
-        }
-      }
-
-      // events
-      $("unitSelect").addEventListener("change", () => {
-        state.unitId = $("unitSelect").value;
-        saveStore({ unitId: state.unitId });
-        state.patternStep = 0;
-        state.words = [];
-        state.results = [];
-        renderUnitMeta();
-        renderWord();
-      });
-
-      document.querySelectorAll(".chip[data-mode]").forEach((el) => {
-        el.addEventListener("click", () => {
-          state.mode = el.dataset.mode;
-          saveStore({ mode: state.mode });
-          document.querySelectorAll(".chip[data-mode]").forEach((c) => c.classList.toggle("active", c === el));
-          $("durCheck").textContent = modeCfg().check + " 分钟";
-          $("durOral").textContent = modeCfg().oral + " 分钟";
-          $("durRead").textContent = modeCfg().read + " 分钟";
-          setTimerForStep();
-          renderWeekHint();
+          saveStore({ voiceOn: on });
+          if (!on) V.stop();
+          $("btnMute").textContent = on ? "♪" : "🔇";
         });
-      });
-
-      document.querySelectorAll(".step-pill").forEach((el) => {
-        el.addEventListener("click", () => showStep(el.dataset.step));
-      });
-
-      $("btnTimer").addEventListener("click", startTimer);
-
-      document.querySelectorAll(".chip[data-quiz]").forEach((el) => {
-        el.addEventListener("click", () => {
-          state.quiz = el.dataset.quiz;
-          document.querySelectorAll(".chip[data-quiz]").forEach((c) => c.classList.toggle("active", c === el));
-          renderWord();
+        $("btnSettings").addEventListener("click", () => {
+          renderSettings();
+          openSettings(true);
         });
-      });
-
-      $("btnDrawWords").addEventListener("click", drawWords);
-      $("btnReveal").addEventListener("click", () => {
-        $("wordAnswer").classList.remove("hidden");
-        if (V && state.speakAnswerText) V.speak(state.speakAnswerText, state.speakAnswerRole || "adultFemale");
-      });
-      $("btnSpeakPrompt").addEventListener("click", () => {
-        if (!V) return;
-        if (state.speakPromptText) V.speak(state.speakPromptText, state.speakPromptRole || "adultFemale");
-        else if (state.words[state.index]) V.speak(state.words[state.index].en, "adultFemale");
-      });
-      $("btnSpeakAnswer").addEventListener("click", () => {
-        if (!V) return;
-        $("wordAnswer").classList.remove("hidden");
-        if (state.speakAnswerText) V.speak(state.speakAnswerText, state.speakAnswerRole || "adultFemale");
-      });
-      $("btnSpeakPattern").addEventListener("click", () => {
-        if (!V) return;
-        const p = unit().patterns.find((x) => x.id === state.patternId) || unit().patterns[0];
-        const demos = p.demos || [];
-        if (demos.length) V.speakSequence(demos);
-        else V.speak(p.label, "adultFemale");
-      });
-      $("btnOk").addEventListener("click", () => markWord(true));
-      $("btnBad").addEventListener("click", () => markWord(false));
-
-      $("accentSelect").addEventListener("change", () => {
-        if (!V) return;
-        V.setAccent($("accentSelect").value);
-        saveStore({ accent: $("accentSelect").value });
-        renderCastMap();
-      });
-      $("btnVoiceToggle").addEventListener("click", () => {
-        if (!V) return;
-        const on = !V.isEnabled();
-        V.setEnabled(on);
-        saveStore({ voiceOn: on });
-        $("btnVoiceToggle").textContent = on ? "语音开" : "语音关";
-        $("btnVoiceToggle").classList.toggle("active", on);
-      });
-      $("btnVoicePreview").addEventListener("click", () => {
-        if (!V) return;
-        V.speakSequence([
-          { role: "adultMale", text: "Hello. I am Dad." },
-          { role: "adultFemale", text: "Hello. I am Mum." },
-          { role: "boyChild", text: "Hi! I am a boy." },
-          { role: "girlChild", text: "Hi! I am a girl." },
-        ]);
-      });
-      $("btnSpeakDialogue").addEventListener("click", () => {
-        if (!V) return;
-        const lines = unit().dialogues || [];
-        if (!lines.length) return;
-        V.speakSequence(lines.map((l) => ({ role: l.role, text: l.text })));
-      });
-      $("btnStopVoice").addEventListener("click", () => { if (V) V.stop(); });
-      $("btnSpeakReadPrompts").addEventListener("click", () => {
-        if (!V) return;
-        const prompts = unit().readPrompts || [
-          { role: "adultFemale", text: "Who is in the story?" },
-          { role: "adultFemale", text: "What happened?" },
-        ];
-        V.speakSequence(prompts);
-      });
-      $("btnSpeakSummary").addEventListener("click", () => {
-        if (!V) return;
-        const t = $("readSummary").value.trim();
-        if (!t) {
-          alert("先写一句英文大意再朗读。");
-          return;
-        }
-        V.speak(t, "boyChild");
-      });
-
-      $("dialogueBox").addEventListener("click", (e) => {
-        const btn = e.target.closest("[data-say]");
-        if (!btn || !V) return;
-        V.speak(decodeURIComponent(btn.dataset.say), btn.dataset.role || "adultFemale");
-      });
-
-      $("qaBox").addEventListener("click", (e) => {
-        const askBtn = e.target.closest("[data-ask]");
-        const sampleBtn = e.target.closest("[data-sample]");
-        const markBtn = e.target.closest("[data-qmark]");
-        if (askBtn && V) {
-          const q = normalizeQuestion(unit().questions[Number(askBtn.dataset.ask)]);
-          V.speak(q.ask, q.asker || "adultFemale");
-          return;
-        }
-        if (sampleBtn && V) {
-          const q = normalizeQuestion(unit().questions[Number(sampleBtn.dataset.sample)]);
-          if (q.sample && q.sample.text) V.speak(q.sample.text, q.sample.role || "boyChild");
-          return;
-        }
-        if (!markBtn) return;
-        markBtn.parentElement.querySelectorAll("button").forEach((b) => b.classList.remove("primary"));
-        markBtn.classList.add("primary");
-      });
-
-      $("patternSelect").addEventListener("change", () => {
-        state.patternId = $("patternSelect").value;
-        state.patternStep = 0;
-        renderPattern();
-      });
-      document.querySelectorAll("[data-pstep]").forEach((el) => {
-        el.addEventListener("click", () => {
-          state.patternStep = Number(el.dataset.pstep);
-          renderPattern();
-          const correct = state.results.filter((x) => x === true).length;
-          const total = state.results.length;
-          saveTodayPartial({
-            wordScore: total ? (correct + "/" + total) : null,
-            patternStep: state.patternStep,
-            patternId: state.patternId,
+        $("btnCloseSettings").addEventListener("click", () => openSettings(false));
+        $("settingsOverlay").addEventListener("click", (e) => {
+          if (e.target === $("settingsOverlay")) openSettings(false);
+        });
+        $("unitSelect").addEventListener("change", () => {
+          state.unitId = $("unitSelect").value;
+          saveStore({ unitId: state.unitId });
+          renderHome();
+        });
+        document.querySelectorAll("[data-accent]").forEach((el) => {
+          el.addEventListener("click", () => {
+            if (!V) return;
+            V.setAccent(el.dataset.accent);
+            saveStore({ accent: el.dataset.accent });
+            renderSettings();
           });
         });
-      });
-
-      $("btnAddWord").addEventListener("click", () => {
-        const en = $("customWordEn").value.trim();
-        const zh = $("customWordZh").value.trim();
-        if (!en || !zh) return;
-        const store = loadStore();
-        const map = store.customWords || {};
-        map[state.unitId] = (map[state.unitId] || []).concat([{ en: en, zh: zh, src: "自加" }]);
-        saveStore({ customWords: map });
-        $("customWordEn").value = "";
-        $("customWordZh").value = "";
-        alert("已加入本单元词池。");
-      });
-
-      $("btnSaveOral").addEventListener("click", () => {
-        const marks = [];
-        $("qaBox").querySelectorAll(".qa-item").forEach((item, i) => {
-          const active = item.querySelector("button.primary");
-          const note = item.querySelector("textarea").value.trim();
-          marks.push("Q" + (i + 1) + ":" + (active ? active.dataset.val : "?") + (note ? "(" + note + ")" : ""));
+        $("btnVoiceOn").addEventListener("click", () => {
+          if (!V) return;
+          V.setEnabled(true);
+          saveStore({ voiceOn: true });
+          renderSettings();
         });
-        saveTodayPartial({ oral: marks.join(" · ") });
-        alert("问答已记入今日记录。可进入课外阅读。");
-        showStep("read");
-        document.querySelector('.step-pill[data-step="check"]').classList.add("done");
-        document.querySelector('.step-pill[data-step="oral"]').classList.add("done");
-      });
-
-      $("btnSaveRead").addEventListener("click", () => {
-        const title = $("readTitle").value.trim();
-        const pages = $("readPages").value.trim();
-        const summary = $("readSummary").value.trim();
-        if (!title) {
-          alert("先填书名或级别。");
-          return;
-        }
-        saveStore({ readTitle: title });
-        const correct = state.results.filter((x) => x === true).length;
-        const total = state.results.length;
-        saveTodayPartial({
-          wordScore: total ? (correct + "/" + total) : (loadStore().logs && loadStore().logs[todayKey()] || {}).wordScore,
-          patternStep: state.patternStep || (loadStore().logs && loadStore().logs[todayKey()] || {}).patternStep,
-          readTitle: title,
-          readPages: pages,
-          readSummary: summary,
-          done: true,
+        $("btnVoiceOff").addEventListener("click", () => {
+          if (!V) return;
+          V.setEnabled(false);
+          V.stop();
+          saveStore({ voiceOn: false });
+          renderSettings();
         });
-        document.querySelectorAll(".step-pill").forEach((el) => el.classList.add("done"));
-        alert("今日三块已记入。明天见。");
-        renderLogs();
-      });
+        $("btnVoicePreview").addEventListener("click", () => {
+          if (!V) return;
+          V.speakSequence([
+            { role: "adultMale", text: "Hello. I am your English agent." },
+            { role: "adultFemale", text: "Listen carefully. Please write the word." },
+            { role: "boyChild", text: "I feel happy because I can play." },
+            { role: "girlChild", text: "What's the matter? I can help you." },
+          ]);
+        });
 
-      $("btnExport").addEventListener("click", () => {
-        const logs = loadStore().logs || {};
-        const keys = Object.keys(logs).sort().reverse().slice(0, 14);
-        const text = keys.map((k) => JSON.stringify(logs[k])).join("\n");
-        const blob = new Blob([text || "暂无记录"], { type: "text/plain;charset=utf-8" });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "english-desk-log.txt";
-        a.click();
-      });
-
-      initUnits();
-      renderWeekHint();
-      renderUnitMeta();
-      renderCastMap();
-      renderLogs();
-      setTimerForStep();
-      showStep("check");
-      if (V) {
-        setTimeout(renderCastMap, 500);
-        if (window.speechSynthesis) {
-          window.speechSynthesis.onvoiceschanged = function () {
-            V.refresh();
-            renderCastMap();
-          };
+        const turtle = document.querySelector(".mascot-turtle");
+        const bee = document.querySelector(".mascot-bee");
+        ensurePng(turtle, "turtle");
+        ensurePng(bee, "bee");
+        lottieAnims.turtle = mountLottie(turtle, "turtle", true);
+        lottieAnims.bee = mountLottie(bee, "bee", true);
+        const homeClips = {
+          turtle: "./audio/home/turtle.mp3",
+          bee: "./audio/home/bee.mp3",
+        };
+        const homeLines = {
+          turtle: { role: "boyChild", text: "每天进步一点点，有一天比兔子跑得还远。" },
+          bee: { role: "girlChild", text: "嗡嗡嗡，今天你也开口了吗？" },
+        };
+        let homeWho = "turtle";
+        let introToken = 0;
+        cancelHomeIntro = function () { introToken += 1; };
+        function homeAlive(token) {
+          return token === introToken && $("screenHome") && !$("screenHome").classList.contains("hidden");
         }
+        function playHomeClip(who) {
+          return new Promise((resolve) => {
+            if (!V || !V.isEnabled()) { resolve(); return; }
+            if (!$("screenHome") || $("screenHome").classList.contains("hidden")) { resolve(); return; }
+            let settled = false;
+            const finish = () => {
+              if (settled) return;
+              settled = true;
+              if (homeAudioDone === finish) homeAudioDone = null;
+              resolve();
+            };
+            homeAudioDone = finish;
+            fetch("http://127.0.0.1:8731/api/play?who=" + encodeURIComponent(who), { cache: "no-store" })
+              .then((r) => {
+                if (!r.ok) throw new Error("speaker");
+                finish();
+              })
+              .catch(() => {
+                if (settled) return;
+                const src = homeClips[who];
+                if (!src) { finish(); return; }
+                const a = new Audio(src + "?v=1");
+                homeAudio = a;
+                a.onended = finish;
+                a.onerror = finish;
+                const started = a.play();
+                if (started && started.catch) started.catch(finish);
+              });
+          });
+        }
+        function setHomeLine(who) {
+          const line = homeLines[who];
+          const lineEl = $("mascotLine");
+          if (lineEl && line) lineEl.textContent = line.text;
+        }
+        function spinTurtleIntoBee() {
+          turtle.classList.add("is-on");
+          bee.classList.remove("is-on");
+          turtle.style.transformOrigin = "50% 50%";
+          bee.style.transformOrigin = "50% 50%";
+          turtle.style.zIndex = "3";
+          bee.style.zIndex = "2";
+          bee.style.opacity = "0";
+          const spin = { duration: 880, easing: "cubic-bezier(0.45, 0, 0.2, 1)", fill: "forwards" };
+          const leave = turtle.animate([
+            { transform: "rotate(0deg) scale(1)", opacity: 1 },
+            { transform: "rotate(160deg) scaleX(0.08) scaleY(1.06)", opacity: 1, offset: 0.46 },
+            { transform: "rotate(200deg) scale(0.2)", opacity: 0, offset: 0.58 },
+            { transform: "rotate(360deg) scale(1)", opacity: 0 },
+          ], spin);
+          const enter = bee.animate([
+            { transform: "rotate(0deg) scaleX(0.08)", opacity: 0 },
+            { transform: "rotate(160deg) scaleX(0.08) scaleY(1.06)", opacity: 0, offset: 0.46 },
+            { transform: "rotate(210deg) scale(0.92)", opacity: 1, offset: 0.64 },
+            { transform: "rotate(360deg) scale(1.06)", opacity: 1, offset: 0.9 },
+            { transform: "rotate(360deg) scale(1)", opacity: 1 },
+          ], spin);
+          document.querySelectorAll(".spark").forEach((dot, i) => {
+            dot.animate(
+              [
+                { transform: "scale(0.2)", opacity: 0 },
+                { transform: "scale(1.3)", opacity: 1, offset: 0.4 },
+                { transform: "scale(0.4)", opacity: 0 },
+              ],
+              { duration: 520, delay: 420 + i * 50, easing: "ease-out", fill: "forwards" }
+            );
+          });
+          return Promise.all([leave.finished, enter.finished]).then(() => {
+            turtle.classList.remove("is-on");
+            bee.classList.add("is-on");
+            setHomeLine("bee");
+            return bee.animate([
+              { transform: "rotate(0deg) scale(1.06)" },
+              { transform: "rotate(-5deg) scale(0.97)", offset: 0.45 },
+              { transform: "rotate(0deg) scale(1)" },
+            ], { duration: 320, easing: "ease-out", fill: "forwards" }).finished;
+          }).then(() => {
+            turtle.getAnimations().forEach((a) => a.cancel());
+            bee.getAnimations().forEach((a) => a.cancel());
+            turtle.style.opacity = "";
+            turtle.style.zIndex = "";
+            turtle.style.transform = "";
+            bee.style.opacity = "";
+            bee.style.zIndex = "";
+            bee.style.transform = "";
+          });
+        }
+        function runHomeIntro() {
+          const token = ++introToken;
+          homeWho = "turtle";
+          setHomeLine("turtle");
+          playHomeClip("turtle").then(() => {
+            if (!homeAlive(token)) return;
+            return spinTurtleIntoBee();
+          }).then(() => {
+            if (!homeAlive(token)) return;
+            homeWho = "bee";
+            return playHomeClip("bee");
+          }).catch(() => {});
+        }
+        if (turtle && bee) setTimeout(runHomeIntro, 80);
+
+        renderHome();
+        showView("home");
+        if (V) setTimeout(renderSettings, 400);
       }
+
+      init();
     })();
   </script>
 </body>

@@ -1,3 +1,12 @@
 .DS_Store
 Thumbs.db
 *.log
+_exam_u1/
+_textbook_preview/
+_list_voices.py
+_play_slogan.ps1
+_gen_*.py
+_check_*.py
+_apply_*.py
+_mci_*.py
+__pycache__/

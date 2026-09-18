@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <g class="bob">
+    <ellipse cx="44" cy="28" rx="16" ry="10" fill="#C8E8F8" transform="rotate(-18 44 28)"/>
+    <ellipse cx="76" cy="28" rx="16" ry="10" fill="#C8E8F8" transform="rotate(18 76 28)"/>
+    <ellipse cx="44" cy="28" rx="9" ry="5.5" fill="#EEF8FF" transform="rotate(-18 44 28)"/>
+    <ellipse cx="76" cy="28" rx="9" ry="5.5" fill="#EEF8FF" transform="rotate(18 76 28)"/>
+    <line x1="42" y1="18" x2="34" y2="6" stroke="#3C3C3C" stroke-width="3" stroke-linecap="round"/>
+    <line x1="78" y1="18" x2="86" y2="6" stroke="#3C3C3C" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="34" cy="6" r="3" fill="#3C3C3C"/>
+    <circle cx="86" cy="6" r="3" fill="#3C3C3C"/>
+    <circle cx="60" cy="64" r="38" fill="#FFC800"/>
+    <circle cx="46" cy="70" r="8" fill="#FF9EB5"/>
+    <circle cx="74" cy="70" r="8" fill="#FF9EB5"/>
+    <g class="eye" transform="translate(46 54)"><ellipse cx="0" cy="0" rx="4" ry="5" fill="#2B2B2B"/></g>
+    <g class="eye" transform="translate(74 54)"><ellipse cx="0" cy="0" rx="4" ry="5" fill="#2B2B2B"/></g>
+    <circle cx="60" cy="62" r="2.6" fill="#E85A7A"/>
+    <path d="M50 76c5 6 15 6 20 0" fill="none" stroke="#2B2B2B" stroke-width="3" stroke-linecap="round"/>
+    <ellipse class="tongue" cx="60" cy="84" rx="5" ry="7" fill="#FF6B8A"/>
+  </g>
+  <style><![CDATA[
+    .bob{transform-origin:60px 100px;animation:bob 1.8s cubic-bezier(.37,.01,.28,1) infinite}
+    .eye{transform-box:fill-box;transform-origin:center;animation:blink 4s ease-in-out infinite}
+    .tongue{transform-box:fill-box;transform-origin:50% 0%;animation:tongue 2.2s ease-in-out infinite}
+    @keyframes bob{0%,100%{transform:translateY(0) rotate(0)}35%{transform:translateY(-5px) rotate(-3deg)}70%{transform:translateY(2px) rotate(2deg)}}
+    @keyframes blink{0%,82%,92%,100%{transform:scaleY(1)}85%,88%{transform:scaleY(.08)}}
+    @keyframes tongue{0%,55%,100%{transform:scaleY(.15);opacity:.35}68%,82%{transform:scaleY(1);opacity:1}}
+  ]]></style>
+</svg>

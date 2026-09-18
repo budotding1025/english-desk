@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <g class="bob">
+    <path d="M28 46c0-18 16-34 32-34s32 16 32 34v4c-6-10-18-16-32-16S34 40 28 50v-4z" fill="#3A8F2E"/>
+    <path d="M44 28c4 8 8 12 16 14 8-2 12-6 16-14" fill="none" stroke="#2F7A24" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="60" cy="68" r="38" fill="#B8E879"/>
+    <circle cx="46" cy="66" r="7" fill="#FF9EB5"/>
+    <circle cx="74" cy="66" r="7" fill="#FF9EB5"/>
+    <g class="eye" transform="translate(46 58)"><ellipse cx="0" cy="0" rx="4.2" ry="5.2" fill="#2B2B2B"/></g>
+    <g class="eye" transform="translate(74 58)"><ellipse cx="0" cy="0" rx="4.2" ry="5.2" fill="#2B2B2B"/></g>
+    <path d="M52 78c4 5 12 5 16 0" fill="none" stroke="#2B2B2B" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <style><![CDATA[
+    .bob{transform-origin:60px 100px;animation:bob 2.8s cubic-bezier(.45,.05,.55,.95) infinite}
+    .eye{transform-box:fill-box;transform-origin:center;animation:blink 3.6s ease-in-out infinite}
+    @keyframes bob{0%,100%{transform:translateY(0) scale(1,1)}40%{transform:translateY(-3px) scale(1.02,.96)}70%{transform:translateY(1px) scale(.98,1.03)}}
+    @keyframes blink{0%,86%,94%,100%{transform:scaleY(1)}88%,91%{transform:scaleY(.08)}}
+  ]]></style>
+</svg>

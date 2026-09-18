@@ -63,6 +63,24 @@ def collect_from_data_js(src: str) -> set[tuple[str, str]]:
         if text:
             items.add((role, text))
 
+    # listen cards: role + speak
+    for m in re.finditer(
+        r'role:\s*"([^"]+)"\s*,\s*speak:\s*"([^"]*)"',
+        src,
+    ):
+        role, text = m.group(1), m.group(2).strip()
+        if text:
+            items.add((role, text))
+
+    # speak first then role (rare)
+    for m in re.finditer(
+        r'speak:\s*"([^"]*)"\s*,\s*(?:show:\s*"[^"]*"\s*,\s*)?role:\s*"([^"]+)"',
+        src,
+    ):
+        text, role = m.group(1).strip(), m.group(2)
+        if text:
+            items.add((role, text))
+
     # sample: { role: "...", text: "..." } already covered
     # questions ask strings inside objects
     for m in re.finditer(r'ask:\s*"([^"]+)"\s*,\s*asker:\s*"([^"]+)"', src):
@@ -85,12 +103,13 @@ def collect_from_data_js(src: str) -> set[tuple[str, str]]:
         if re.search(r"[A-Za-z]{3,}", label) and not re.search(r"[\u4e00-\u9fff]", label):
             items.add(("adultFemale", label))
 
-    # all word.en
+    # all word.en — adult + 翻翻龟 boyChild
     for m in re.finditer(r'en:\s*"([^"]+)"\s*,\s*zh:', src):
         w = m.group(1).strip()
         if w:
             items.add(("adultFemale", w))
             items.add(("adultMale", w))
+            items.add(("boyChild", w))
 
     for role, text in PREVIEW + READ_FALLBACK:
         items.add((role, text))

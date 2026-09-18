@@ -1,14 +1,14 @@
 /**
- * 英语家侧 · 四角色英语语音
+ * 翻翻英语 · 四角色英语语音
  * 优先播放预生成的微软神经语音 MP3（真男声 / 真女童声 / 年轻男声男孩）
  * 仅在无现成录音时，才回退系统 TTS（且不再把同一女声提调冒充童声）
  */
 (function (global) {
   const ROLE_META = {
-    adultMale: { label: "男成年", neural: "Guy / Ryan" },
-    adultFemale: { label: "女成年", neural: "Jenny / Sonia" },
-    boyChild: { label: "男小孩", neural: "Andrew / Thomas（年轻男声）" },
-    girlChild: { label: "女小孩", neural: "Ana / Maisie（儿童神经声）" },
+    adultMale: { label: "Agent·男成年", neural: "Guy / Ryan" },
+    adultFemale: { label: "Agent·女成年", neural: "Jenny / Sonia" },
+    boyChild: { label: "Agent·男小孩", neural: "Andrew / Thomas（年轻男声）" },
+    girlChild: { label: "Agent·女小孩", neural: "Ana / Maisie（儿童神经声）" },
   };
 
   const ROLE_ALIASES = {
@@ -66,7 +66,7 @@
   function loadManifest() {
     if (manifest) return Promise.resolve(manifest);
     if (manifestPromise) return manifestPromise;
-    manifestPromise = fetch("./audio/manifest.json?v=2")
+    manifestPromise = fetch("./audio/manifest.json?v=5")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         manifest = data;
@@ -124,9 +124,22 @@
     return window.speechSynthesis ? window.speechSynthesis.getVoices() || [] : [];
   }
 
-  function scoreSynth(v, roleKey) {
+  function scoreSynth(v, roleKey, langHint) {
     const name = (v.name || "").toLowerCase();
     const lang = (v.lang || "").toLowerCase();
+    if (langHint === "zh") {
+      if (!/^zh([-_]|$)/.test(lang)) return -200;
+      let s = 20;
+      if (/xiaoxiao|xiaoyi|xiaoshuang|huihui|yaoyao|kangkang|yunxi|yunyang/.test(name)) s += 30;
+      if (roleKey === "boyChild") {
+        if (/yunxi|yunyang|kangkang|male|男/.test(name)) s += 40;
+        if (/xiaoxiao|xiaoyi|xiaoshuang|huihui|female|女/.test(name)) s -= 20;
+      } else if (roleKey === "girlChild") {
+        if (/xiaoxiao|xiaoyi|xiaoshuang|huihui|female|女/.test(name)) s += 40;
+        if (/yunxi|yunyang|kangkang|male|男/.test(name)) s -= 20;
+      }
+      return s;
+    }
     if (!/^en([-_]|$)/.test(lang)) return -200;
     let s = 10;
     if (accent === "en-GB" && /en-?gb|british/.test(lang + name)) s += 30;
@@ -145,20 +158,20 @@
     return s;
   }
 
-  function pickSynth(roleKey) {
-    const cacheKey = roleKey + "|" + accent;
+  function pickSynth(roleKey, langHint) {
+    const cacheKey = roleKey + "|" + (langHint || accent);
     if (synthCache[cacheKey]) return synthCache[cacheKey];
     const voices = getVoices();
     if (!voices.length) return null;
     const ranked = voices
-      .map((v) => ({ v, s: scoreSynth(v, roleKey) }))
+      .map((v) => ({ v, s: scoreSynth(v, roleKey, langHint) }))
       .filter((x) => x.s > 0)
       .sort((a, b) => b.s - a.s);
     synthCache[cacheKey] = ranked.length ? ranked[0].v : null;
     return synthCache[cacheKey];
   }
 
-  function speakSynth(text, roleKey) {
+  function speakSynth(text, roleKey, langHint) {
     if (!window.speechSynthesis) return Promise.resolve(false);
     // Children: do NOT extreme-pitch the same voice; prefer real system child if any,
     // otherwise speak with distinct adult gender at near-normal pitch (honest fallback).
@@ -171,18 +184,19 @@
       pitch = 1.02;
       rate = 0.95;
     } else if (roleKey === "boyChild") {
-      pitch = 1.08; // mild only
+      pitch = langHint === "zh" ? 1.18 : 1.08;
       rate = 1.0;
     } else if (roleKey === "girlChild") {
-      pitch = 1.12;
+      pitch = langHint === "zh" ? 1.22 : 1.12;
       rate = 1.0;
     }
 
-    const voice = pickSynth(roleKey === "boyChild" ? "adultMale" : roleKey === "girlChild" ? "adultFemale" : roleKey);
+    const mapped = roleKey === "boyChild" ? "adultMale" : roleKey === "girlChild" ? "adultFemale" : roleKey;
+    const voice = pickSynth(langHint === "zh" ? roleKey : mapped, langHint);
     return new Promise((resolve) => {
       try {
         const u = new SpeechSynthesisUtterance(text);
-        u.lang = (voice && voice.lang) || accent;
+        u.lang = (voice && voice.lang) || (langHint === "zh" ? "zh-CN" : accent);
         if (voice) u.voice = voice;
         u.rate = rate;
         u.pitch = pitch;
@@ -202,17 +216,22 @@
     const roleKey = normRole(role);
     const utterText = cleanText(text, opts.forceAll);
     if (!utterText) return Promise.resolve(false);
+    const langHint = opts.lang || (/[\u4e00-\u9fff]/.test(utterText) ? "zh" : "en");
 
     return loadManifest().then((man) => {
       if (!opts.queue) stop();
-      const rel = man ? clipPath(roleKey, utterText) : null;
-      if (rel) {
-        return playUrl(rel + (rel.indexOf("?") >= 0 ? "&" : "?") + "v=2").then((ok) => {
-          if (ok) return true;
-          return speakSynth(utterText, roleKey);
-        });
+      if (langHint !== "zh") {
+        let rel = man ? clipPath(roleKey, utterText) : null;
+        if (!rel && roleKey === "boyChild") rel = man ? clipPath("adultMale", utterText) : null;
+        if (!rel && roleKey === "girlChild") rel = man ? clipPath("adultFemale", utterText) : null;
+        if (rel) {
+          return playUrl(rel + (rel.indexOf("?") >= 0 ? "&" : "?") + "v=5").then((ok) => {
+            if (ok) return true;
+            return speakSynth(utterText, roleKey, langHint);
+          });
+        }
       }
-      return speakSynth(utterText, roleKey);
+      return speakSynth(utterText, roleKey, langHint);
     });
   }
 
