@@ -98,11 +98,15 @@
     if (window.speechSynthesis) window.speechSynthesis.cancel();
   }
 
-  function playUrl(url) {
+  function playUrl(url, rate) {
     return new Promise((resolve) => {
       try {
         stop();
         const a = new Audio(url);
+        a.playbackRate = rate && rate > 0 ? rate : 1;
+        a.preservesPitch = true;
+        try { a.mozPreservesPitch = true; } catch (e) {}
+        try { a.webkitPreservesPitch = true; } catch (e) {}
         currentAudio = a;
         a.onended = () => {
           if (currentAudio === a) currentAudio = null;
@@ -171,7 +175,7 @@
     return synthCache[cacheKey];
   }
 
-  function speakSynth(text, roleKey, langHint) {
+  function speakSynth(text, roleKey, langHint, rateScale) {
     if (!window.speechSynthesis) return Promise.resolve(false);
     // Children: do NOT extreme-pitch the same voice; prefer real system child if any,
     // otherwise speak with distinct adult gender at near-normal pitch (honest fallback).
@@ -190,6 +194,7 @@
       pitch = langHint === "zh" ? 1.22 : 1.12;
       rate = 1.0;
     }
+    if (rateScale && rateScale > 0) rate = rate * rateScale;
 
     const mapped = roleKey === "boyChild" ? "adultMale" : roleKey === "girlChild" ? "adultFemale" : roleKey;
     const voice = pickSynth(langHint === "zh" ? roleKey : mapped, langHint);
@@ -217,6 +222,7 @@
     const utterText = cleanText(text, opts.forceAll);
     if (!utterText) return Promise.resolve(false);
     const langHint = opts.lang || (/[\u4e00-\u9fff]/.test(utterText) ? "zh" : "en");
+    const rateScale = opts.rate && opts.rate > 0 ? opts.rate : 1;
 
     return loadManifest().then((man) => {
       if (!opts.queue) stop();
@@ -225,13 +231,13 @@
         if (!rel && roleKey === "boyChild") rel = man ? clipPath("adultMale", utterText) : null;
         if (!rel && roleKey === "girlChild") rel = man ? clipPath("adultFemale", utterText) : null;
         if (rel) {
-          return playUrl(rel + (rel.indexOf("?") >= 0 ? "&" : "?") + "v=5").then((ok) => {
+          return playUrl(rel + (rel.indexOf("?") >= 0 ? "&" : "?") + "v=5", rateScale).then((ok) => {
             if (ok) return true;
-            return speakSynth(utterText, roleKey, langHint);
+            return speakSynth(utterText, roleKey, langHint, rateScale);
           });
         }
       }
-      return speakSynth(utterText, roleKey, langHint);
+      return speakSynth(utterText, roleKey, langHint, rateScale);
     });
   }
 
@@ -241,7 +247,7 @@
     let chain = Promise.resolve();
     (lines || []).forEach((line, i) => {
       chain = chain
-        .then(() => speak(line.text, line.role, { queue: true, forceAll: line.forceAll }))
+        .then(() => speak(line.text, line.role, { queue: true, forceAll: line.forceAll, rate: line.rate }))
         .then(
           () =>
             new Promise((r) => {

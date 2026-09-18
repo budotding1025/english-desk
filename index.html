@@ -256,20 +256,21 @@
         });
       }
 
-      function speakCard(c) {
+      function speakCard(c, rate) {
         if (!V || !c) return;
         setCoachTalking(true);
         const done = () => setTimeout(() => setCoachTalking(false), 200);
+        const opts = rate && rate !== 1 ? { rate: rate } : undefined;
         let p;
         if (c.type === "dialogue" && c.lines) {
-          p = V.speakSequence(c.lines.map((l) => ({ role: l.role, text: l.text })));
+          p = V.speakSequence(c.lines.map((l) => ({ role: l.role, text: l.text, rate: opts && opts.rate })));
         } else if (c.type === "pattern" && c.demos && c.demos.length) {
-          p = V.speakSequence(c.demos.map((d) => ({ role: "girlChild", text: d.text })));
+          p = V.speakSequence(c.demos.map((d) => ({ role: "girlChild", text: d.text, rate: opts && opts.rate })));
         } else if (c.type === "write" && c.passage) {
           const parts = c.passage.split(/\n+/).map((s) => s.trim()).filter(Boolean);
-          p = V.speakSequence(parts.map((text) => ({ role: c.narratorRole || "boyChild", text: text })));
+          p = V.speakSequence(parts.map((text) => ({ role: c.narratorRole || "boyChild", text: text, rate: opts && opts.rate })));
         } else if (c.speakText) {
-          p = V.speak(c.speakText, c.speakRole || "adultFemale");
+          p = V.speak(c.speakText, c.speakRole || "adultFemale", opts);
         }
         if (p && p.then) p.then(done).catch(done);
         else done();
@@ -426,20 +427,20 @@
       }
 
       function renderWordCard(c) {
-        if (c.mode === "zh2en") {
-          actionSpeak("听答案", () => {
-            state.revealed = true;
-            $("cardExtra").innerHTML = '<div class="answer-peek">' + c.en + "</div>";
-            if (V) V.speak(c.en, "adultMale");
-          });
-          actionOkBad(() => advance(true, c), () => advance(false, c));
-          return;
-        }
-
-        $("cardPrompt").textContent = "";
-        $("cardSub").textContent = c.zh ? "中文意思：" + c.zh : "";
+        const isDictation = c.mode === "dictation";
         const extra = $("cardExtra");
-        extra.appendChild(coachBanner("turtle", "听「翻翻龟」读，写出英文"));
+        extra.innerHTML = "";
+        $("cardActions").innerHTML = "";
+
+        if (isDictation) {
+          $("cardPrompt").textContent = "";
+          $("cardSub").textContent = c.zh ? "中文意思：" + c.zh : "";
+          extra.appendChild(coachBanner("turtle", "听「翻翻龟」读，写出英文"));
+        } else {
+          $("cardPrompt").textContent = c.zh || c.prompt || "";
+          $("cardSub").textContent = "看中文，写出英文单词";
+          extra.appendChild(coachBanner("turtle", "写出英文，点确定"));
+        }
 
         const field = document.createElement("div");
         field.className = "dictation-box";
@@ -468,7 +469,7 @@
             extra.appendChild(peek);
             confirm.disabled = true;
             if (input) input.disabled = true;
-            if (V) V.speak(c.en, "boyChild");
+            if (V) V.speak(c.en, isDictation ? "boyChild" : "boyChild");
             setTimeout(() => advance(true, c), 800);
             return;
           }
@@ -484,9 +485,16 @@
           startFollowRead(c, () => advance(false, c));
         });
         $("cardActions").appendChild(confirm);
-        actionSpeak("再听一遍", () => {
-          if (V) V.speak(c.en, "boyChild");
-        }, true);
+
+        if (isDictation) {
+          actionSpeak("再听一遍", () => {
+            if (V) V.speak(c.en, "boyChild");
+          }, true);
+        } else {
+          actionSpeak("听发音", () => {
+            if (V) V.speak(c.en, "boyChild");
+          }, true);
+        }
 
         const input = $("dictInput");
         if (input) {
@@ -530,6 +538,9 @@
         });
         extra.appendChild(box);
         actionSpeak(c.coach === "bee" ? "再听翻翻蜂" : "听 Agent", () => speakCard(c));
+        if (c.kind === "judge" || c.coach === "bee") {
+          actionSpeak("慢速 0.7×", () => speakCard(c, 0.7), true);
+        }
       }
 
       function renderPatternCard(c) {
