@@ -399,6 +399,19 @@
         actionOkBad(() => advance(true), () => advance(false));
       }
 
+      function showAnswerThenContinue(c, wasOk) {
+        $("cardActions").innerHTML = "";
+        actionSpeak("再播放一次", () => {
+          if (V) V.speak(c.en, "boyChild");
+        });
+        const go = document.createElement("button");
+        go.type = "button";
+        go.className = "btn-ok";
+        go.textContent = "会了";
+        go.addEventListener("click", () => advance(wasOk, c));
+        $("cardActions").appendChild(go);
+      }
+
       function startFollowRead(c, onDone) {
         let count = 0;
         $("cardActions").innerHTML = "";
@@ -438,7 +451,7 @@
           extra.appendChild(coachBanner("turtle", "听「翻翻龟」读，写出英文"));
         } else {
           $("cardPrompt").textContent = c.zh || c.prompt || "";
-          $("cardSub").textContent = "看中文，写出英文单词";
+          $("cardSub").textContent = "看中文，在下方输入英文";
           extra.appendChild(coachBanner("turtle", "写出英文，点确定"));
         }
 
@@ -469,8 +482,9 @@
             extra.appendChild(peek);
             confirm.disabled = true;
             if (input) input.disabled = true;
-            if (V) V.speak(c.en, isDictation ? "boyChild" : "boyChild");
-            setTimeout(() => advance(true, c), 800);
+            if (V) V.speak(c.en, "boyChild");
+            $("cardActions").innerHTML = "";
+            showAnswerThenContinue(c, true);
             return;
           }
           state.revealed = true;
@@ -480,9 +494,15 @@
           peek.className = "answer-peek";
           peek.textContent = "正确答案：" + c.en;
           extra.appendChild(peek);
-          $("cardSub").textContent = "先听翻翻龟领读，再跟读 3 遍";
-          $("cardActions").innerHTML = "";
-          startFollowRead(c, () => advance(false, c));
+          if (isDictation) {
+            $("cardSub").textContent = "先听翻翻龟领读，再跟读 3 遍";
+            $("cardActions").innerHTML = "";
+            startFollowRead(c, () => advance(false, c));
+            return;
+          }
+          $("cardSub").textContent = "听一遍正确答案，会了再继续";
+          if (V) V.speak(c.en, "boyChild");
+          showAnswerThenContinue(c, false);
         });
         $("cardActions").appendChild(confirm);
 
@@ -511,6 +531,8 @@
           $("cardPrompt").textContent = c.prompt || "";
           $("cardSub").textContent = (c.tip ? c.tip + " · " : "") + "听「翻翻蜂」读完再选";
           extra.appendChild(coachBanner("bee", "听「翻翻蜂」读，再判断对错"));
+        } else if (c.kind === "reply") {
+          $("cardSub").textContent = (c.tip ? c.tip + " · " : "") + "听问句，选正确应答";
         }
         const box = document.createElement("div");
         box.className = "choices";
@@ -537,16 +559,120 @@
           box.appendChild(b);
         });
         extra.appendChild(box);
-        actionSpeak(c.coach === "bee" ? "再听翻翻蜂" : "听 Agent", () => speakCard(c));
-        if (c.kind === "judge" || c.coach === "bee") {
-          actionSpeak("慢速 0.7×", () => speakCard(c, 0.7), true);
-        }
+        actionSpeak(c.coach === "bee" ? "再听翻翻蜂" : "再听一遍", () => speakCard(c));
+        actionSpeak("慢速 0.7×", () => speakCard(c, 0.7), true);
       }
 
       function renderPatternCard(c) {
-        $("cardExtra").appendChild(coachBanner("bee", "跟「翻翻蜂」读句型，再自己说一遍"));
+        const extra = $("cardExtra");
+        extra.innerHTML = "";
+        $("cardActions").innerHTML = "";
+        extra.appendChild(coachBanner("bee", "跟「翻翻蜂」读句型，再自己说一遍"));
+        const target =
+          (c.demos && c.demos[0] && c.demos[0].text) ||
+          c.speakText ||
+          "I'm happy because I can play.";
+
         actionSpeak("再听翻翻蜂", () => speakCard(c));
-        actionOkBad(() => advance(true), () => advance(false));
+        actionSpeak("慢速 0.7×", () => speakCard(c, 0.7), true);
+
+        const tip = document.createElement("p");
+        tip.className = "follow-tip";
+        tip.textContent = "选一种方式作答：语音 或 打字";
+        extra.appendChild(tip);
+
+        const mode = document.createElement("div");
+        mode.className = "row2";
+        const voiceBtn = document.createElement("button");
+        voiceBtn.type = "button";
+        voiceBtn.className = "btn-speak";
+        voiceBtn.textContent = "语音输入";
+        const textBtn = document.createElement("button");
+        textBtn.type = "button";
+        textBtn.className = "btn-speak secondary";
+        textBtn.textContent = "文字输入";
+        mode.appendChild(voiceBtn);
+        mode.appendChild(textBtn);
+        $("cardActions").appendChild(mode);
+
+        function finishPattern(ok, heard) {
+          tip.className = "follow-tip " + (ok ? "ok" : "bad");
+          tip.textContent = ok ? "说得不错！" : "再听听翻翻蜂，然后点会了继续";
+          if (heard) {
+            let line = extra.querySelector(".heard-line");
+            if (!line) {
+              line = document.createElement("p");
+              line.className = "heard-line";
+              extra.appendChild(line);
+            }
+            line.textContent = "你说了 / 写了：" + heard;
+          }
+          $("cardActions").innerHTML = "";
+          actionSpeak("再听翻翻蜂", () => speakCard(c));
+          actionSpeak("再播放一次示范", () => {
+            if (V) V.speak(target, "girlChild");
+          }, true);
+          const go = document.createElement("button");
+          go.type = "button";
+          go.className = "btn-ok";
+          go.textContent = "会了";
+          go.addEventListener("click", () => advance(ok));
+          $("cardActions").appendChild(go);
+        }
+
+        voiceBtn.addEventListener("click", () => {
+          tip.textContent = "正在听…请用英文说一句";
+          voiceBtn.disabled = true;
+          textBtn.disabled = true;
+          if (V) V.stop();
+          listenOnceEnglish().then((res) => {
+            voiceBtn.disabled = false;
+            textBtn.disabled = false;
+            if (res.error === "nosupport") {
+              tip.textContent = "此浏览器不支持语音，请改用文字输入";
+              return;
+            }
+            if (!res.text) {
+              tip.textContent = "没听清，再试一次语音，或改用文字";
+              return;
+            }
+            const judge = scoreSpeech(res.text, target);
+            finishPattern(judge.ok, res.text);
+          });
+        });
+
+        textBtn.addEventListener("click", () => {
+          tip.textContent = "把你的句子打在下面";
+          voiceBtn.disabled = true;
+          textBtn.disabled = true;
+          const field = document.createElement("div");
+          field.className = "dictation-box";
+          field.innerHTML =
+            '<input id="patternInput" class="dict-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="I\'m … because / when …" />';
+          extra.appendChild(field);
+          $("cardActions").innerHTML = "";
+          const confirm = document.createElement("button");
+          confirm.type = "button";
+          confirm.className = "btn-ok";
+          confirm.textContent = "确定";
+          confirm.addEventListener("click", () => {
+            const input = $("patternInput");
+            const typed = (input && input.value) || "";
+            if (!typed.trim()) {
+              if (input) input.focus();
+              return;
+            }
+            const judge = scoreSpeech(typed, target);
+            if (input) input.disabled = true;
+            confirm.disabled = true;
+            finishPattern(judge.ok, typed.trim());
+          });
+          $("cardActions").appendChild(confirm);
+          setTimeout(() => {
+            const input = $("patternInput");
+            if (input) input.focus();
+          }, 80);
+        });
       }
 
       function renderOralCard(c) {
