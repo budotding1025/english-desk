@@ -7,14 +7,23 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Noto+Sans+SC:wght@500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./theme-duo.css?v=12" />
+  <link rel="stylesheet" href="./theme-duo.css?v=14" />
   <script src="./assets/vendor/lottie.min.js"></script>
 </head>
 <body>
+  <div class="coin-toast hidden" id="coinToast" aria-live="polite">
+    <span class="coin-toast-icon" aria-hidden="true">🪙</span>
+    <span id="coinToastText">+10</span>
+  </div>
+
   <div class="screen" id="screenHome">
     <div class="top">
       <div class="brand">翻翻英语</div>
-      <button type="button" class="icon-btn" id="btnSettings" aria-label="设置">⚙</button>
+      <div class="top-wallet">
+        <span class="wallet-pill coin" id="homeCoins" title="金币">🪙 0</span>
+        <span class="wallet-pill gem" id="homeGems" title="宝石">💎 0</span>
+        <button type="button" class="icon-btn" id="btnSettings" aria-label="设置">⚙</button>
+      </div>
     </div>
     <div class="home-main">
       <div class="mascot-stage">
@@ -37,8 +46,24 @@
         <h1 id="sessionTitle">词听练习</h1>
         <p class="meta" id="sessionMeta">约 18 分钟 · Agent 带练</p>
         <button type="button" class="btn-start" id="btnStart">开始</button>
+        <button type="button" class="btn-path" id="btnOpenPath">看学期路径</button>
       </div>
       <p class="unit-line" id="unitLine">Unit 1</p>
+      <p class="path-summary" id="pathSummary">本学期 0 / 0 课</p>
+    </div>
+  </div>
+
+  <!-- PATH -->
+  <div class="screen hidden" id="screenPath">
+    <div class="path-top">
+      <button type="button" class="icon-btn" id="btnClosePath" aria-label="关闭">×</button>
+      <h1>学期学习路径</h1>
+      <div class="wallet-pill coin" id="pathCoins">🪙 0</div>
+    </div>
+    <p class="path-meta" id="pathMeta">本学期共 0 课 · 已学 0 课</p>
+    <div class="path-scroll" id="pathList"></div>
+    <div class="path-footer">
+      <button type="button" class="btn-start" id="btnPathStart">开始下一课</button>
     </div>
   </div>
 
@@ -47,7 +72,10 @@
     <div class="lesson-top">
       <button type="button" class="icon-btn" id="btnCloseLesson" aria-label="关闭">×</button>
       <div class="progress" aria-hidden="true"><i id="progressFill"></i></div>
-      <button type="button" class="icon-btn" id="btnMute" aria-label="静音" title="语音开闭">♪</button>
+      <div class="lesson-wallet">
+        <span class="wallet-pill coin sm" id="lessonCoinsHud">🪙 0</span>
+        <button type="button" class="icon-btn" id="btnMute" aria-label="静音" title="语音开闭">♪</button>
+      </div>
     </div>
     <div class="lesson-body">
       <p class="card-type" id="cardType">词</p>
@@ -61,10 +89,14 @@
   <!-- DONE -->
   <div class="screen hidden" id="screenDone">
     <div class="done-main">
-      <h1>今日完成</h1>
-      <p class="meta" id="doneScore" style="color:var(--muted)">—</p>
-      <div class="egg" id="doneEgg"></div>
-      <div id="donePractice" class="done-practice"></div>
+      <div id="doneSummary" class="done-summary"></div>
+      <div id="donePracticeWrap" class="hidden">
+        <h1>今日一句</h1>
+        <p class="meta" id="doneScore" style="color:var(--muted)">—</p>
+        <div class="egg" id="doneEgg"></div>
+        <div id="donePractice" class="done-practice"></div>
+      </div>
+      <div class="done-actions-bar" id="doneActionsBar"></div>
       <button type="button" class="btn-start hidden" id="btnHome">回首页</button>
     </div>
   </div>
@@ -93,12 +125,29 @@
     </div>
   </div>
 
+  <nav class="app-nav" id="appNav" aria-label="主导航">
+    <button type="button" class="nav-item is-on" data-nav="home" id="navHome" aria-label="首页">
+      <span class="nav-lottie" id="navHomeLottie" aria-hidden="true"></span>
+      <span class="nav-label">Home</span>
+    </button>
+    <button type="button" class="nav-item" data-nav="path" id="navPath" aria-label="学习路径">
+      <span class="nav-icon" aria-hidden="true">🗺️</span>
+      <span class="nav-label">路径</span>
+    </button>
+    <button type="button" class="nav-item" data-nav="learn" id="navLearn" aria-label="开始学习">
+      <span class="nav-icon" aria-hidden="true">▶️</span>
+      <span class="nav-label">学习</span>
+    </button>
+  </nav>
+
   <script src="./data.js"></script>
+  <script src="./progress.js"></script>
   <script src="./voice.js"></script>
   <script>
     (function () {
       const DATA = window.ENGLISH_DESK_DATA;
       const Lesson = window.EnglishDeskLesson;
+      const Progress = window.EnglishDeskProgress;
       const V = window.EnglishVoice;
       const STORE_KEY = "english-desk-v3";
 
@@ -107,6 +156,7 @@
         view: "home",
         unitId: "u1",
         sessionId: "weekdayListen",
+        pathId: "u1-L1",
         cards: [],
         index: 0,
         results: [],
@@ -114,6 +164,9 @@
         listenLocked: false,
         sortAssign: {},
         sortActive: null,
+        lessonCoins: 0,
+        correctInLesson: 0,
+        lastSettle: null,
       };
 
       function loadStore() {
@@ -177,37 +230,205 @@
         $("screenHome").classList.toggle("hidden", name !== "home");
         $("screenLesson").classList.toggle("hidden", name !== "lesson");
         $("screenDone").classList.toggle("hidden", name !== "done");
+        if ($("screenPath")) $("screenPath").classList.toggle("hidden", name !== "path");
+        const showNav = name === "home" || name === "path";
+        if ($("appNav")) $("appNav").classList.toggle("hidden", !showNav);
+        syncNav(name === "path" ? "path" : name === "home" ? "home" : null);
         if (name !== "home") {
           cancelHomeIntro();
           stopHomeAudio();
+        } else {
+          playNavHome();
         }
         if (name !== "lesson" && V) V.stop();
       }
 
-      function renderHome() {
-        state.sessionId = Lesson.todaySessionId();
-        const sess = Lesson.sessionMeta(state.sessionId);
-        const u = unit();
-        $("sessionEyebrow").textContent = "今天 · 自动安排";
-        $("sessionTitle").textContent = sess.label.replace(/^工作日① |^工作日② /, "") || sess.label;
-        $("sessionMeta").textContent = "约 " + sess.minutes + " 分钟 · Agent 提问与听写";
-        $("unitLine").textContent = u.name + (u.lessonTitle ? " · " + u.lessonTitle : "");
-        $("streakLine").innerHTML = "连续 <strong>" + streakDays() + "</strong> 天";
+      let navHomeAnim = null;
+      function mountNavHome() {
+        const host = $("navHomeLottie");
+        if (!host || navHomeAnim) return;
+        if (!window.lottie || location.protocol === "file:") {
+          host.textContent = "🏠";
+          host.classList.add("nav-fallback");
+          return;
+        }
+        try {
+          navHomeAnim = window.lottie.loadAnimation({
+            container: host,
+            renderer: "svg",
+            loop: false,
+            autoplay: false,
+            path: "./assets/lottie/home-in-out.json?v=1",
+          });
+        } catch (e) {
+          host.textContent = "🏠";
+          host.classList.add("nav-fallback");
+        }
+      }
+      function playNavHome() {
+        if (!navHomeAnim) {
+          mountNavHome();
+        }
+        if (!navHomeAnim) return;
+        try {
+          navHomeAnim.stop();
+          navHomeAnim.goToAndPlay(0, true);
+        } catch (e) {}
+      }
+      function syncNav(active) {
+        document.querySelectorAll(".nav-item").forEach((el) => {
+          el.classList.toggle("is-on", !!active && el.dataset.nav === active);
+        });
       }
 
-      function startLesson() {
-        const store = loadStore();
-        state.cards = Lesson.buildCards(unit(), state.sessionId, store);
+      function walletStore() {
+        return Progress.ensureProgress(loadStore());
+      }
+
+      function syncWalletUI() {
+        const s = walletStore();
+        if ($("homeCoins")) $("homeCoins").textContent = "🪙 " + s.coins;
+        if ($("homeGems")) $("homeGems").textContent = "💎 " + s.gems;
+        if ($("pathCoins")) $("pathCoins").textContent = "🪙 " + s.coins;
+        if ($("lessonCoinsHud")) {
+          $("lessonCoinsHud").textContent = "🪙 +" + (state.lessonCoins || 0);
+        }
+        const done = Progress.completedCount(s.completedLessons);
+        const total = Progress.pathTotal();
+        if ($("pathSummary")) {
+          $("pathSummary").textContent = "本学期已学 " + done + " / " + total + " 课 · 多学/复习可拿附加金币";
+        }
+      }
+
+      function showCoinToast(amount) {
+        const el = $("coinToast");
+        if (!el) return;
+        $("coinToastText").textContent = "+" + amount;
+        el.classList.remove("hidden");
+        el.classList.remove("pop");
+        void el.offsetWidth;
+        el.classList.add("pop");
+        clearTimeout(showCoinToast._t);
+        showCoinToast._t = setTimeout(() => {
+          el.classList.add("hidden");
+          el.classList.remove("pop");
+        }, 900);
+      }
+
+      function praiseVoice() {
+        if (V) V.speak("你真是太棒了！再接再厉！", "girlChild");
+      }
+      function encourageVoice() {
+        if (V) V.speak("不要紧，马上改，下次你一定行！", "girlChild");
+      }
+
+      function onCorrectReward() {
+        const gain = Progress.COIN_CORRECT;
+        state.lessonCoins = (state.lessonCoins || 0) + gain;
+        state.correctInLesson = (state.correctInLesson || 0) + 1;
+        showCoinToast(gain);
+        syncWalletUI();
+        if (state.correctInLesson % Progress.PRAISE_EVERY === 0) {
+          setTimeout(praiseVoice, 350);
+        }
+      }
+
+      function onWrongReward() {
+        encourageVoice();
+      }
+
+      function mountCoinsLottie(host, loop) {
+        if (!host) return null;
+        host.innerHTML = "";
+        if (!window.lottie || location.protocol === "file:") {
+          host.innerHTML = '<div class="coin-fallback">🪙🪙🪙</div>';
+          return null;
+        }
+        try {
+          return window.lottie.loadAnimation({
+            container: host,
+            renderer: "svg",
+            loop: !!loop,
+            autoplay: true,
+            path: "./assets/lottie/coins.json?v=1",
+          });
+        } catch (e) {
+          host.innerHTML = '<div class="coin-fallback">🪙🪙🪙</div>';
+          return null;
+        }
+      }
+
+      function renderHome() {
+        state.sessionId = Lesson.todaySessionId();
+        const store = walletStore();
+        const node = Progress.nodeById(store.currentPathId) || Progress.semesterPath()[0];
+        if (node) {
+          state.pathId = node.id;
+          state.unitId = node.unitId;
+        }
+        const sess = Lesson.sessionMeta(state.sessionId);
+        const u = unit();
+        $("sessionEyebrow").textContent = "今天 · " + (node ? node.label : "自动安排");
+        $("sessionTitle").textContent = sess.label.replace(/^工作日① |^工作日② /, "") || sess.label;
+        $("sessionMeta").textContent = "约 " + sess.minutes + " 分钟 · 答对拿金币 · 五题语音表扬";
+        $("unitLine").textContent = u.name + (node ? " · 第" + node.lesson + "课" : "");
+        $("streakLine").innerHTML = "连续 <strong>" + streakDays() + "</strong> 天";
+        syncWalletUI();
+      }
+
+      function startLesson(pathId) {
+        const store = walletStore();
+        if (pathId) state.pathId = pathId;
+        else state.pathId = store.currentPathId || state.pathId;
+        const node = Progress.nodeById(state.pathId);
+        if (node) {
+          state.unitId = node.unitId;
+          saveStore({ unitId: state.unitId, currentPathId: state.pathId });
+        }
+        state.cards = Lesson.buildCards(unit(), state.sessionId || Lesson.todaySessionId(), store);
+        state.sessionId = state.sessionId || Lesson.todaySessionId();
         state.index = 0;
         state.results = [];
         state.revealed = false;
         state.listenLocked = false;
+        state.lessonCoins = 0;
+        state.correctInLesson = 0;
+        state.lastSettle = null;
         if (!state.cards.length) {
           alert("本单元暂无练习内容。");
           return;
         }
         showView("lesson");
+        syncWalletUI();
         renderCard(true);
+      }
+
+      function renderPath() {
+        const store = walletStore();
+        const path = Progress.semesterPath();
+        const doneN = Progress.completedCount(store.completedLessons);
+        $("pathMeta").textContent =
+          "本学期共 " + path.length + " 课 · 已学 " + doneN + " 课 · 复习/多学都有附加金币";
+        syncWalletUI();
+        const list = $("pathList");
+        list.innerHTML = "";
+        path.forEach((node, i) => {
+          const rec = store.completedLessons[node.id];
+          const done = !!(rec && rec.count > 0);
+          const current = store.currentPathId === node.id;
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "path-node" + (done ? " is-done" : "") + (current ? " is-current" : "");
+          btn.innerHTML =
+            '<span class="path-dot">' + (done ? "✓" : i + 1) + "</span>" +
+            '<span class="path-copy"><strong>' + node.label + "</strong>" +
+            "<small>" + (done ? "已学 · 复习 +" + 25 + " 币" : current ? "下一课 · 首通 +" + 50 + " 币" : "待解锁奖励") +
+            "</small></span>";
+          btn.addEventListener("click", () => {
+            startLesson(node.id);
+          });
+          list.appendChild(btn);
+        });
       }
 
       function progressPct() {
@@ -819,32 +1040,113 @@
         const cur = c || card();
         state.results.push(!!ok);
         if (!ok && cur && cur.retryWord) pushRetry(cur);
-        if (V) V.stop();
+        if (ok) onCorrectReward();
+        else onWrongReward();
         state.index += 1;
-        if (state.index >= state.cards.length) finishLesson();
-        else renderCard(true);
+        const praiseHit = ok && state.correctInLesson % Progress.PRAISE_EVERY === 0;
+        const delay = !ok ? 1000 : praiseHit ? 1800 : 700;
+        setTimeout(() => {
+          if (state.index >= state.cards.length) finishLesson();
+          else renderCard(true);
+        }, delay);
       }
 
       function finishLesson() {
         const ok = state.results.filter(Boolean).length;
         const total = state.results.length;
         const egg = Lesson.eggLine(unit());
-        const logs = loadStore().logs || {};
+        const store0 = walletStore();
+        const settle = Progress.settleLesson(
+          store0,
+          state.pathId || store0.currentPathId,
+          state.lessonCoins || 0,
+          todayKey()
+        );
+        state.lastSettle = settle;
+        const logs = settle.store.logs || loadStore().logs || {};
         logs[todayKey()] = Object.assign({}, logs[todayKey()] || {}, {
           date: todayKey(),
           unitId: state.unitId,
           unitName: unit().name,
+          pathId: settle.pathId,
           session: state.sessionId,
           wordScore: ok + "/" + total,
+          lessonCoins: settle.earned,
           done: true,
         });
-        saveStore({ logs: logs, unitId: state.unitId });
-        $("doneScore").textContent = "做对 " + ok + " / " + total + " · " + (Lesson.sessionMeta(state.sessionId).label || "");
-        $("doneEgg").textContent = "";
-        $("btnHome").classList.add("hidden");
+        settle.store.logs = logs;
+        settle.store.unitId = state.unitId;
+        localStorage.setItem(STORE_KEY, JSON.stringify(settle.store));
         $("progressFill").style.width = "100%";
         showView("done");
-        startDonePractice(egg);
+        renderDoneSummary(settle, ok, total, egg);
+      }
+
+      function renderDoneSummary(settle, ok, total, egg) {
+        const wrap = $("doneSummary");
+        const practice = $("donePracticeWrap");
+        const bar = $("doneActionsBar");
+        practice.classList.add("hidden");
+        $("btnHome").classList.add("hidden");
+        wrap.innerHTML = "";
+        bar.innerHTML = "";
+
+        const coinHost = document.createElement("div");
+        coinHost.className = "done-coins-lottie";
+        wrap.appendChild(coinHost);
+        mountCoinsLottie(coinHost, true);
+
+        const title = document.createElement("h1");
+        title.textContent = settle.isReview ? "复习完成！" : "本课完成！";
+        wrap.appendChild(title);
+
+        const score = document.createElement("p");
+        score.className = "meta";
+        score.textContent = "做对 " + ok + " / " + total;
+        wrap.appendChild(score);
+
+        const earned = document.createElement("div");
+        earned.className = "done-earn";
+        earned.innerHTML =
+          '<div class="earn-row"><span>答题金币</span><strong>+' + settle.lessonCoins + "</strong></div>" +
+          '<div class="earn-row"><span>' + settle.bonusLabel + '</span><strong>+' + settle.bonus + "</strong></div>" +
+          '<div class="earn-row gem"><span>宝石</span><strong>+' + settle.gems + " 💎</strong></div>" +
+          '<div class="earn-total"><span>本课合计</span><strong>+' + settle.earned + " 🪙</strong></div>" +
+          '<div class="earn-total all"><span>总金币</span><strong>' + settle.totalCoins + " 🪙</strong></div>";
+        wrap.appendChild(earned);
+
+        if (V) V.speak("你真是太棒了！再接再厉！", "girlChild");
+
+        function addBtn(label, cls, fn) {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = cls;
+          b.textContent = label;
+          b.addEventListener("click", fn);
+          bar.appendChild(b);
+        }
+        addBtn(settle.next ? "下一课 · " + settle.next.label : "看学期路径", "btn-start", () => {
+          if (settle.next) startLesson(settle.next.id);
+          else {
+            showView("path");
+            renderPath();
+          }
+        });
+        addBtn("看学期路径", "btn-path", () => {
+          showView("path");
+          renderPath();
+        });
+        addBtn("今日一句挑战", "btn-speak", () => {
+          practice.classList.remove("hidden");
+          $("doneScore").textContent = "做对 " + ok + " / " + total;
+          $("doneEgg").textContent = "";
+          startDonePractice(egg);
+        });
+        addBtn("回首页", "btn-bad", () => {
+          showView("home");
+          renderHome();
+        });
+        syncWalletUI();
       }
 
       function scoreSpeech(heard, target) {
@@ -999,8 +1301,8 @@
           banner.replaceWith(coachBanner("bee", "翻翻蜂来听你造句"));
           const heard = document.createElement("p");
           heard.className = "heard-line";
-          heard.textContent = "点下方按钮后开始说";
-          box.appendChild(heard);
+          heard.textContent = "";
+          box.insertBefore(heard, actions);
 
           const mic = document.createElement("button");
           mic.type = "button";
@@ -1015,20 +1317,22 @@
             if (V) V.stop();
             mic.textContent = "正在听…请说英文";
             mic.disabled = true;
+            tip.className = "follow-tip";
             tip.textContent = "模仿今日一句，用 I'm … because / when … 说一遍";
+            heard.textContent = "";
             listenOnceEnglish().then((res) => {
               busy = false;
               mic.disabled = false;
               mic.textContent = "再说一次";
               if (res.error === "nosupport") {
-                heard.textContent = "这台浏览器不支持语音识别，请用 Chrome 打开";
-                tip.textContent = "也可以先回首页，下次再用 Chrome";
+                tip.textContent = "这台浏览器不支持语音识别，请用 Chrome 打开";
+                tip.className = "follow-tip bad";
                 home.classList.remove("hidden");
                 return;
               }
               if (!res.text) {
-                heard.textContent = "没听清，再试一次";
-                tip.textContent = "靠近麦克风，说完整一句";
+                tip.className = "follow-tip bad";
+                tip.textContent = "没听清，靠近麦克风再说完整一句";
                 return;
               }
               heard.textContent = "你说了：" + res.text;
@@ -1036,15 +1340,38 @@
               tip.textContent = judge.reason;
               tip.className = "follow-tip " + (judge.ok ? "ok" : "bad");
               if (judge.ok) {
-                mic.disabled = true;
-                mic.textContent = "过关啦";
-                home.classList.remove("hidden");
-                if (V) V.speak("Great job!", "girlChild");
+                showDoneReward();
               } else if (V) {
                 V.speak("Try again.", "girlChild");
               }
             });
           });
+        }
+
+        function showDoneReward() {
+          box.innerHTML = "";
+          const reward = document.createElement("div");
+          reward.className = "done-reward";
+          reward.innerHTML =
+            '<div class="reward-stage">' +
+            '<div class="reward-burst" aria-hidden="true"></div>' +
+            '<img class="reward-char turtle" src="./assets/reward-turtle-lift.svg" alt="翻翻龟单手举重" width="132" height="132">' +
+            '<img class="reward-char bee" src="./assets/reward-bee-dance.svg" alt="翻翻蜂扭屁跳舞" width="124" height="124">' +
+            "</div>" +
+            '<h2 class="reward-title">今日一句过关！</h2>' +
+            '<p class="reward-sub">翻翻龟单手举重 · 翻翻蜂扭屁跳舞</p>';
+          box.appendChild(reward);
+          const again = document.createElement("button");
+          again.type = "button";
+          again.className = "btn-ok";
+          again.textContent = "看学期路径";
+          again.addEventListener("click", () => {
+            showView("path");
+            renderPath();
+          });
+          box.appendChild(again);
+          home.classList.remove("hidden");
+          if (V) V.speak("你真是太棒了！再接再厉！", "girlChild");
         }
       }
 
@@ -1073,22 +1400,58 @@
       }
 
       function init() {
-        const store = loadStore();
+        let store = Progress.ensureProgress(loadStore());
+        localStorage.setItem(STORE_KEY, JSON.stringify(store));
         if (store.unitId && DATA.units.some((u) => u.id === store.unitId)) {
           state.unitId = store.unitId;
         }
+        if (store.currentPathId) state.pathId = store.currentPathId;
         if (V) {
           if (store.accent === "en-GB" || store.accent === "en-US") V.setAccent(store.accent);
           V.setEnabled(store.voiceOn !== false);
         }
-        $("btnStart").addEventListener("click", startLesson);
+        $("btnStart").addEventListener("click", () => startLesson());
+        if ($("btnOpenPath")) {
+          $("btnOpenPath").addEventListener("click", () => {
+            showView("path");
+            renderPath();
+          });
+        }
+        if ($("btnClosePath")) {
+          $("btnClosePath").addEventListener("click", () => {
+            showView("home");
+            renderHome();
+          });
+        }
+        if ($("btnPathStart")) {
+          $("btnPathStart").addEventListener("click", () => {
+            const s = walletStore();
+            startLesson(s.currentPathId);
+          });
+        }
+        if ($("navHome")) {
+          $("navHome").addEventListener("click", () => {
+            showView("home");
+            renderHome();
+          });
+        }
+        if ($("navPath")) {
+          $("navPath").addEventListener("click", () => {
+            showView("path");
+            renderPath();
+          });
+        }
+        if ($("navLearn")) {
+          $("navLearn").addEventListener("click", () => startLesson());
+        }
+        mountNavHome();
         $("btnHome").addEventListener("click", () => {
           showView("home");
           renderHome();
         });
         $("btnCloseLesson").addEventListener("click", () => {
           if (V) V.stop();
-          if (confirm("结束今天的练习？进度不保存为完成。")) {
+          if (confirm("结束今天的练习？未完成不记本课积分。")) {
             showView("home");
             renderHome();
           }

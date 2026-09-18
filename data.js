@@ -64,6 +64,7 @@ window.ENGLISH_DESK_DATA = {
       id: "u1",
       name: "Unit 1 Share and Care",
       examFocus: true,
+      lessonCount: 4,
       currentLesson: 4,
       lessonTitle: "对标第一单元练习卷",
       themes: "情绪 · 天气 · because/when · What's the matter · 找东西",
@@ -345,6 +346,7 @@ window.ENGLISH_DESK_DATA = {
     {
       id: "u2",
       name: "Unit 2 Be Good Friends",
+      lessonCount: 4,
       themes: "朋友 · 一起读 · 帮助 · 休息",
       kaixinHint: "开心单词书：一起玩 / 读书 / 生病休息",
       words: [
@@ -440,6 +442,7 @@ window.ENGLISH_DESK_DATA = {
     {
       id: "u3",
       name: "Unit 3 Be a Nice Person",
+      lessonCount: 4,
       themes: "礼貌 · 请求 · 道歉",
       kaixinHint: "开心单词书：借东西 / 道歉 / 请帮忙",
       words: [
@@ -532,6 +535,7 @@ window.ENGLISH_DESK_DATA = {
     {
       id: "u5",
       name: "Unit 5 Enjoy Eating",
+      lessonCount: 4,
       themes: "点餐 · 食物 · 餐桌礼仪",
       kaixinHint: "开心单词书：点餐 / 食物饮料 / 餐桌",
       words: [
@@ -628,6 +632,7 @@ window.ENGLISH_DESK_DATA = {
     {
       id: "u6",
       name: "Unit 6 Get Close to Nature",
+      lessonCount: 4,
       themes: "自然 · 农场 · 旅行",
       kaixinHint: "开心单词书：农场 / 天气 / 动植物",
       words: [
@@ -722,6 +727,7 @@ window.ENGLISH_DESK_DATA = {
     {
       id: "u7",
       name: "Unit 7 Be Together",
+      lessonCount: 4,
       themes: "新年 · 春节 · 元宵",
       kaixinHint: "开心单词书：生日 / 春节 / 聚会 / 许愿",
       words: [
