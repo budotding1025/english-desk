@@ -932,33 +932,67 @@
         leadBtn.type = "button";
         leadBtn.className = "btn-speak";
         leadBtn.textContent = "听翻翻龟领读";
+        const slowBtn = document.createElement("button");
+        slowBtn.type = "button";
+        slowBtn.className = "btn-speak secondary";
+        slowBtn.textContent = "慢速 0.7×";
         const followBtn = document.createElement("button");
         followBtn.type = "button";
         followBtn.className = "btn-ok";
-        followBtn.textContent = "跟读（0 / 3）";
+        followBtn.textContent = "跟读并检测（0 / 3）";
         followBtn.disabled = true;
 
-        function playLead() {
-          if (V) V.speak(egg, "boyChild");
+        function playLead(rate) {
+          if (V) V.speak(egg, "boyChild", rate && rate !== 1 ? { rate: rate } : undefined);
           followBtn.disabled = false;
-          tip.textContent = "跟「翻翻龟」读 3 遍，点一下跟读一遍";
+          tip.textContent = "点「跟读并检测」：说出整句，系统检查是否说对（免费，不耗 token）";
         }
 
-        leadBtn.addEventListener("click", playLead);
+        leadBtn.addEventListener("click", () => playLead(1));
+        slowBtn.addEventListener("click", () => playLead(0.7));
         followBtn.addEventListener("click", () => {
-          if (V) V.speak(egg, "boyChild");
-          follow += 1;
-          followBtn.textContent = "跟读（" + follow + " / 3）";
-          if (follow >= 3) {
-            followBtn.disabled = true;
-            leadBtn.disabled = true;
-            tip.textContent = "跟读完成！试着模仿造句，自己说一遍";
-            startSayStep();
-          }
+          if (followBtn.disabled) return;
+          followBtn.disabled = true;
+          tip.textContent = "正在听…请跟读整句英文";
+          if (V) V.stop();
+          listenOnceEnglish().then((res) => {
+            followBtn.disabled = false;
+            if (res.error === "nosupport") {
+              tip.textContent = "此浏览器不支持语音检测，改为点一下算一遍";
+              follow += 1;
+              followBtn.textContent = "跟读并检测（" + follow + " / 3）";
+              if (V) V.speak(egg, "boyChild");
+              if (follow >= 3) afterFollow();
+              return;
+            }
+            if (!res.text) {
+              tip.className = "follow-tip bad";
+              tip.textContent = "没听清，再跟读一次";
+              return;
+            }
+            const judge = scoreSpeech(res.text, egg);
+            tip.className = "follow-tip " + (judge.ok ? "ok" : "bad");
+            tip.textContent = (judge.ok ? "第 " + (follow + 1) + " 遍过关： " : "再试：") + judge.reason;
+            if (!judge.ok) return;
+            follow += 1;
+            followBtn.textContent = "跟读并检测（" + follow + " / 3）";
+            if (follow >= 3) afterFollow();
+          });
         });
+
+        function afterFollow() {
+          followBtn.disabled = true;
+          leadBtn.disabled = true;
+          slowBtn.disabled = true;
+          tip.className = "follow-tip ok";
+          tip.textContent = "跟读完成！试着模仿造句，自己说一遍";
+          startSayStep();
+        }
+
         actions.appendChild(leadBtn);
+        actions.appendChild(slowBtn);
         actions.appendChild(followBtn);
-        setTimeout(playLead, 200);
+        setTimeout(() => playLead(1), 200);
 
         function startSayStep() {
           actions.innerHTML = "";
