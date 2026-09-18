@@ -877,4 +877,109 @@ button { cursor: pointer; border: none; background: none; }
   text-align: center;
 }
 .nav-icon { font-size: 1.35rem; line-height: 36px; height: 36px; }
+.nav-glyph {
+  width: 28px;
+  height: 28px;
+  display: block;
+  background: currentColor;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
 .nav-label { letter-spacing: 0.02em; }
+
+.records-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 0;
+}
+.records-score {
+  margin: 0 16px 12px;
+}
+.score-hero {
+  background: #fff;
+  border: 2px solid var(--line);
+  border-radius: 18px;
+  padding: 14px 16px 12px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.score-label {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--muted);
+}
+.score-num {
+  margin: 4px 0 2px;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--accent-deep);
+  line-height: 1.1;
+}
+.score-num span { font-size: 1.2rem; }
+.score-sub {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+.rec-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 4px;
+  border-radius: 14px;
+  background: #fff;
+  border: 2px solid var(--line);
+}
+.rec-stat.float { border-color: #84d8ff; background: #f3fbff; }
+.rec-stat strong {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--accent-deep);
+}
+.rec-stat span {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+.rec-stat small {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #9aa3ad;
+}
+.records-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 0 16px 12px;
+}
+.rec-action {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 14px 12px;
+  border-radius: 16px;
+  border: 2px solid var(--line);
+  background: #fff;
+  text-align: left;
+  font-weight: 800;
+}
+.rec-action strong { font-size: 0.95rem; color: var(--ink); }
+.rec-action span { font-size: 0.72rem; color: var(--muted); font-weight: 700; }
+.rec-action.challenge { border-color: #ffc800; background: #fff9e6; }
+.rec-action:disabled { opacity: 0.45; }
+.records-empty {
+  margin: 24px 16px;
+  text-align: center;
+  color: var(--muted);
+  font-weight: 700;
+  line-height: 1.5;
+}

@@ -207,6 +207,93 @@ window.ENGLISH_DESK_DATA = {
             tip: "一起找东西：Sure / OK + together。",
           },
         ],
+        /** 难度挑战：比卷面再长一点、干扰更近、少给中文提示 */
+        challenge: {
+          judge: [
+            {
+              id: "cj1",
+              role: "boyChild",
+              speak:
+                "I feel happy because I can play catch with my friends, ride a bike in the park, and read a good book after school.",
+              answer: true,
+              meaning: "我开心，因为能和朋友玩捉人、在公园骑车，放学后还能读好书。",
+              tip: "挑战：because 后有三件事，都要听到。",
+            },
+            {
+              id: "cj2",
+              role: "girlChild",
+              speak: "Mum is worried because it is windy and rainy, and Grandma is ill today.",
+              answer: true,
+              meaning: "妈妈担心，因为又刮风又下雨，而且奶奶今天生病了。",
+              tip: "挑战：天气 + 生病两个原因叠在一起。",
+            },
+            {
+              id: "cj3",
+              role: "adultMale",
+              speak: "Tom is excited when it is sunny because he can fly a kite with his sister.",
+              showTrick: "判断：Tom 很难过，因为下雨不能放风筝。",
+              answer: false,
+              tip: "挑战：excited/sunny 与「难过/下雨」完全相反。",
+            },
+            {
+              id: "cj4",
+              role: "adultFemale",
+              speak: "I don't like rainy days because I can't play outside, but I like reading books at home.",
+              answer: true,
+              meaning: "我不喜欢雨天，因为不能出去玩，但我喜欢在家读书。",
+              tip: "挑战：听清 don't like + but I like。",
+            },
+            {
+              id: "cj5",
+              role: "boyChild",
+              speak: "I'm angry because he broke my pencil, but my friend says he can help me.",
+              showTrick: "判断：我很高兴，因为交到了新朋友。",
+              answer: false,
+              tip: "挑战：angry ≠ happy；后面还有 but。",
+            },
+          ],
+          reply: [
+            {
+              id: "cr1",
+              role: "adultFemale",
+              speak: "You look sad. What's the matter?",
+              prompt: "听完整两句，选最佳应答",
+              choices: [
+                { id: "a", text: "I can't find my watch. Can you look for it with me?" },
+                { id: "b", text: "I'm fine, thank you. How are you?" },
+                { id: "c", text: "It's sunny and I feel happy." },
+              ],
+              answer: "a",
+              tip: "挑战：先共情再求助，比只说 fine 更贴题。",
+            },
+            {
+              id: "cr2",
+              role: "adultMale",
+              speak: "How do you feel today? Why?",
+              prompt: "听问句，选带原因的完整应答",
+              choices: [
+                { id: "a", text: "Happy." },
+                { id: "b", text: "I feel happy because I can play with friends." },
+                { id: "c", text: "It's under the desk." },
+              ],
+              answer: "b",
+              tip: "挑战：必须带 because，不能只丢一个词。",
+            },
+            {
+              id: "cr3",
+              role: "girlChild",
+              speak: "I'm worried because I can't find my red scarf.",
+              prompt: "听陈述，选最合适的安慰+行动",
+              choices: [
+                { id: "a", text: "Don't worry. Let's look for it together." },
+                { id: "b", text: "I like rainy days." },
+                { id: "c", text: "Happy birthday!" },
+              ],
+              answer: "a",
+              tip: "挑战：安慰 + together 行动。",
+            },
+          ],
+        },
       },
       patterns: [
         {
@@ -888,19 +975,29 @@ window.ENGLISH_DESK_DATA = {
     };
   }
 
-  function listenCard(item, kind) {
+  function listenCard(item, kind, opts) {
+    opts = opts || {};
+    const hard = !!opts.hard;
     const isJudge = kind === "judge";
+    let prompt;
+    if (hard && isJudge) {
+      prompt = item.showTrick || "听完整句，判断对错（先听，不给中文提示）";
+    } else {
+      prompt = item.show || item.prompt || "听完再选";
+    }
     return {
       type: "listen",
       kind: kind,
-      title: isJudge ? "听力判断" : "听应答",
-      prompt: item.show || item.prompt || "听完再选",
+      hard: hard,
+      title: hard ? (isJudge ? "听力挑战·判断" : "听力挑战·应答") : isJudge ? "听力判断" : "听应答",
+      prompt: prompt,
       speakText: item.speak,
-      speakRole: isJudge ? "girlChild" : item.role || "adultFemale",
+      speakRole: isJudge ? (item.role || "girlChild") : item.role || "adultFemale",
       coach: isJudge ? "bee" : null,
       autoPlay: true,
       answer: item.answer,
-      tip: item.tip || "",
+      tip: (item.tip || "") + (hard ? " · 先听再选" : ""),
+      meaning: item.meaning || "",
       choices:
         isJudge
           ? [
@@ -911,11 +1008,12 @@ window.ENGLISH_DESK_DATA = {
     };
   }
 
-  function patternCard(unit) {
-    const p = (unit.patterns && unit.patterns[0]) || null;
+  function patternCard(unit, index) {
+    const list = unit.patterns || [];
+    const p = list[typeof index === "number" ? index : 0] || null;
     if (!p) return null;
     const demos = (p.demos || []).map((d) => ({
-      role: "girlChild",
+      role: d.role || "girlChild",
       text: d.text,
     }));
     return {
@@ -928,13 +1026,35 @@ window.ENGLISH_DESK_DATA = {
       coach: "bee",
       tip: (p.steps && p.steps[2]) || "用自己的话再说一遍",
       autoPlay: true,
+      frame: p.frame || "",
     };
   }
 
-  function oralCard(q, i) {
+  function sentenceCard(unit, index) {
+    const list = unit.patterns || [];
+    const p = list[typeof index === "number" ? index : 0] || list[0];
+    if (!p) return null;
+    const demo = (p.demos && p.demos[0] && p.demos[0].text) || "I'm happy because I can play.";
+    return {
+      type: "pattern",
+      title: "造句挑战",
+      prompt: "用句型自己造一句（不要照抄示范）\n" + (p.frame || p.label),
+      demos: [{ role: "girlChild", text: demo }],
+      speakText: demo,
+      speakRole: "girlChild",
+      coach: "bee",
+      tip: "必须含 because 或 when；地点注意 a/the",
+      autoPlay: true,
+      frame: p.frame || "",
+      makeSentence: true,
+    };
+  }
+
+  function oralCard(q, i, opts) {
+    opts = opts || {};
     return {
       type: "oral",
-      title: "口头问答 " + (i + 1),
+      title: opts.challenge ? "口语挑战 " + (i + 1) : "口头问答 " + (i + 1),
       prompt: q.ask,
       speakText: q.ask,
       speakRole: q.asker || "adultFemale",
@@ -942,6 +1062,8 @@ window.ENGLISH_DESK_DATA = {
       sampleRole: (q.sample && q.sample.role) || "boyChild",
       tip: q.tip || "请说完整句（because / when）",
       autoPlay: true,
+      requireSpeech: !!opts.challenge,
+      challenge: !!opts.challenge,
     };
   }
 
@@ -1024,6 +1146,10 @@ window.ENGLISH_DESK_DATA = {
       (unit.questions || []).slice(0, 3).forEach((q, i) => cards.push(oralCard(q, i)));
       const d = dialogueCard(unit);
       if (d) cards.push(d);
+    } else if (sessionId === "retry") {
+      return buildRetryCards(unit, store);
+    } else if (sessionId === "challenge") {
+      return buildChallengeCards(unit, store);
     } else {
       const s = sortCard(unit);
       if (s) cards.push(s);
@@ -1038,10 +1164,75 @@ window.ENGLISH_DESK_DATA = {
     return cards;
   }
 
+  function buildRetryCards(unit, store) {
+    store = store || {};
+    const retry = ((store.retryWords || []).filter((w) => w.unitId === unit.id) || []);
+    const allRetry = store.retryWords || [];
+    const pool = (retry.length ? retry : allRetry).map((r) => ({
+      en: r.en,
+      zh: r.zh,
+      src: "错词",
+      priority: "high",
+    }));
+    const cards = [];
+    shuffle(pool).slice(0, 8).forEach((w, i) => {
+      cards.push(wordCard(w, i % 3 === 0 ? "zh2en" : "dictation"));
+    });
+    return cards;
+  }
+
+  function buildChallengeCards(unit, store) {
+    store = store || {};
+    const cards = [];
+    const ch = (unit.listen && unit.listen.challenge) || {};
+    const hardJudges = ch.judge && ch.judge.length ? ch.judge : (unit.listen && unit.listen.judge) || [];
+    const hardReplies = ch.reply && ch.reply.length ? ch.reply : (unit.listen && unit.listen.reply) || [];
+
+    // 词：高难听写（优先高频卷面词）
+    pickWords(unit, store, 4, 2).forEach((w) => cards.push(wordCard(w, "dictation")));
+
+    // 听力：比卷面更长句 + 无中文提示判断 + 更多应答
+    shuffle(hardJudges).slice(0, 4).forEach((j) => {
+      cards.push(listenCard(j, "judge", { hard: true }));
+    });
+    shuffle(hardReplies).slice(0, 2).forEach((r) => {
+      cards.push(listenCard(r, "reply", { hard: true }));
+    });
+
+    // 卷 VI 分类
+    const s = sortCard(unit);
+    if (s) {
+      s.title = "词分类挑战";
+      cards.push(s);
+    }
+
+    // 造句：because + when 各一句
+    const sent1 = sentenceCard(unit, 0);
+    const sent2 = sentenceCard(unit, 1);
+    if (sent1) cards.push(sent1);
+    if (sent2) cards.push(sent2);
+
+    // 仿写（冠词）
+    const w = writeCard(unit);
+    if (w) {
+      w.title = "仿写挑战";
+      cards.push(w);
+    }
+
+    // 口语：完整句 + 需开口说
+    shuffle(unit.questions || []).slice(0, 3).forEach((q, i) => {
+      cards.push(oralCard(q, i, { challenge: true }));
+    });
+
+    return cards;
+  }
+
   g.EnglishDeskLesson = {
     todaySessionId,
     sessionMeta,
     buildCards,
+    buildRetryCards,
+    buildChallengeCards,
     eggLine,
     shuffle,
   };

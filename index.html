@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Noto+Sans+SC:wght@500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./theme-duo.css?v=15" />
+  <link rel="stylesheet" href="./theme-duo.css?v=17" />
   <script src="./assets/vendor/lottie.min.js"></script>
 </head>
 <body>
@@ -64,6 +64,22 @@
     <div class="path-scroll" id="pathList"></div>
     <div class="path-footer">
       <button type="button" class="btn-start" id="btnPathStart">开始下一课</button>
+    </div>
+  </div>
+
+  <!-- RECORDS -->
+  <div class="screen hidden" id="screenRecords">
+    <div class="path-top">
+      <button type="button" class="icon-btn" id="btnCloseRecords" aria-label="关闭">×</button>
+      <h1>Records</h1>
+      <div class="wallet-pill gem" id="recordsGems">💎 0</div>
+    </div>
+    <div class="records-score" id="recordsScore"></div>
+    <div class="records-actions" id="recordsActions"></div>
+    <p class="path-meta" id="recordsMeta">错题本</p>
+    <div class="path-scroll" id="recordsList"></div>
+    <div class="path-footer">
+      <button type="button" class="btn-start" id="btnRecordsToPath">去学期路径</button>
     </div>
   </div>
 
@@ -130,13 +146,13 @@
       <span class="nav-lottie" id="navHomeLottie" aria-hidden="true"></span>
       <span class="nav-label">Home</span>
     </button>
-    <button type="button" class="nav-item" data-nav="path" id="navPath" aria-label="学习路径">
-      <span class="nav-icon" aria-hidden="true">🗺️</span>
-      <span class="nav-label">路径</span>
+    <button type="button" class="nav-item" data-nav="path" id="navPath" aria-label="Path">
+      <span class="nav-glyph" style="-webkit-mask-image:url('./assets/icons/map-pin-line.png');mask-image:url('./assets/icons/map-pin-line.png')" aria-hidden="true"></span>
+      <span class="nav-label">Path</span>
     </button>
-    <button type="button" class="nav-item" data-nav="learn" id="navLearn" aria-label="开始学习">
-      <span class="nav-icon" aria-hidden="true">▶️</span>
-      <span class="nav-label">学习</span>
+    <button type="button" class="nav-item" data-nav="records" id="navRecords" aria-label="Records">
+      <span class="nav-glyph" style="-webkit-mask-image:url('./assets/icons/book-open-line.png');mask-image:url('./assets/icons/book-open-line.png')" aria-hidden="true"></span>
+      <span class="nav-label">Records</span>
     </button>
   </nav>
 
@@ -167,6 +183,7 @@
         lessonCoins: 0,
         correctInLesson: 0,
         lastSettle: null,
+        lessonMode: "normal",
       };
 
       function loadStore() {
@@ -232,9 +249,10 @@
         $("screenLesson").classList.toggle("hidden", name !== "lesson");
         $("screenDone").classList.toggle("hidden", name !== "done");
         if ($("screenPath")) $("screenPath").classList.toggle("hidden", name !== "path");
-        const showNav = name === "home" || name === "path";
+        if ($("screenRecords")) $("screenRecords").classList.toggle("hidden", name !== "records");
+        const showNav = name === "home" || name === "path" || name === "records";
         if ($("appNav")) $("appNav").classList.toggle("hidden", !showNav);
-        syncNav(name === "path" ? "path" : name === "home" ? "home" : null);
+        syncNav(name === "path" || name === "home" || name === "records" ? name : null);
         if (name !== "home") {
           cancelHomeIntro();
           stopHomeAudio();
@@ -258,9 +276,17 @@
           navHomeAnim = window.lottie.loadAnimation({
             container: host,
             renderer: "svg",
-            loop: false,
-            autoplay: false,
-            path: "./assets/lottie/home-in-out.json?v=1",
+            loop: true,
+            autoplay: true,
+            path: "./assets/lottie/home-in-out.json?v=2",
+          });
+          navHomeAnim.addEventListener("DOMLoaded", () => {
+            try { navHomeAnim.play(); } catch (e) {}
+          });
+          navHomeAnim.addEventListener("data_failed", () => {
+            host.textContent = "🏠";
+            host.classList.add("nav-fallback");
+            navHomeAnim = null;
           });
         } catch (e) {
           host.textContent = "🏠";
@@ -273,8 +299,10 @@
         }
         if (!navHomeAnim) return;
         try {
-          navHomeAnim.stop();
-          navHomeAnim.goToAndPlay(0, true);
+          if (navHomeAnim.isPaused) navHomeAnim.play();
+          else {
+            navHomeAnim.goToAndPlay(0, true);
+          }
         } catch (e) {}
       }
       function syncNav(active) {
@@ -292,6 +320,7 @@
         if ($("homeCoins")) $("homeCoins").textContent = "🪙 " + s.coins;
         if ($("homeGems")) $("homeGems").textContent = "💎 " + s.gems;
         if ($("pathCoins")) $("pathCoins").textContent = "🪙 " + s.coins;
+        if ($("recordsGems")) $("recordsGems").textContent = "💎 " + s.gems;
         if ($("lessonCoinsHud")) {
           $("lessonCoinsHud").textContent = "🪙 +" + (state.lessonCoins || 0);
         }
@@ -378,17 +407,29 @@
         syncWalletUI();
       }
 
-      function startLesson(pathId) {
+      function startLesson(pathId, opts) {
+        opts = opts || {};
         const store = walletStore();
+        state.lessonMode = opts.mode || "normal";
         if (pathId) state.pathId = pathId;
         else state.pathId = store.currentPathId || state.pathId;
         const node = Progress.nodeById(state.pathId);
         if (node) {
           state.unitId = node.unitId;
-          saveStore({ unitId: state.unitId, currentPathId: state.pathId });
+          if (state.lessonMode === "normal") {
+            saveStore({ unitId: state.unitId, currentPathId: state.pathId });
+          } else {
+            saveStore({ unitId: state.unitId });
+          }
         }
-        state.cards = Lesson.buildCards(unit(), state.sessionId || Lesson.todaySessionId(), store);
-        state.sessionId = state.sessionId || Lesson.todaySessionId();
+        const sessionId =
+          state.lessonMode === "retry"
+            ? "retry"
+            : state.lessonMode === "challenge"
+              ? "challenge"
+              : state.sessionId || Lesson.todaySessionId();
+        state.cards = Lesson.buildCards(unit(), sessionId, store);
+        state.sessionId = sessionId;
         state.index = 0;
         state.results = [];
         state.revealed = false;
@@ -397,7 +438,8 @@
         state.correctInLesson = 0;
         state.lastSettle = null;
         if (!state.cards.length) {
-          alert("本单元暂无练习内容。");
+          if (state.lessonMode === "retry") alert("暂时没有错题，先去上课积累几道吧。");
+          else alert("本单元暂无练习内容。");
           return;
         }
         showView("lesson");
@@ -431,6 +473,82 @@
           });
           list.appendChild(btn);
         });
+      }
+
+      function renderRecords() {
+        const store = walletStore();
+        syncWalletUI();
+        const acc = Progress.accuracyPct(store);
+        const floatAcc = Progress.floatAccuracyPct(store);
+        const answered = (store.stats && store.stats.answered) || 0;
+        const correct = (store.stats && store.stats.correct) || 0;
+        const recentN = ((store.stats && store.stats.recent) || []).length;
+        const retries = store.retryWords || [];
+        if ($("recordsScore")) {
+          $("recordsScore").innerHTML =
+            '<div class="score-hero">' +
+            '<p class="score-label">总积分</p>' +
+            '<p class="score-num">' + store.coins + ' <span>🪙</span></p>' +
+            '<p class="score-sub">宝石 ' + store.gems + ' 💎 · 连续 ' + streakDays() + ' 天</p>' +
+            "</div>" +
+            '<div class="records-stats">' +
+            '<div class="rec-stat"><strong>' + (acc == null ? "—" : acc + "%") + "</strong><span>正确率</span><small>" + correct + "/" + answered + "</small></div>" +
+            '<div class="rec-stat float"><strong>' + (floatAcc == null ? "—" : floatAcc + "%") + "</strong><span>浮动正确率</span><small>近 " + (recentN || Progress.FLOAT_WINDOW) + " 题</small></div>" +
+            '<div class="rec-stat"><strong>' + retries.length + "</strong><span>错题待练</span><small>错词本</small></div>" +
+            "</div>";
+        }
+        if ($("recordsActions")) {
+          $("recordsActions").innerHTML = "";
+          const retryBtn = document.createElement("button");
+          retryBtn.type = "button";
+          retryBtn.className = "rec-action";
+          retryBtn.innerHTML =
+            "<strong>错题复习</strong><span>" +
+            (retries.length ? retries.length + " 道错题 · 听写强化" : "暂无错题") +
+            "</span>";
+          retryBtn.disabled = !retries.length;
+          retryBtn.addEventListener("click", () => startLesson(null, { mode: "retry" }));
+          const challengeBtn = document.createElement("button");
+          challengeBtn.type = "button";
+          challengeBtn.className = "rec-action challenge";
+          challengeBtn.innerHTML = "<strong>难度挑战</strong><span>加长听力 · 造句 · 口语</span>";
+          challengeBtn.addEventListener("click", () => startLesson(null, { mode: "challenge" }));
+          $("recordsActions").appendChild(retryBtn);
+          $("recordsActions").appendChild(challengeBtn);
+        }
+        if ($("recordsMeta")) {
+          $("recordsMeta").textContent = retries.length
+            ? "错题本 · 点一项可单练，或上方整组复习"
+            : "还没有错题，完成练习后答错的词会出现在这里";
+        }
+        const list = $("recordsList");
+        if (!list) return;
+        list.innerHTML = "";
+        if (!retries.length) {
+          const empty = document.createElement("p");
+          empty.className = "records-empty";
+          empty.textContent = "答错的单词会自动进错题本，方便反复练。";
+          list.appendChild(empty);
+          return;
+        }
+        retries
+          .slice()
+          .reverse()
+          .forEach((r) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "path-node";
+            const u = DATA.units.find((x) => x.id === r.unitId);
+            btn.innerHTML =
+              '<span class="path-dot">!</span>' +
+              '<span class="path-copy"><strong>' + r.en + "</strong>" +
+              "<small>" + r.zh + (u ? " · " + u.name : "") + (r.date ? " · " + r.date : "") + "</small></span>";
+            btn.addEventListener("click", () => {
+              state.unitId = r.unitId || state.unitId;
+              startLesson(null, { mode: "retry" });
+            });
+            list.appendChild(btn);
+          });
       }
 
       function progressPct() {
@@ -488,7 +606,13 @@
         if (c.type === "dialogue" && c.lines) {
           p = V.speakSequence(c.lines.map((l) => ({ role: l.role, text: l.text, rate: opts && opts.rate })));
         } else if (c.type === "pattern" && c.demos && c.demos.length) {
-          p = V.speakSequence(c.demos.map((d) => ({ role: "girlChild", text: d.text, rate: opts && opts.rate })));
+          p = V.speakSequence(
+            c.demos.map((d) => ({
+              role: d.role || c.speakRole || "girlChild",
+              text: d.text,
+              rate: opts && opts.rate,
+            }))
+          );
         } else if (c.type === "write" && c.passage) {
           const parts = c.passage.split(/\n+/).map((s) => s.trim()).filter(Boolean);
           p = V.speakSequence(parts.map((text) => ({ role: c.narratorRole || "boyChild", text: text, rate: opts && opts.rate })));
@@ -599,6 +723,35 @@
         b.textContent = label;
         b.addEventListener("click", fn);
         $("cardActions").appendChild(b);
+        return b;
+      }
+
+      /** 听音 + 慢速 0.7× 并排，始终一起出现 */
+      function actionSpeakPair(label, speakFn) {
+        const row = document.createElement("div");
+        row.className = "row2 speak-pair";
+        const normal = document.createElement("button");
+        normal.type = "button";
+        normal.className = "btn-speak";
+        normal.textContent = label;
+        normal.addEventListener("click", () => speakFn(1));
+        const slow = document.createElement("button");
+        slow.type = "button";
+        slow.className = "btn-speak secondary";
+        slow.textContent = "慢速 0.7×";
+        slow.addEventListener("click", () => speakFn(0.7));
+        row.appendChild(normal);
+        row.appendChild(slow);
+        $("cardActions").appendChild(row);
+        return row;
+      }
+
+      function wordSpeak(c, rate) {
+        if (!V || !c) return;
+        const text = String(c.en || c.speakText || "").trim();
+        if (!text || text === "null" || text === "undefined") return;
+        const role = c.speakRole || (c.mode === "dictation" ? "boyChild" : "adultMale");
+        V.speak(text, role, rate && rate !== 1 ? { rate: rate } : undefined);
       }
       function actionOkBad(onOk, onBad) {
         const row = document.createElement("div");
@@ -624,9 +777,7 @@
 
       function showAnswerThenContinue(c, wasOk) {
         $("cardActions").innerHTML = "";
-        actionSpeak("再播放一次", () => {
-          if (V) V.speak(c.en, "boyChild");
-        });
+        actionSpeakPair("再播放一次", (rate) => wordSpeak(c, rate));
         const go = document.createElement("button");
         go.type = "button";
         go.className = "btn-ok";
@@ -643,6 +794,7 @@
         tip.id = "followTip";
         tip.textContent = "跟「翻翻龟」读 3 遍，点一下跟读一遍";
         $("cardExtra").appendChild(tip);
+        actionSpeakPair("听翻翻龟领读", (rate) => wordSpeak(c, rate));
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "btn-ok";
@@ -651,7 +803,7 @@
           if (!V) return;
           count += 1;
           btn.textContent = "跟读（" + count + " / 3）";
-          V.speak(c.en, "boyChild");
+          wordSpeak(c, 1);
           if (count >= 3) {
             btn.disabled = true;
             tip.textContent = "跟读完成，继续下一题";
@@ -659,7 +811,7 @@
           }
         });
         $("cardActions").appendChild(btn);
-        if (V) V.speak(c.en, "boyChild");
+        setTimeout(() => wordSpeak(c, 1), 200);
       }
 
       function renderWordCard(c) {
@@ -680,8 +832,17 @@
 
         const field = document.createElement("div");
         field.className = "dictation-box";
-        field.innerHTML =
-          '<input id="dictInput" class="dict-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="在这里输入英文" />';
+        const inputEl = document.createElement("input");
+        inputEl.id = "dictInput";
+        inputEl.className = "dict-input";
+        inputEl.type = "text";
+        inputEl.value = "";
+        inputEl.autocomplete = "off";
+        inputEl.setAttribute("autocapitalize", "off");
+        inputEl.setAttribute("autocorrect", "off");
+        inputEl.spellcheck = false;
+        inputEl.placeholder = "在这里输入英文";
+        field.appendChild(inputEl);
         extra.appendChild(field);
 
         const confirm = document.createElement("button");
@@ -705,7 +866,7 @@
             extra.appendChild(peek);
             confirm.disabled = true;
             if (input) input.disabled = true;
-            if (V) V.speak(c.en, "boyChild");
+            wordSpeak(c, 1);
             $("cardActions").innerHTML = "";
             showAnswerThenContinue(c, true);
             return;
@@ -724,49 +885,47 @@
             return;
           }
           $("cardSub").textContent = "听一遍正确答案，会了再继续";
-          if (V) V.speak(c.en, "boyChild");
+          wordSpeak(c, 1);
           showAnswerThenContinue(c, false);
         });
         $("cardActions").appendChild(confirm);
+        actionSpeakPair(isDictation ? "再听一遍" : "听发音", (rate) => wordSpeak(c, rate));
 
-        if (isDictation) {
-          actionSpeak("再听一遍", () => {
-            if (V) V.speak(c.en, "boyChild");
-          }, true);
-        } else {
-          actionSpeak("听发音", () => {
-            if (V) V.speak(c.en, "boyChild");
-          }, true);
-        }
-
-        const input = $("dictInput");
-        if (input) {
-          input.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") confirm.click();
-          });
-          setTimeout(() => input.focus(), 120);
-        }
+        inputEl.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") confirm.click();
+        });
+        setTimeout(() => {
+          inputEl.value = "";
+          inputEl.focus();
+        }, 120);
       }
 
       function renderListenCard(c) {
         const extra = $("cardExtra");
-        if (c.coach === "bee") {
+        if (c.hard) {
+          $("cardSub").textContent = (c.tip ? c.tip + " · " : "") + "挑战：先听完整句，再点选项";
+        } else if (c.coach === "bee") {
           $("cardPrompt").textContent = c.prompt || "";
           $("cardSub").textContent = (c.tip ? c.tip + " · " : "") + "听「翻翻蜂」读完再选";
           extra.appendChild(coachBanner("bee", "听「翻翻蜂」读，再判断对错"));
         } else if (c.kind === "reply") {
           $("cardSub").textContent = (c.tip ? c.tip + " · " : "") + "听问句，选正确应答";
         }
+        if (c.hard && c.coach === "bee") {
+          extra.appendChild(coachBanner("bee", "听力挑战：先听，不看中文"));
+        }
         const box = document.createElement("div");
         box.className = "choices";
         box.id = "listenChoices";
+        let heardOnce = !c.hard;
         (c.choices || []).forEach((ch) => {
           const b = document.createElement("button");
           b.type = "button";
           b.className = "choice";
           b.textContent = ch.label;
+          if (c.hard) b.disabled = true;
           b.addEventListener("click", () => {
-            if (state.listenLocked) return;
+            if (state.listenLocked || (c.hard && !heardOnce)) return;
             state.listenLocked = true;
             const ok = String(ch.id) === String(c.answer);
             box.querySelectorAll(".choice").forEach((el) => {
@@ -776,32 +935,51 @@
             box.querySelectorAll(".choice").forEach((el, i) => {
               if (String(c.choices[i].id) === String(c.answer)) el.classList.add("correct");
             });
-            if (c.tip) $("cardSub").textContent = (ok ? "对了。 " : "再听会更准。 ") + c.tip;
+            let tip = (ok ? "对了。 " : "再听会更准。 ") + (c.tip || "");
+            if (c.hard && c.meaning) tip += " 原意：" + c.meaning;
+            $("cardSub").textContent = tip;
             setTimeout(() => advance(ok), 700);
           });
           box.appendChild(b);
         });
         extra.appendChild(box);
-        actionSpeak(c.coach === "bee" ? "再听翻翻蜂" : "再听一遍", () => speakCard(c));
-        actionSpeak("慢速 0.7×", () => speakCard(c, 0.7), true);
+        function unlockChoices() {
+          if (!c.hard) return;
+          heardOnce = true;
+          box.querySelectorAll(".choice").forEach((el) => {
+            if (!state.listenLocked) el.disabled = false;
+          });
+        }
+        actionSpeak(c.coach === "bee" ? "再听翻翻蜂" : "再听一遍", () => {
+          speakCard(c);
+          setTimeout(unlockChoices, 600);
+        });
+        actionSpeak("慢速 0.7×", () => {
+          speakCard(c, 0.7);
+          setTimeout(unlockChoices, 600);
+        }, true);
+        if (c.hard && c.autoPlay) {
+          setTimeout(unlockChoices, 2200);
+        }
       }
 
       function renderPatternCard(c) {
         const extra = $("cardExtra");
         extra.innerHTML = "";
         $("cardActions").innerHTML = "";
-        extra.appendChild(coachBanner("bee", "跟「翻翻蜂」读句型，再自己说一遍"));
+        extra.appendChild(coachBanner("bee", "听双人对话示范，再自己说一遍"));
         const target =
           (c.demos && c.demos[0] && c.demos[0].text) ||
           c.speakText ||
           "I'm happy because I can play.";
 
-        actionSpeak("再听翻翻蜂", () => speakCard(c));
-        actionSpeak("慢速 0.7×", () => speakCard(c, 0.7), true);
+        actionSpeakPair("听对话", (rate) => speakCard(c, rate));
 
         const tip = document.createElement("p");
         tip.className = "follow-tip";
-        tip.textContent = "选一种方式作答：语音 或 打字";
+        tip.textContent = c.makeSentence
+          ? "造句：用 because / when 说自己的一句（语音或打字）"
+          : "选一种方式作答：语音 或 打字";
         extra.appendChild(tip);
 
         const mode = document.createElement("div");
@@ -831,10 +1009,7 @@
             line.textContent = "你说了 / 写了：" + heard;
           }
           $("cardActions").innerHTML = "";
-          actionSpeak("再听翻翻蜂", () => speakCard(c));
-          actionSpeak("再播放一次示范", () => {
-            if (V) V.speak(target, "girlChild");
-          }, true);
+          actionSpeakPair("听对话", (rate) => speakCard(c, rate));
           const go = document.createElement("button");
           go.type = "button";
           go.className = "btn-ok";
@@ -899,6 +1074,11 @@
       }
 
       function renderOralCard(c) {
+        const extra = $("cardExtra");
+        $("cardActions").innerHTML = "";
+        if (c.challenge) {
+          extra.appendChild(coachBanner("bee", "口语挑战：说完整句"));
+        }
         actionSpeak("听提问", () => {
           if (V) V.speak(c.speakText, c.speakRole || "adultFemale");
         });
@@ -907,7 +1087,62 @@
             if (V) V.speak(c.sampleText, c.sampleRole || "boyChild");
           }, true);
         }
-        actionOkBad(() => advance(true), () => advance(false));
+        if (!c.requireSpeech) {
+          actionOkBad(() => advance(true), () => advance(false));
+          return;
+        }
+        const tip = document.createElement("p");
+        tip.className = "follow-tip";
+        tip.textContent = "点「我说」开口答；要用 because / when";
+        extra.appendChild(tip);
+        const mic = document.createElement("button");
+        mic.type = "button";
+        mic.className = "btn-ok";
+        mic.textContent = "我说";
+        mic.addEventListener("click", () => {
+          mic.disabled = true;
+          tip.textContent = "正在听…请说英文完整句";
+          if (V) V.stop();
+          listenOnceEnglish().then((res) => {
+            mic.disabled = false;
+            if (res.error === "nosupport") {
+              tip.textContent = "此浏览器不支持语音，请点「我会了」或「再练」";
+              actionOkBad(() => advance(true), () => advance(false));
+              return;
+            }
+            if (!res.text) {
+              tip.className = "follow-tip bad";
+              tip.textContent = "没听清，再试一次";
+              return;
+            }
+            const target = c.sampleText || "I feel happy because I can play.";
+            const judge = scoreSpeech(res.text, target);
+            tip.className = "follow-tip " + (judge.ok ? "ok" : "bad");
+            tip.textContent = judge.reason + "（你说了：" + res.text + "）";
+            $("cardActions").innerHTML = "";
+            actionSpeak("听提问", () => {
+              if (V) V.speak(c.speakText, c.speakRole || "adultFemale");
+            });
+            if (c.sampleText) {
+              actionSpeak("听示范答", () => {
+                if (V) V.speak(c.sampleText, c.sampleRole || "boyChild");
+              }, true);
+            }
+            const go = document.createElement("button");
+            go.type = "button";
+            go.className = "btn-ok";
+            go.textContent = judge.ok ? "过关" : "算过关，继续";
+            go.addEventListener("click", () => advance(judge.ok));
+            const again = document.createElement("button");
+            again.type = "button";
+            again.className = "btn-bad";
+            again.textContent = "再练一次";
+            again.addEventListener("click", () => renderOralCard(c));
+            $("cardActions").appendChild(go);
+            $("cardActions").appendChild(again);
+          });
+        });
+        $("cardActions").appendChild(mic);
       }
 
       function renderDialogueCard(c) {
@@ -1038,10 +1273,22 @@
         saveStore({ retryWords: retry });
       }
 
+      function clearRetry(c) {
+        if (!c || !c.retryWord) return;
+        const store = loadStore();
+        const retry = (store.retryWords || []).filter(
+          (r) => !(r.unitId === state.unitId && r.en === c.retryWord.en)
+        );
+        saveStore({ retryWords: retry });
+      }
+
       function advance(ok, c) {
         const cur = c || card();
         state.results.push(!!ok);
+        const tracked = Progress.recordAnswer(walletStore(), !!ok);
+        saveStore({ stats: tracked.stats });
         if (!ok && cur && cur.retryWord) pushRetry(cur);
+        if (ok && cur && cur.retryWord) clearRetry(cur);
         if (ok) onCorrectReward();
         else onWrongReward();
         state.index += 1;
@@ -1058,12 +1305,15 @@
         const total = state.results.length;
         const egg = Lesson.eggLine(unit());
         const store0 = walletStore();
-        const settle = Progress.settleLesson(
-          store0,
-          state.pathId || store0.currentPathId,
-          state.lessonCoins || 0,
-          todayKey()
-        );
+        const settle =
+          state.lessonMode === "retry" || state.lessonMode === "challenge"
+            ? Progress.settlePractice(store0, state.lessonCoins || 0, todayKey(), state.lessonMode)
+            : Progress.settleLesson(
+                store0,
+                state.pathId || store0.currentPathId,
+                state.lessonCoins || 0,
+                todayKey()
+              );
         state.lastSettle = settle;
         const logs = settle.store.logs || loadStore().logs || {};
         logs[todayKey()] = Object.assign({}, logs[todayKey()] || {}, {
@@ -1074,6 +1324,7 @@
           session: state.sessionId,
           wordScore: ok + "/" + total,
           lessonCoins: settle.earned,
+          mode: state.lessonMode || "normal",
           done: true,
         });
         settle.store.logs = logs;
@@ -1099,7 +1350,14 @@
         mountCoinsLottie(coinHost, true);
 
         const title = document.createElement("h1");
-        title.textContent = settle.isReview ? "复习完成！" : "本课完成！";
+        title.textContent =
+          settle.practiceKind === "challenge"
+            ? "挑战完成！"
+            : settle.practiceKind === "retry"
+              ? "错题复习完成！"
+              : settle.isReview
+                ? "复习完成！"
+                : "本课完成！";
         wrap.appendChild(title);
 
         const score = document.createElement("p");
@@ -1127,16 +1385,33 @@
           b.addEventListener("click", fn);
           bar.appendChild(b);
         }
-        addBtn(settle.next ? "下一课 · " + settle.next.label : "看学期路径", "btn-start", () => {
-          if (settle.next) startLesson(settle.next.id);
-          else {
+        addBtn(
+          settle.practiceKind === "challenge"
+            ? "再挑战一次"
+            : settle.practiceKind === "retry"
+              ? "继续错题"
+              : settle.next
+                ? "下一课 · " + settle.next.label
+                : "看学期路径",
+          "btn-start",
+          () => {
+            if (settle.practiceKind === "challenge") startLesson(null, { mode: "challenge" });
+            else if (settle.practiceKind === "retry") startLesson(null, { mode: "retry" });
+            else if (settle.next) startLesson(settle.next.id);
+            else {
+              showView("path");
+              renderPath();
+            }
+          }
+        );
+        addBtn(settle.practiceKind ? "看 Records" : "看学期路径", "btn-path", () => {
+          if (settle.practiceKind) {
+            showView("records");
+            renderRecords();
+          } else {
             showView("path");
             renderPath();
           }
-        });
-        addBtn("看学期路径", "btn-path", () => {
-          showView("path");
-          renderPath();
         });
         addBtn("今日一句挑战", "btn-speak", () => {
           practice.classList.remove("hidden");
@@ -1443,8 +1718,23 @@
             renderPath();
           });
         }
-        if ($("navLearn")) {
-          $("navLearn").addEventListener("click", () => startLesson());
+        if ($("navRecords")) {
+          $("navRecords").addEventListener("click", () => {
+            showView("records");
+            renderRecords();
+          });
+        }
+        if ($("btnCloseRecords")) {
+          $("btnCloseRecords").addEventListener("click", () => {
+            showView("home");
+            renderHome();
+          });
+        }
+        if ($("btnRecordsToPath")) {
+          $("btnRecordsToPath").addEventListener("click", () => {
+            showView("path");
+            renderPath();
+          });
         }
         mountNavHome();
         $("btnHome").addEventListener("click", () => {
@@ -1583,15 +1873,21 @@
           cancelHomeIntro();
           stopHomeAudio();
           const token = ++introToken;
-          showHomeMascot("turtle");
-          playHomeClip("turtle");
+          const spoken = { turtle: false, bee: false };
+          function showAndMaybeSpeak(who) {
+            showHomeMascot(who);
+            if (!spoken[who]) {
+              spoken[who] = true;
+              playHomeClip(who);
+            }
+          }
+          showAndMaybeSpeak("turtle");
           function scheduleNext() {
             if (!homeAlive(token)) return;
             homeTimer = setTimeout(() => {
               if (!homeAlive(token)) return;
               stopHomeAudio();
-              showHomeMascot(homeWho === "turtle" ? "bee" : "turtle");
-              playHomeClip(homeWho);
+              showAndMaybeSpeak(homeWho === "turtle" ? "bee" : "turtle");
               scheduleNext();
             }, 5000);
           }

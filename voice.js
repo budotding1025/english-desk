@@ -39,6 +39,7 @@
   let manifestPromise = null;
   let currentAudio = null;
   let synthCache = {};
+  let playGen = 0;
 
   function normRole(role) {
     if (!role) return "adultFemale";
@@ -66,7 +67,7 @@
   function loadManifest() {
     if (manifest) return Promise.resolve(manifest);
     if (manifestPromise) return manifestPromise;
-    manifestPromise = fetch("./audio/manifest.json?v=5")
+    manifestPromise = fetch("./audio/manifest.json?v=6")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         manifest = data;
@@ -85,7 +86,7 @@
     return manifest.clips[key] || null;
   }
 
-  function stop() {
+  function haltPlayback() {
     if (currentAudio) {
       try {
         currentAudio.onended = null;
@@ -98,10 +99,15 @@
     if (window.speechSynthesis) window.speechSynthesis.cancel();
   }
 
+  function stop() {
+    playGen += 1;
+    haltPlayback();
+  }
+
   function playUrl(url, rate) {
     return new Promise((resolve) => {
       try {
-        stop();
+        haltPlayback();
         const a = new Audio(url);
         a.playbackRate = rate && rate > 0 ? rate : 1;
         a.preservesPitch = true;
@@ -231,7 +237,7 @@
         if (!rel && roleKey === "boyChild") rel = man ? clipPath("adultMale", utterText) : null;
         if (!rel && roleKey === "girlChild") rel = man ? clipPath("adultFemale", utterText) : null;
         if (rel) {
-          return playUrl(rel + (rel.indexOf("?") >= 0 ? "&" : "?") + "v=5", rateScale).then((ok) => {
+          return playUrl(rel + (rel.indexOf("?") >= 0 ? "&" : "?") + "v=6", rateScale).then((ok) => {
             if (ok) return true;
             return speakSynth(utterText, roleKey, langHint, rateScale);
           });
@@ -244,17 +250,25 @@
   function speakSequence(lines, gapMs) {
     gapMs = gapMs == null ? 380 : gapMs;
     stop();
+    const gen = playGen;
     let chain = Promise.resolve();
     (lines || []).forEach((line, i) => {
       chain = chain
-        .then(() => speak(line.text, line.role, { queue: true, forceAll: line.forceAll, rate: line.rate }))
-        .then(
-          () =>
-            new Promise((r) => {
-              if (i < lines.length - 1) setTimeout(r, gapMs);
-              else r();
-            })
-        );
+        .then(() => {
+          if (gen !== playGen) return false;
+          return speak(line.text, line.role, {
+            queue: true,
+            forceAll: line.forceAll,
+            rate: line.rate,
+          });
+        })
+        .then(() => {
+          if (gen !== playGen) return;
+          return new Promise((r) => {
+            if (i < lines.length - 1) setTimeout(r, gapMs);
+            else r();
+          });
+        });
     });
     return chain;
   }

@@ -75,11 +75,70 @@
     if (typeof store.coins !== "number") store.coins = 0;
     if (typeof store.gems !== "number") store.gems = 0;
     if (!store.completedLessons) store.completedLessons = {};
+    if (!store.retryWords) store.retryWords = [];
+    if (!store.stats) {
+      store.stats = { answered: 0, correct: 0, recent: [] };
+    } else {
+      if (typeof store.stats.answered !== "number") store.stats.answered = 0;
+      if (typeof store.stats.correct !== "number") store.stats.correct = 0;
+      if (!Array.isArray(store.stats.recent)) store.stats.recent = [];
+    }
     if (!store.currentPathId) {
       const path = semesterPath();
       store.currentPathId = (path[0] && path[0].id) || "u1-L1";
     }
     return store;
+  }
+
+  const FLOAT_WINDOW = 20;
+
+  function recordAnswer(store, ok) {
+    store = ensureProgress(store);
+    store.stats.answered += 1;
+    if (ok) store.stats.correct += 1;
+    store.stats.recent.push(ok ? 1 : 0);
+    if (store.stats.recent.length > FLOAT_WINDOW) {
+      store.stats.recent = store.stats.recent.slice(-FLOAT_WINDOW);
+    }
+    return store;
+  }
+
+  function accuracyPct(store) {
+    store = ensureProgress(store);
+    if (!store.stats.answered) return null;
+    return Math.round((store.stats.correct / store.stats.answered) * 100);
+  }
+
+  function floatAccuracyPct(store) {
+    store = ensureProgress(store);
+    const recent = store.stats.recent || [];
+    if (!recent.length) return null;
+    const hit = recent.reduce((a, b) => a + b, 0);
+    return Math.round((hit / recent.length) * 100);
+  }
+
+  function settlePractice(store, lessonCoins, todayKey, kind) {
+    store = ensureProgress(store);
+    const bonus = kind === "challenge" ? 40 : 20;
+    const bonusLabel = kind === "challenge" ? "难度挑战奖励" : "错题复习奖励";
+    const gems = kind === "challenge" ? 1 : 0;
+    const earned = (lessonCoins || 0) + bonus;
+    store.coins += earned;
+    store.gems += gems;
+    return {
+      store: store,
+      lessonCoins: lessonCoins || 0,
+      bonus: bonus,
+      bonusLabel: bonusLabel,
+      gems: gems,
+      earned: earned,
+      totalCoins: store.coins,
+      totalGems: store.gems,
+      isReview: true,
+      next: null,
+      pathId: store.currentPathId,
+      practiceKind: kind,
+    };
   }
 
   function settleLesson(store, pathId, lessonCoins, todayKey) {
@@ -127,6 +186,7 @@
   g.EnglishDeskProgress = {
     COIN_CORRECT: COIN_CORRECT,
     PRAISE_EVERY: PRAISE_EVERY,
+    FLOAT_WINDOW: FLOAT_WINDOW,
     semesterPath: semesterPath,
     pathTotal: pathTotal,
     nodeById: nodeById,
@@ -135,5 +195,9 @@
     unitLessonCount: unitLessonCount,
     ensureProgress: ensureProgress,
     settleLesson: settleLesson,
+    settlePractice: settlePractice,
+    recordAnswer: recordAnswer,
+    accuracyPct: accuracyPct,
+    floatAccuracyPct: floatAccuracyPct,
   };
 })(window);
