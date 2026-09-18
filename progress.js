@@ -23,18 +23,27 @@
     return m ? m[0] : u.id;
   }
 
+  function lessonEnglish(u, i) {
+    const list = (u && u.lessonTitles) || [];
+    return list[i - 1] || ("Lesson " + i);
+  }
+
   function semesterPath() {
     const nodes = [];
     (DATA.units || []).forEach((u) => {
       const n = unitLessonCount(u);
       for (let i = 1; i <= n; i++) {
-        nodes.push({
-          id: u.id + "-L" + i,
-          unitId: u.id,
-          lesson: i,
-          label: shortUnitName(u) + " · 第" + i + "课",
-          unitName: u.name,
-        });
+          const bookNo = (u.lessonStart || 1) + i - 1;
+          nodes.push({
+            id: u.id + "-L" + i,
+            unitId: u.id,
+            lesson: i,
+            bookLesson: bookNo,
+            label: "Lesson " + bookNo + " · " + lessonEnglish(u, i),
+            lessonTitle: lessonEnglish(u, i),
+            unitTitle: u.name,
+            unitName: u.name,
+          });
       }
     });
     return nodes;
@@ -87,7 +96,88 @@
       const path = semesterPath();
       store.currentPathId = (path[0] && path[0].id) || "u1-L1";
     }
+    if (typeof store.rank !== "number" || store.rank < 1) store.rank = 1;
+    if (store.rank > RANKS.length) store.rank = RANKS.length;
+    if (typeof store.gemCut !== "number" || store.gemCut < 0) store.gemCut = 0;
     return store;
+  }
+
+  const GEM_CUT = 50;
+  const GEM_TIME = 30;
+
+  const RANKS = [
+    { id: 1, en: "Sprout", zh: "新芽", cost: 0, lessons: 0 },
+    { id: 2, en: "Listener", zh: "耳朵", cost: 80, lessons: 1 },
+    { id: 3, en: "Speaker", zh: "开口", cost: 180, lessons: 2 },
+    { id: 4, en: "Reader", zh: "读书", cost: 320, lessons: 4 },
+    { id: 5, en: "Writer", zh: "写句", cost: 480, lessons: 6 },
+    { id: 6, en: "Challenger", zh: "挑战", cost: 700, lessons: 8 },
+    { id: 7, en: "Star", zh: "小星", cost: 980, lessons: 12 },
+    { id: 8, en: "Fanfan", zh: "翻翻达人", cost: 1400, lessons: 16 },
+  ];
+
+  function rankById(id) {
+    return RANKS.filter(function (r) { return r.id === id; })[0] || RANKS[0];
+  }
+
+  function currentRank(store) {
+    store = ensureProgress(store);
+    return rankById(store.rank);
+  }
+
+  function nextRank(store) {
+    store = ensureProgress(store);
+    return RANKS.filter(function (r) { return r.id === store.rank + 1; })[0] || null;
+  }
+
+  function coinNeed(store, rank) {
+    store = ensureProgress(store);
+    return Math.max(0, (rank.cost || 0) - (store.gemCut || 0));
+  }
+
+  function lessonNeedMet(store, rank) {
+    return completedCount(store.completedLessons) >= (rank.lessons || 0);
+  }
+
+  function upgradeRank(store) {
+    store = ensureProgress(store);
+    const nxt = nextRank(store);
+    if (!nxt) return { ok: false, reason: "已经是最高等级", store: store };
+    const coins = coinNeed(store, nxt);
+    const lessons = completedCount(store.completedLessons);
+    if (store.coins < coins) {
+      return { ok: false, reason: "金币还差 " + (coins - store.coins), store: store };
+    }
+    if (lessons < nxt.lessons) {
+      return { ok: false, reason: "进度还差 " + (nxt.lessons - lessons) + " 课", store: store };
+    }
+    store.coins -= coins;
+    store.gemCut = 0;
+    store.rank = nxt.id;
+    return { ok: true, reason: "升到 " + nxt.en + " · " + nxt.zh, store: store, rank: nxt };
+  }
+
+  function spendGemBoost(store) {
+    store = ensureProgress(store);
+    const nxt = nextRank(store);
+    if (!nxt) return { ok: false, reason: "已经是最高等级", store: store };
+    if (store.gems < 1) return { ok: false, reason: "没有宝石", store: store };
+    if (coinNeed(store, nxt) <= 0) return { ok: false, reason: "金币条件已经够了", store: store };
+    store.gems -= 1;
+    store.gemCut += GEM_CUT;
+    return { ok: true, reason: "已用 1 宝石抵 " + GEM_CUT + " 金币", store: store };
+  }
+
+  function spendGemTime(store) {
+    store = ensureProgress(store);
+    if (store.gems < 1) return { ok: false, reason: "没有宝石", store: store, add: 0 };
+    store.gems -= 1;
+    return { ok: true, reason: "+" + GEM_TIME + " 秒", store: store, add: GEM_TIME };
+  }
+
+  function challengeSeconds(cardCount) {
+    const n = cardCount || 1;
+    return Math.max(180, n * 25);
   }
 
   const FLOAT_WINDOW = 20;
@@ -120,7 +210,7 @@
   function settlePractice(store, lessonCoins, todayKey, kind) {
     store = ensureProgress(store);
     const bonus = kind === "challenge" ? 40 : 20;
-    const bonusLabel = kind === "challenge" ? "难度挑战奖励" : "错题复习奖励";
+    const bonusLabel = kind === "challenge" ? "限时挑战奖励" : "错题复习奖励";
     const gems = kind === "challenge" ? 1 : 0;
     const earned = (lessonCoins || 0) + bonus;
     store.coins += earned;
@@ -199,5 +289,15 @@
     recordAnswer: recordAnswer,
     accuracyPct: accuracyPct,
     floatAccuracyPct: floatAccuracyPct,
+    RANKS: RANKS,
+    GEM_CUT: GEM_CUT,
+    GEM_TIME: GEM_TIME,
+    currentRank: currentRank,
+    nextRank: nextRank,
+    coinNeed: coinNeed,
+    upgradeRank: upgradeRank,
+    spendGemBoost: spendGemBoost,
+    spendGemTime: spendGemTime,
+    challengeSeconds: challengeSeconds,
   };
 })(window);

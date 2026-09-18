@@ -1,7 +1,6 @@
-/* 北京版四年级上册 · 家侧检测
- * Unit 1 按「第一单元练习卷」考点与丢分点设计：
- * 新增词（情绪/天气/动作）· 听力长句 because · 口语/仿写 I'm…because/when… + 冠词
- * 其余单元保留作滚动复习。
+/* 北京版四年级上册（2025）
+ * 单词、句型、听力、重难点按课本课次。
+ * 每单元最后一课：复习 + 知识延展。挑战比课本再难一点。
  */
 window.ENGLISH_DESK_DATA = {
   title: "翻翻英语 · 先稳 95 再冲汇文南",
@@ -62,849 +61,1785 @@ window.ENGLISH_DESK_DATA = {
   units: [
     {
       id: "u1",
-      name: "Unit 1 Share and Care",
-      examFocus: true,
+      name: "Unit One Share and Care",
       lessonCount: 4,
-      currentLesson: 4,
-      lessonTitle: "对标第一单元练习卷",
-      themes: "情绪 · 天气 · because/when · What's the matter · 找东西",
-      kaixinHint: "卷面重点：happy/sad/angry/excited/worried + sunny/rainy/cloudy/windy；丢分在听力长句与仿写冠词",
-      words: [
-        { en: "happy", zh: "高兴的", src: "卷·情绪", lesson: 1, cat: "emotion", priority: "high" },
-        { en: "sad", zh: "难过的", src: "卷·情绪", lesson: 1, cat: "emotion", priority: "high" },
-        { en: "angry", zh: "生气的", src: "卷·情绪", lesson: 3, cat: "emotion", priority: "high" },
-        { en: "excited", zh: "兴奋的", src: "卷·情绪", lesson: 2, cat: "emotion", priority: "high" },
-        { en: "worried", zh: "担心的", src: "卷·情绪", lesson: 2, cat: "emotion", priority: "high" },
-        { en: "better", zh: "更好的；（感觉）好些", src: "卷·情绪", lesson: 2, cat: "emotion", priority: "mid" },
-        { en: "feel", zh: "感觉", src: "卷·核心", lesson: 1, cat: "verb", priority: "high" },
-        { en: "matter", zh: "麻烦；问题（What's the matter?）", src: "卷·核心", lesson: 2, cat: "verb", priority: "high" },
-        { en: "look", zh: "看；看起来", src: "卷·动词", lesson: 2, cat: "verb", priority: "high" },
-        { en: "find", zh: "找到", src: "卷·动词", lesson: 2, cat: "verb", priority: "high" },
-        { en: "help", zh: "帮助", src: "卷·动词", lesson: 2, cat: "verb", priority: "mid" },
-        { en: "play", zh: "玩", src: "卷·动词", lesson: 1, cat: "verb", priority: "mid" },
-        { en: "sunny", zh: "晴朗的", src: "卷·天气", lesson: 4, cat: "weather", priority: "high" },
-        { en: "rainy", zh: "下雨的", src: "卷·天气", lesson: 4, cat: "weather", priority: "high" },
-        { en: "cloudy", zh: "多云的", src: "卷·天气", lesson: 4, cat: "weather", priority: "high" },
-        { en: "windy", zh: "有风的", src: "卷·天气", lesson: 4, cat: "weather", priority: "high" },
-        { en: "hot", zh: "热的", src: "卷·天气", lesson: 4, cat: "weather", priority: "mid" },
-        { en: "rain", zh: "雨；下雨", src: "第4课", lesson: 4, cat: "weather", priority: "mid" },
-        { en: "wind", zh: "风", src: "第4课", lesson: 4, cat: "weather", priority: "mid" },
-        { en: "together", zh: "一起", src: "卷·对话", lesson: 2, cat: "other", priority: "high" },
-        { en: "idea", zh: "主意", src: "第4课", lesson: 4, cat: "other", priority: "mid" },
-        { en: "come", zh: "来", src: "第4课", lesson: 4, cat: "other", priority: "mid" },
-        { en: "stop", zh: "停止", src: "第4课", lesson: 4, cat: "other", priority: "low" },
-        { en: "his", zh: "他的", src: "第4课", lesson: 4, cat: "other", priority: "low" },
-        { en: "mouse", zh: "老鼠", src: "第4课", lesson: 4, cat: "other", priority: "low" },
-        { en: "but", zh: "但是", src: "第4课", lesson: 4, cat: "other", priority: "low" },
-        { en: "have", zh: "有", src: "第4课", lesson: 4, cat: "other", priority: "mid" },
+      lessonStart: 1,
+      lessonTitles: ["How Do You Feel Today?", "What's the Matter?", "Let's Take a Walk", "Yoyo and Joe"],
+      focus: [
+        "重难点：How do you feel today? I'm worried / happy / excited.",
+        "重难点：What's the matter? I can't find… Let's look for… together.",
+        "重难点：Please don't be angry. I feel better. Calm down.",
+        "复习心情和帮助；延展 because，以及 a_e / e / e_e（cake, he, these）。",
       ],
-      wordSort: {
-        title: "词分类（卷 VI）",
-        hint: "把词拖进三类：情绪 / 动作 / 天气。和卷子同一考法。",
-        groups: [
-          { id: "emotion", label: "情绪类（如 happy）", answers: ["worried", "sad", "angry", "excited", "better"] },
-          { id: "verb", label: "动作类（如 look）", answers: ["feel", "look", "find", "help", "play"] },
-          { id: "weather", label: "天气类（如 windy）", answers: ["sunny", "cloudy", "hot", "rainy", "windy"] },
-        ],
-        bank: ["worried", "sad", "angry", "excited", "better", "feel", "look", "find", "help", "play", "sunny", "cloudy", "hot", "rainy", "windy"],
-      },
-      listen: {
-        title: "听力强化（卷面丢分点）",
-        hint: "单图听力已会。这里练「听整句原因」和「听问句选应答」。点播放，孩子听完再选。",
-        judge: [
-          {
-            id: "j1",
-            role: "boyChild",
-            speak: "I am happy because I can play with friends and read interesting books at school.",
-            show: "判断：我开心，因为能和朋友玩，还能在学校读有趣的书。",
-            answer: true,
-            tip: "卷 IV 易错：because 后面有两件事，都要听到。",
-          },
-          {
-            id: "j2",
-            role: "girlChild",
-            speak: "I am sad because it is rainy and I can't play outside.",
-            show: "判断：我难过，因为下雨了，不能出去玩。",
-            answer: true,
-            tip: "抓住 because + can't。",
-          },
-          {
-            id: "j3",
-            role: "adultMale",
-            speak: "Tom is angry because his friend broke his pencil.",
-            show: "判断：Tom 很高兴，因为他交到了新朋友。",
-            answer: false,
-            tip: "情绪词 angry ≠ happy；听清原因。",
-          },
-          {
-            id: "j4",
-            role: "adultFemale",
-            speak: "Mum is worried because Grandma is ill.",
-            show: "判断：妈妈担心，因为奶奶生病了。",
-            answer: true,
-            tip: "worried + ill 常一起出现。",
-          },
-          {
-            id: "j5",
-            role: "boyChild",
-            speak: "I feel excited when it is sunny. I can ride a bike.",
-            show: "判断：晴天我很兴奋，可以骑自行车。",
-            answer: true,
-            tip: "when 引导的条件/时间，和 because 一样要听完整。",
-          },
-        ],
-        reply: [
-          {
-            id: "r1",
-            role: "adultFemale",
-            speak: "What's the matter?",
-            prompt: "听到问句，选最佳应答",
-            choices: [
-              { id: "a", text: "I can't find my watch." },
-              { id: "b", text: "I'm fine, thank you." },
-              { id: "c", text: "It's sunny today." },
-            ],
-            answer: "a",
-            tip: "What's the matter? → 说问题/麻烦。",
-          },
-          {
-            id: "r2",
-            role: "adultMale",
-            speak: "How do you feel?",
-            prompt: "听到问句，选最佳应答",
-            choices: [
-              { id: "a", text: "I feel happy." },
-              { id: "b", text: "It's under the desk." },
-              { id: "c", text: "Yes, please." },
-            ],
-            answer: "a",
-            tip: "How do you feel? → I feel + 情绪词。",
-          },
-          {
-            id: "r3",
-            role: "boyChild",
-            speak: "I'm angry because he broke my pencil.",
-            prompt: "听到陈述，选合适回应",
-            choices: [
-              { id: "a", text: "Don't be angry. I can help you." },
-              { id: "b", text: "Happy birthday!" },
-              { id: "c", text: "It's rainy." },
-            ],
-            answer: "a",
-            tip: "安慰 + 提议帮助，是卷面常见应答。",
-          },
-          {
-            id: "r4",
-            role: "girlChild",
-            speak: "Can you look for it together?",
-            prompt: "听到问句，选最佳应答",
-            choices: [
-              { id: "a", text: "Sure. Let's look for it together." },
-              { id: "b", text: "I am sad." },
-              { id: "c", text: "It's black." },
-            ],
-            answer: "a",
-            tip: "一起找东西：Sure / OK + together。",
-          },
-        ],
-        /** 难度挑战：比卷面再长一点、干扰更近、少给中文提示 */
-        challenge: {
-          judge: [
-            {
-              id: "cj1",
-              role: "boyChild",
-              speak:
-                "I feel happy because I can play catch with my friends, ride a bike in the park, and read a good book after school.",
-              answer: true,
-              meaning: "我开心，因为能和朋友玩捉人、在公园骑车，放学后还能读好书。",
-              tip: "挑战：because 后有三件事，都要听到。",
-            },
-            {
-              id: "cj2",
-              role: "girlChild",
-              speak: "Mum is worried because it is windy and rainy, and Grandma is ill today.",
-              answer: true,
-              meaning: "妈妈担心，因为又刮风又下雨，而且奶奶今天生病了。",
-              tip: "挑战：天气 + 生病两个原因叠在一起。",
-            },
-            {
-              id: "cj3",
-              role: "adultMale",
-              speak: "Tom is excited when it is sunny because he can fly a kite with his sister.",
-              showTrick: "判断：Tom 很难过，因为下雨不能放风筝。",
-              answer: false,
-              tip: "挑战：excited/sunny 与「难过/下雨」完全相反。",
-            },
-            {
-              id: "cj4",
-              role: "adultFemale",
-              speak: "I don't like rainy days because I can't play outside, but I like reading books at home.",
-              answer: true,
-              meaning: "我不喜欢雨天，因为不能出去玩，但我喜欢在家读书。",
-              tip: "挑战：听清 don't like + but I like。",
-            },
-            {
-              id: "cj5",
-              role: "boyChild",
-              speak: "I'm angry because he broke my pencil, but my friend says he can help me.",
-              showTrick: "判断：我很高兴，因为交到了新朋友。",
-              answer: false,
-              tip: "挑战：angry ≠ happy；后面还有 but。",
-            },
-          ],
-          reply: [
-            {
-              id: "cr1",
-              role: "adultFemale",
-              speak: "You look sad. What's the matter?",
-              prompt: "听完整两句，选最佳应答",
-              choices: [
-                { id: "a", text: "I can't find my watch. Can you look for it with me?" },
-                { id: "b", text: "I'm fine, thank you. How are you?" },
-                { id: "c", text: "It's sunny and I feel happy." },
-              ],
-              answer: "a",
-              tip: "挑战：先共情再求助，比只说 fine 更贴题。",
-            },
-            {
-              id: "cr2",
-              role: "adultMale",
-              speak: "How do you feel today? Why?",
-              prompt: "听问句，选带原因的完整应答",
-              choices: [
-                { id: "a", text: "Happy." },
-                { id: "b", text: "I feel happy because I can play with friends." },
-                { id: "c", text: "It's under the desk." },
-              ],
-              answer: "b",
-              tip: "挑战：必须带 because，不能只丢一个词。",
-            },
-            {
-              id: "cr3",
-              role: "girlChild",
-              speak: "I'm worried because I can't find my red scarf.",
-              prompt: "听陈述，选最合适的安慰+行动",
-              choices: [
-                { id: "a", text: "Don't worry. Let's look for it together." },
-                { id: "b", text: "I like rainy days." },
-                { id: "c", text: "Happy birthday!" },
-              ],
-              answer: "a",
-              tip: "挑战：安慰 + together 行动。",
-            },
-          ],
-        },
-      },
+      words: [
+        { en: "worried", zh: "担心的", src: "课本", lesson: 1, priority: "high" },
+        { en: "late", zh: "晚的", src: "课本", lesson: 1, priority: "high" },
+        { en: "worry", zh: "担心", src: "课本", lesson: 1, priority: "mid" },
+        { en: "just", zh: "正，恰恰", src: "课本", lesson: 1, priority: "mid" },
+        { en: "in time", zh: "及时，按时", src: "课本", lesson: 1, priority: "high" },
+        { en: "welcome", zh: "欢迎", src: "课本", lesson: 1, priority: "mid" },
+        { en: "feel", zh: "感受", src: "课本", lesson: 1, priority: "high" },
+        { en: "today", zh: "今天", src: "课本", lesson: 1, priority: "mid" },
+        { en: "so", zh: "如此，非常", src: "课本", lesson: 1, priority: "mid" },
+        { en: "excited", zh: "兴奋的", src: "课本", lesson: 1, priority: "high" },
+        { en: "happy", zh: "高兴的", src: "课本", lesson: 1, priority: "high" },
+        { en: "matter", zh: "问题；事情", src: "课本", lesson: 2, priority: "high" },
+        { en: "sad", zh: "悲伤的", src: "课本", lesson: 2, priority: "high" },
+        { en: "find", zh: "找到", src: "课本", lesson: 2, priority: "high" },
+        { en: "dog", zh: "狗", src: "课本", lesson: 2, priority: "mid" },
+        { en: "cry", zh: "哭泣", src: "课本", lesson: 2, priority: "mid" },
+        { en: "together", zh: "一起", src: "课本", lesson: 2, priority: "high" },
+        { en: "with", zh: "和……一起；有", src: "课本", lesson: 2, priority: "mid" },
+        { en: "look", zh: "看起来", src: "课本", lesson: 2, priority: "high" },
+        { en: "model", zh: "模型", src: "课本", lesson: 3, priority: "mid" },
+        { en: "plane", zh: "飞机", src: "课本", lesson: 3, priority: "high" },
+        { en: "angry", zh: "生气的", src: "课本", lesson: 3, priority: "high" },
+        { en: "better", zh: "更好地；好些", src: "课本", lesson: 3, priority: "high" },
+        { en: "calm down", zh: "冷静下来", src: "课本", lesson: 3, priority: "high" },
+        { en: "fix", zh: "修理", src: "课本", lesson: 3, priority: "high" },
+        { en: "his", zh: "他的", src: "课本", lesson: 4, priority: "mid" },
+        { en: "mouse", zh: "老鼠", src: "课本", lesson: 4, priority: "mid" },
+        { en: "come", zh: "来", src: "课本", lesson: 4, priority: "mid" },
+        { en: "have", zh: "有", src: "课本", lesson: 4, priority: "mid" },
+        { en: "idea", zh: "主意", src: "课本", lesson: 4, priority: "high" },
+        { en: "stop", zh: "停止", src: "课本", lesson: 4, priority: "mid" },
+        { en: "but", zh: "但是", src: "课本", lesson: 4, priority: "mid" },
+        { en: "because", zh: "因为", src: "课本", lesson: 4, priority: "high", extend: true },
+        { en: "cake", zh: "蛋糕（a_e）", src: "课本", lesson: 4, priority: "high", extend: true },
+        { en: "these", zh: "这些（e_e）", src: "课本", lesson: 4, priority: "high", extend: true },
+      ],
       patterns: [
         {
-          id: "because",
-          label: "I'm … because …（卷核心）",
+          id: "feel",
+          lesson: 1,
+          label: "How do you feel today?",
+          frame: "How do you feel today? I'm ____.",
           steps: [
-            "原句：I'm happy because I can play with friends.",
-            "换词：happy→sad/angry/worried；because 后换原因",
-            "说自己：今天真实的心情 + 原因（完整一句）",
+            "原句：How do you feel today? I'm a little worried.",
+            "换词：worried → happy / excited",
+            "说自己：今天真实的心情",
           ],
-          frame: "I'm ____ because ____.",
           demos: [
-            { role: "boyChild", text: "I'm happy because I can play with friends." },
-            { role: "girlChild", text: "I'm sad because it is rainy." },
-            { role: "boyChild", text: "I'm worried because I can't find my book." },
-          ],
-        },
-        {
-          id: "when",
-          label: "I'm happy when …（仿写考点）",
-          steps: [
-            "原句：I'm happy when I read a good book.",
-            "换词：read a good book → play catch / go to the park / help Mum",
-            "说自己：两句；注意 a / the（go to a park / the park）",
-          ],
-          frame: "I'm happy when I ____.",
-          demos: [
-            { role: "girlChild", text: "I'm happy when I read a good book." },
-            { role: "boyChild", text: "I'm happy when I play catch." },
-            { role: "girlChild", text: "I'm happy when I go to the park." },
+            { role: "adultFemale", text: "How do you feel today?" },
+            { role: "boyChild", text: "I'm a little worried." },
+            { role: "girlChild", text: "I'm so happy." },
           ],
         },
         {
           id: "matter",
+          lesson: 2,
           label: "What's the matter?",
+          frame: "What's the matter? I can't find ____. Let's look for ____ together.",
           steps: [
-            "原句：What's the matter? → I can't find my watch.",
-            "换词：watch → bag / pencil / scarf",
-            "说自己：假装丢了一样东西，问答各一句",
+            "原句：What's the matter? I can't find my dog.",
+            "换词：dog → book / bag",
+            "说自己：丢了什么，并邀请一起找",
           ],
-          frame: "What's the matter? / I can't find ____.",
           demos: [
-            { role: "adultFemale", text: "What's the matter?" },
-            { role: "boyChild", text: "I can't find my watch." },
-            { role: "adultMale", text: "Let's look for it together." },
+            { role: "girlChild", text: "What's the matter? You look sad." },
+            { role: "boyChild", text: "I can't find my dog." },
+            { role: "girlChild", text: "Let's look for him together." },
           ],
         },
         {
-          id: "like-rain",
-          label: "I like / don't like rainy days",
+          id: "walk",
+          lesson: 3,
+          label: "Don't be angry. I feel better.",
+          frame: "Please don't be angry. I feel better. Let's ____.",
           steps: [
-            "原句：I like rainy days. / I don't like rainy days.",
-            "换词：rainy → sunny / windy / cloudy",
-            "说自己：喜欢哪种天气？because…",
+            "原句：Please don't be angry. Let's take a walk.",
+            "换词：walk → fix it / calm down",
+            "说自己：生气时怎么让自己好一点",
           ],
-          frame: "I like / don't like ____ days because ____.",
           demos: [
-            { role: "boyChild", text: "I like rainy days." },
-            { role: "girlChild", text: "I don't like rainy days." },
-            { role: "boyChild", text: "I like sunny days because I can ride a bike." },
+            { role: "adultFemale", text: "Please don't be angry." },
+            { role: "boyChild", text: "I feel better." },
+            { role: "boyChild", text: "Let's fix it together." },
           ],
         },
+        {
+          id: "story",
+          lesson: 4,
+          label: "I have an idea.",
+          frame: "I have an idea. Let's ____.",
+          steps: [
+            "原句：I have an idea.",
+            "用 his / mouse / stop / but 讲一句故事",
+            "把本单元心情词放进故事",
+          ],
+          demos: [
+            { role: "boyChild", text: "I have an idea." },
+            { role: "girlChild", text: "Come and look. But stop!" },
+          ],
+        },
+        {
+          id: "because",
+          lesson: 4,
+          label: "知识延展 I'm … because …",
+          frame: "I'm ____ because ____.",
+          steps: [
+            "课本心情词 + because 说原因",
+            "换词：worried because I'm late / happy because I can play",
+            "说自己今天的心情和原因",
+          ],
+          demos: [
+            { role: "boyChild", text: "I'm worried because I'm late." },
+            { role: "girlChild", text: "I'm happy because we look for the dog together." },
+          ],
+          extend: true,
+        },
+        {
+          id: "phonics1",
+          lesson: 4,
+          label: "知识延展 a_e / e / e_e",
+          frame: "cake / he / these",
+          steps: [
+            "a_e：cake",
+            "e：he, she",
+            "e_e：these",
+          ],
+          demos: [
+            { role: "boyChild", text: "I like cake." },
+            { role: "girlChild", text: "Look at these cakes." },
+          ],
+          extend: true,
+        },
       ],
+      listen: {
+        judge: [
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak: "Dad, I'm a little worried. Am I late?",
+            show: "判断：男孩有点担心自己迟到了。",
+            answer: true,
+            tip: "课文：I'm a little worried.",
+          },
+          {
+            lesson: 2,
+            role: "boyChild",
+            speak: "I can't find my dog Danny. He is brown with a black nose.",
+            show: "判断：他找不到棕色的狗 Danny。",
+            answer: true,
+            tip: "课文：I can't find my dog.",
+          },
+          {
+            lesson: 3,
+            role: "adultFemale",
+            speak: "Please don't be angry. A walk always helps me calm down.",
+            show: "判断：散步能帮助冷静下来。",
+            answer: true,
+            tip: "课文：calm down",
+          },
+          {
+            lesson: 4,
+            role: "boyChild",
+            speak: "The mouse has an idea, but the cat does not stop.",
+            show: "判断：老鼠有主意，可是猫没有停。",
+            answer: true,
+            tip: "故事课：idea / but / stop",
+          },
+          {
+            lesson: 4,
+            role: "girlChild",
+            speak: "I'm excited because I can see these cakes.",
+            show: "判断：她兴奋是因为看到了这些蛋糕。",
+            answer: true,
+            tip: "延展：because + these",
+            extend: true,
+          },
+        ],
+        reply: [
+          {
+            lesson: 1,
+            role: "adultFemale",
+            speak: "How do you feel today?",
+            choices: [
+              { id: "a", text: "I'm so happy." },
+              { id: "b", text: "I'd like some chicken." },
+              { id: "c", text: "Open the door, please." },
+            ],
+            answer: "a",
+            tip: "回应心情",
+          },
+          {
+            lesson: 2,
+            role: "girlChild",
+            speak: "What's the matter?",
+            choices: [
+              { id: "a", text: "I can't find my dog." },
+              { id: "b", text: "Happy New Year!" },
+              { id: "c", text: "Use the fork." },
+            ],
+            answer: "a",
+            tip: "说说怎么了",
+          },
+          {
+            lesson: 3,
+            role: "adultFemale",
+            speak: "How do you feel now?",
+            choices: [
+              { id: "a", text: "I feel better." },
+              { id: "b", text: "He is a mouse." },
+              { id: "c", text: "Fifty." },
+            ],
+            answer: "a",
+            tip: "现在感觉好些了",
+          },
+        ],
+        challenge: {
+          judge: [
+          {
+            lesson: 0,
+            role: "boyChild",
+            speak: "Mike is worried because he thinks he is late, but Dad says he is just in time.",
+            show: "判断：Mike 最后还是迟到了。",
+            answer: false,
+            tip: "挑战：just in time 不是迟到",
+          },
+          {
+            lesson: 0,
+            role: "girlChild",
+            speak: "Maomao is sad because he can't find Danny, so Lingling looks for the dog with him.",
+            show: "判断：Lingling 和 Maomao 一起找狗。",
+            answer: true,
+            tip: "挑战：because + together",
+          },
+          ],
+          reply: [
+          {
+            lesson: 0,
+            role: "adultFemale",
+            speak: "You look angry. What's the matter?",
+            choices: [
+              { id: "a", text: "My model plane is broken. Let's fix it." },
+              { id: "b", text: "I'd like some soup." },
+              { id: "c", text: "Happy Lantern Festival!" },
+            ],
+            answer: "a",
+            tip: "挑战：先说问题，再说办法",
+          },
+          ],
+        },
+      },
       questions: [
         {
-          ask: "How do you feel today? Why?",
+          lesson: 1,
+          ask: "How do you feel today?",
           asker: "adultFemale",
-          sample: { role: "boyChild", text: "I feel happy because I can play with my friends." },
-          tip: "必须说出 because / when 原因，不要只说 happy。",
+          sample: { role: "boyChild", text: "I feel happy." },
         },
         {
+          lesson: 2,
           ask: "What's the matter?",
-          asker: "adultMale",
-          sample: { role: "girlChild", text: "I can't find my red scarf." },
-          tip: "答问题本身，不要答天气。",
+          asker: "girlChild",
+          sample: { role: "boyChild", text: "I can't find my dog." },
         },
         {
-          ask: "I'm happy when I read a good book. What about you?",
+          lesson: 3,
+          ask: "How do you feel now?",
           asker: "adultFemale",
-          sample: { role: "boyChild", text: "I'm happy when I go to the park." },
-          tip: "仿写口说；park 前要有 a/the。",
+          sample: { role: "boyChild", text: "I feel better." },
         },
         {
-          ask: "Do you like rainy days? Why?",
-          asker: "adultMale",
-          sample: { role: "girlChild", text: "No. I don't like rainy days because I can't play outside." },
-          tip: "Yes/No + because。",
+          lesson: 4,
+          ask: "I'm worried because I'm late. How about you?",
+          asker: "girlChild",
+          tip: "用 because 说自己的原因。",
+          sample: { role: "boyChild", text: "I'm excited because I can play." },
+          extend: true
         },
-      ],
-      roleplay: "你看起来难过；朋友问 What's the matter？你说找不到手表，两人一起找，最后在帽子下面找到。",
-      dialogues: [
-        { role: "adultFemale", name: "Mum", text: "You look sad. What's the matter?" },
-        { role: "boyChild", name: "You", text: "I can't find my watch." },
-        { role: "girlChild", name: "Friend", text: "Don't worry. Let's look for it together." },
-        { role: "boyChild", name: "You", text: "It's round in shape and black in colour." },
-        { role: "girlChild", name: "Friend", text: "Look! It's under your cap." },
-        { role: "boyChild", name: "You", text: "Thank you! I feel happy now." },
-      ],
-      reading: {
-        title: "I'm Happy（卷面短文风格）",
-        narratorRole: "boyChild",
-        passage:
-          "I am happy when it is sunny. I can play with my friends. We ride bikes, fly kites and play catch.\n" +
-          "I am happy when I am with my family. We eat dinner and listen to stories.\n" +
-          "I am happy when I read a good book. I can go on adventures with the characters.\n" +
-          "I am happy when I help others. Helping makes me feel warm.",
-        prompts: [
-          { role: "adultFemale", text: "When is the writer happy?" },
-          { role: "adultMale", text: "What do the friends do on a sunny day?" },
-          { role: "adultFemale", text: "How does helping others make him feel?" },
-        ],
-        writeModel: "I'm happy when I read a good book.",
-        writeHints: [
-          "仿两句：I'm happy when I ____.",
-          "活动短语：play catch / ride a bike / fly a kite / go to the park / help Mum",
-          "冠词自查：go to a park / go to the park（不要写成 go to park）",
-          "读完可对照：a good book、the park、my friends",
-        ],
-        articleTips: [
-          { wrong: "go to park", right: "go to a park / go to the park", note: "卷面 −2 点：地点前常要 a/the" },
-          { wrong: "read book", right: "read a book / read a good book", note: "可数名词单数要冠词" },
-          { wrong: "play the catch", right: "play catch", note: "球类/捉人游戏前常常不用 the" },
-        ],
-      },
-      readPrompts: [
-        { role: "adultFemale", text: "When are you happy?" },
-        { role: "adultMale", text: "What do you do with your friends?" },
-        { role: "adultFemale", text: "Can you make a sentence with because?" },
-      ],
-      phonics: [
-        { a: "cake", b: "make", same: true, note: "a_e → /eɪ/" },
-        { a: "cat", b: "angry", same: true, note: "a → /æ/" },
-        { a: "he", b: "she", same: true, note: "e → /iː/" },
-        { a: "bed", b: "me", same: false, note: "/e/ vs /iː/" },
       ],
     },
     {
       id: "u2",
-      name: "Unit 2 Be Good Friends",
+      name: "Unit Two Be Good Friends",
       lessonCount: 4,
-      themes: "朋友 · 一起读 · 帮助 · 休息",
-      kaixinHint: "开心单词书：一起玩 / 读书 / 生病休息",
+      lessonStart: 5,
+      lessonTitles: ["We Can Read It Together", "Let Me Help You", "You Should Have a Good Rest", "A Cupcake"],
+      focus: [
+        "重难点：We can read it together. The story is interesting.",
+        "重难点：Let me help you. May I try? It's hard.",
+        "重难点：You should have a good rest.",
+        "复习朋友互助；延展 should … because …，以及 i / i_e / o。",
+      ],
       words: [
-        { en: "read", zh: "读", src: "课本" },
-        { en: "story", zh: "故事", src: "课本" },
-        { en: "together", zh: "一起", src: "课本" },
-        { en: "help", zh: "帮助", src: "课本" },
-        { en: "share", zh: "分享", src: "课本" },
-        { en: "should", zh: "应该", src: "课本" },
-        { en: "rest", zh: "休息", src: "课本" },
-        { en: "ill", zh: "生病的", src: "课本" },
-        { en: "remember", zh: "记住", src: "课本" },
-        { en: "poem", zh: "诗", src: "课本" },
-        { en: "friend", zh: "朋友", src: "课本" },
-        { en: "polite", zh: "礼貌的", src: "拓展" },
-        { en: "kind", zh: "友好的", src: "拓展" },
-        { en: "book", zh: "书", src: "拓展" },
+        { en: "animal", zh: "动物", src: "课本", lesson: 1, priority: "high" },
+        { en: "different", zh: "不同的", src: "课本", lesson: 1, priority: "high" },
+        { en: "interesting", zh: "有趣的", src: "课本", lesson: 1, priority: "high" },
+        { en: "story", zh: "故事", src: "课本", lesson: 1, priority: "high" },
+        { en: "brush", zh: "刷子；画笔", src: "课本", lesson: 1, priority: "mid" },
+        { en: "remember", zh: "记住", src: "课本", lesson: 2, priority: "high" },
+        { en: "poem", zh: "诗", src: "课本", lesson: 2, priority: "mid" },
+        { en: "hard", zh: "难的", src: "课本", lesson: 2, priority: "high" },
+        { en: "may", zh: "可以", src: "课本", lesson: 2, priority: "high" },
+        { en: "try", zh: "尝试", src: "课本", lesson: 2, priority: "high" },
+        { en: "ill", zh: "生病的", src: "课本", lesson: 3, priority: "high" },
+        { en: "call", zh: "打电话", src: "课本", lesson: 3, priority: "mid" },
+        { en: "her", zh: "她", src: "课本", lesson: 3, priority: "mid" },
+        { en: "tomorrow", zh: "明天", src: "课本", lesson: 3, priority: "mid" },
+        { en: "should", zh: "应该", src: "课本", lesson: 3, priority: "high" },
+        { en: "rest", zh: "休息", src: "课本", lesson: 3, priority: "high" },
+        { en: "wait", zh: "等待", src: "课本", lesson: 4, priority: "mid" },
+        { en: "mouth", zh: "嘴", src: "课本", lesson: 4, priority: "mid" },
+        { en: "best", zh: "最好的", src: "课本", lesson: 4, priority: "high" },
+        { en: "share", zh: "分享", src: "课本", lesson: 4, priority: "high" },
+        { en: "little", zh: "小的", src: "课本", lesson: 4, priority: "mid" },
+        { en: "small", zh: "小的", src: "课本", lesson: 4, priority: "mid" },
+        { en: "like", zh: "喜欢（i_e）", src: "课本", lesson: 4, priority: "high", extend: true },
+        { en: "hot", zh: "热的（o）", src: "课本", lesson: 4, priority: "mid", extend: true },
       ],
       patterns: [
         {
-          id: "doing",
-          label: "What are you doing?",
+          id: "read",
+          lesson: 1,
+          label: "We can read it together",
+          frame: "We can read the ____ together. It is interesting.",
           steps: [
-            "原句：What are you doing? → I'm reading.",
-            "换词：reading → drawing / playing / helping Mum",
-            "说自己：现在正在做什么",
+            "原句：We can read it together.",
+            "换词：story / animal book",
+            "说自己想和朋友一起读什么",
           ],
-          frame: "I'm ____ing.",
           demos: [
-            { role: "adultFemale", text: "What are you doing?" },
-            { role: "boyChild", text: "I'm reading." },
-            { role: "girlChild", text: "I'm helping Mum." },
+            { role: "boyChild", text: "We can read it together." },
+            { role: "girlChild", text: "This animal story is interesting." },
           ],
         },
         {
-          id: "can",
-          label: "Can I … with you?",
+          id: "help",
+          lesson: 2,
+          label: "Let me help you",
+          frame: "Let me help you. May I try?",
           steps: [
-            "原句：Can I read it with you? → Sure.",
-            "换词：read → play / walk / sing",
-            "说自己：邀请家人一起做一事",
+            "原句：Let me help you.",
+            "It's hard. May I try?",
+            "说自己怎么帮朋友",
           ],
-          frame: "Can I ____ with you?",
           demos: [
-            { role: "girlChild", text: "Can I read it with you?" },
-            { role: "boyChild", text: "Sure. We can read it together." },
+            { role: "girlChild", text: "Let me help you." },
+            { role: "boyChild", text: "It's hard. May I try?" },
           ],
         },
         {
-          id: "should",
-          label: "You should…",
+          id: "rest",
+          lesson: 3,
+          label: "You should have a good rest",
+          frame: "You should ____.",
           steps: [
             "原句：You should have a good rest.",
-            "换词：have a good rest → drink water / see a doctor",
-            "说自己：给家人一条善意建议",
+            "换词：call her / remember the poem",
+            "给生病的朋友一句建议",
           ],
-          frame: "You should ____.",
           demos: [
-            { role: "adultFemale", text: "You should have a good rest." },
-            { role: "adultMale", text: "You should drink some water." },
+            { role: "adultFemale", text: "She is ill." },
+            { role: "boyChild", text: "You should have a good rest." },
           ],
         },
+        {
+          id: "share",
+          lesson: 4,
+          label: "Friends share",
+          frame: "Good friends share ____.",
+          steps: [
+            "原句：We can share.",
+            "little / small / best",
+            "说说好朋友会分享什么",
+          ],
+          demos: [
+            { role: "girlChild", text: "This cupcake is little, but we can share." },
+            { role: "boyChild", text: "You are my best friend." },
+          ],
+        },
+        {
+          id: "should-because",
+          lesson: 4,
+          label: "知识延展 You should … because …",
+          frame: "You should ____ because ____.",
+          steps: [
+            "should 后说做法",
+            "because 后说原因",
+            "给朋友一条带原因的建议",
+          ],
+          demos: [
+            { role: "girlChild", text: "You should rest because you are ill." },
+          ],
+          extend: true,
+        },
       ],
+      listen: {
+        judge: [
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak: "We can read this animal story together. It is interesting.",
+            show: "判断：他们可以一起读有趣的动物故事。",
+            answer: true,
+            tip: "课文：together / interesting",
+          },
+          {
+            lesson: 2,
+            role: "girlChild",
+            speak: "The poem is hard. May I try?",
+            show: "判断：诗很难，所以她不想试。",
+            answer: false,
+            tip: "May I try 是想试",
+          },
+          {
+            lesson: 3,
+            role: "adultFemale",
+            speak: "She is ill. You should have a good rest and I will call her tomorrow.",
+            show: "判断：她病了，应该好好休息。",
+            answer: true,
+            tip: "课文：should / rest",
+          },
+          {
+            lesson: 4,
+            role: "boyChild",
+            speak: "The cupcake is small. We can wait and share it.",
+            show: "判断：杯子蛋糕很小，他们可以分享。",
+            answer: true,
+            tip: "故事：share / small",
+          },
+          {
+            lesson: 4,
+            role: "girlChild",
+            speak: "You should remember the story because it is interesting.",
+            show: "判断：因为故事有趣，所以应该记住。",
+            answer: true,
+            tip: "延展 should because",
+            extend: true,
+          },
+        ],
+        reply: [
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak: "Can we read it together?",
+            choices: [
+              { id: "a", text: "Yes. The story is interesting." },
+              { id: "b", text: "Open the door." },
+              { id: "c", text: "I'm a mouse." },
+            ],
+            answer: "a",
+            tip: "一起读",
+          },
+          {
+            lesson: 3,
+            role: "adultFemale",
+            speak: "Yangyang is ill. What should he do?",
+            choices: [
+              { id: "a", text: "He should have a good rest." },
+              { id: "b", text: "He should play with chopsticks." },
+              { id: "c", text: "He is a pig." },
+            ],
+            answer: "a",
+            tip: "应该休息",
+          },
+        ],
+        challenge: {
+          judge: [
+          {
+            lesson: 0,
+            role: "girlChild",
+            speak: "A good friend should help you when the poem is hard, and you may try again together.",
+            show: "判断：朋友只在简单的时候才帮忙。",
+            answer: false,
+            tip: "挑战：hard 的时候也该帮忙",
+          },
+          ],
+          reply: [
+          {
+            lesson: 0,
+            role: "boyChild",
+            speak: "I can't remember the poem. It's too hard.",
+            choices: [
+              { id: "a", text: "Let me help you. May I try with you?" },
+              { id: "b", text: "Snow turns into water." },
+              { id: "c", text: "Happy New Year!" },
+            ],
+            answer: "a",
+            tip: "挑战：先帮忙再一起试",
+          },
+          ],
+        },
+      },
       questions: [
         {
-          ask: "What are you doing now?",
+          lesson: 1,
+          ask: "What can we read together?",
           asker: "adultFemale",
-          sample: { role: "boyChild", text: "I'm reading a storybook." },
+          sample: { role: "girlChild", text: "We can read an interesting animal story." },
         },
         {
-          ask: "Can I read / play with you?",
-          asker: "girlChild",
-          sample: { role: "boyChild", text: "Sure. Let's play together." },
+          lesson: 2,
+          ask: "The poem is hard. Can you help me?",
+          asker: "boyChild",
+          sample: { role: "girlChild", text: "Let me help you. May I try?" },
         },
         {
-          ask: "What should a good friend do?",
-          asker: "adultMale",
-          sample: { role: "girlChild", text: "A good friend should help you." },
+          lesson: 3,
+          ask: "I am ill. What should I do?",
+          asker: "boyChild",
+          sample: { role: "adultFemale", text: "You should have a good rest." },
         },
-      ],
-      roleplay: "朋友生病了，你打电话关心并给出建议。",
-      dialogues: [
-        { role: "girlChild", name: "You", text: "Hello. How do you feel today?" },
-        { role: "boyChild", name: "Friend", text: "I'm ill. I feel tired." },
-        { role: "girlChild", name: "You", text: "Oh. You should have a good rest." },
-        { role: "adultFemale", name: "Mum", text: "Please drink a lot of water." },
-      ],
-      readPrompts: [
-        { role: "adultFemale", text: "Who are the friends?" },
-        { role: "adultFemale", text: "What should the friend do?" },
+        {
+          lesson: 4,
+          ask: "What should a good friend do? Why?",
+          asker: "adultFemale",
+          tip: "用 should 和 because。",
+          sample: { role: "boyChild", text: "A good friend should share because we can be happy together." },
+          extend: true
+        },
       ],
     },
     {
       id: "u3",
-      name: "Unit 3 Be a Nice Person",
+      name: "Unit Three Be a Nice Person",
       lessonCount: 4,
-      themes: "礼貌 · 请求 · 道歉",
-      kaixinHint: "开心单词书：借东西 / 道歉 / 请帮忙",
+      lessonStart: 9,
+      lessonTitles: ["Can You Help Me, Please?", "Excuse Me", "I'm Sorry", "Could I Have a Banana, Please?"],
+      focus: [
+        "重难点：Can you help me, please? May I use your bat?",
+        "重难点：Would you open the door, please?",
+        "重难点：I'm sorry. Could you get it?",
+        "复习礼貌请求；延展 Could I / Would you，以及 o / o_e / u_e。",
+      ],
       words: [
-        { en: "help", zh: "帮助", src: "课本" },
-        { en: "please", zh: "请", src: "课本" },
-        { en: "excuse", zh: "劳驾", src: "课本" },
-        { en: "sorry", zh: "抱歉", src: "课本" },
-        { en: "could", zh: "可以（更礼貌）", src: "课本" },
-        { en: "banana", zh: "香蕉", src: "课本" },
-        { en: "pencil", zh: "铅笔", src: "拓展" },
-        { en: "borrow", zh: "借入", src: "拓展" },
-        { en: "thank", zh: "感谢", src: "拓展" },
-        { en: "nice", zh: "友好的", src: "拓展" },
-        { en: "careful", zh: "小心的", src: "拓展" },
-        { en: "wait", zh: "等待", src: "拓展" },
+        { en: "excuse me", zh: "打扰一下", src: "课本", lesson: 1, priority: "high" },
+        { en: "please", zh: "请", src: "课本", lesson: 1, priority: "high" },
+        { en: "bat", zh: "球拍", src: "课本", lesson: 1, priority: "mid" },
+        { en: "use", zh: "使用", src: "课本", lesson: 1, priority: "high" },
+        { en: "sorry", zh: "抱歉的", src: "课本", lesson: 1, priority: "high" },
+        { en: "would", zh: "愿意", src: "课本", lesson: 2, priority: "high" },
+        { en: "open", zh: "打开", src: "课本", lesson: 2, priority: "high" },
+        { en: "door", zh: "门", src: "课本", lesson: 2, priority: "mid" },
+        { en: "problem", zh: "问题", src: "课本", lesson: 2, priority: "mid" },
+        { en: "must", zh: "必须", src: "课本", lesson: 2, priority: "high" },
+        { en: "stand", zh: "站立", src: "课本", lesson: 2, priority: "mid" },
+        { en: "polite", zh: "有礼貌的", src: "课本", lesson: 3, priority: "high" },
+        { en: "could", zh: "能够（表礼貌）", src: "课本", lesson: 3, priority: "high" },
+        { en: "get", zh: "拿；得到", src: "课本", lesson: 3, priority: "high" },
+        { en: "monkey", zh: "猴子", src: "课本", lesson: 4, priority: "mid" },
+        { en: "banana", zh: "香蕉", src: "课本", lesson: 4, priority: "high" },
+        { en: "garden", zh: "花园", src: "课本", lesson: 4, priority: "mid" },
+        { en: "want", zh: "想要", src: "课本", lesson: 4, priority: "high" },
+        { en: "hope", zh: "希望（o_e）", src: "课本", lesson: 4, priority: "high", extend: true },
+        { en: "cute", zh: "可爱的（u_e）", src: "课本", lesson: 4, priority: "mid", extend: true },
       ],
       patterns: [
         {
-          id: "helpme",
+          id: "help-please",
+          lesson: 1,
           label: "Can you help me, please?",
+          frame: "Can you help me, please? May I use ____?",
           steps: [
             "原句：Can you help me, please?",
-            "换词：help me → open the door / carry the books",
-            "说自己：向家人礼貌求助一件事",
+            "May I use your bat?",
+            "礼貌地请求帮助",
           ],
-          frame: "Can you ____, please?",
           demos: [
-            { role: "girlChild", text: "Can you help me, please?" },
-            { role: "adultMale", text: "Sure. Let me help you." },
+            { role: "boyChild", text: "Excuse me. Can you help me, please?" },
+            { role: "girlChild", text: "May I use your bat?" },
+          ],
+        },
+        {
+          id: "door",
+          lesson: 2,
+          label: "Would you open the door?",
+          frame: "Would you ____, please?",
+          steps: [
+            "原句：Would you open the door, please?",
+            "No problem.",
+            "换一个礼貌请求",
+          ],
+          demos: [
+            { role: "girlChild", text: "Would you open the door, please?" },
+            { role: "boyChild", text: "No problem." },
           ],
         },
         {
           id: "sorry",
-          label: "I'm sorry.",
+          lesson: 3,
+          label: "I'm sorry",
+          frame: "I'm sorry. Could you get ____?",
           steps: [
             "原句：I'm sorry.",
-            "换词：补原因 I'm sorry I'm late.",
-            "说自己：今天有没有想道歉的小事",
+            "Could you get it for me?",
+            "说一句道歉和请求",
           ],
-          frame: "I'm sorry ____.",
           demos: [
             { role: "boyChild", text: "I'm sorry." },
-            { role: "boyChild", text: "I'm sorry I'm late." },
+            { role: "girlChild", text: "Could you get it for me? It's polite." },
           ],
         },
         {
-          id: "could",
-          label: "Could I have…?",
+          id: "banana",
+          lesson: 4,
+          label: "Could I have a banana, please?",
+          frame: "Could I have ____, please?",
           steps: [
             "原句：Could I have a banana, please?",
-            "换词：banana → apple / pencil / water",
-            "说自己：礼貌要一样东西",
+            "The monkey wants a banana.",
+            "在花园里礼貌地要一样东西",
           ],
-          frame: "Could I have ____, please?",
           demos: [
             { role: "girlChild", text: "Could I have a banana, please?" },
-            { role: "adultFemale", text: "Yes, of course." },
+            { role: "boyChild", text: "The monkey wants a banana." },
           ],
         },
+        {
+          id: "could-would",
+          lesson: 4,
+          label: "知识延展 Could I / Would you",
+          frame: "Could I ____? / Would you ____, please?",
+          steps: [
+            "Could I 是自己想要",
+            "Would you 是请对方做",
+            "各说一句，都要带 please",
+          ],
+          demos: [
+            { role: "girlChild", text: "Could I have a banana, please?" },
+            { role: "boyChild", text: "Would you open the door, please?" },
+          ],
+          extend: true,
+        },
       ],
+      listen: {
+        judge: [
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak: "Excuse me. Can you help me, please? May I use your bat?",
+            show: "判断：他想用球拍，并且说了 please。",
+            answer: true,
+            tip: "课文：please / use",
+          },
+          {
+            lesson: 2,
+            role: "girlChild",
+            speak: "Would you open the door, please? You must stand here.",
+            show: "判断：她请对方开门。",
+            answer: true,
+            tip: "课文：Would you",
+          },
+          {
+            lesson: 3,
+            role: "boyChild",
+            speak: "I'm sorry. Could you get my bat? It is polite to say sorry.",
+            show: "判断：道歉是不礼貌的。",
+            answer: false,
+            tip: "polite 是有礼貌",
+          },
+          {
+            lesson: 4,
+            role: "girlChild",
+            speak: "The little monkey wants a banana in the garden.",
+            show: "判断：猴子想要香蕉。",
+            answer: true,
+            tip: "课文：want / banana",
+          },
+          {
+            lesson: 4,
+            role: "boyChild",
+            speak: "Could I use your bat, please? I hope I can play.",
+            show: "判断：他礼貌地请求用球拍。",
+            answer: true,
+            tip: "延展 Could I",
+            extend: true,
+          },
+        ],
+        reply: [
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak: "Can you help me, please?",
+            choices: [
+              { id: "a", text: "Yes. You may use my bat." },
+              { id: "b", text: "I am a mouse." },
+              { id: "c", text: "Snow is bad." },
+            ],
+            answer: "a",
+            tip: "答应帮忙",
+          },
+          {
+            lesson: 2,
+            role: "girlChild",
+            speak: "Would you open the door, please?",
+            choices: [
+              { id: "a", text: "No problem." },
+              { id: "b", text: "He is ill." },
+              { id: "c", text: "Fifty." },
+            ],
+            answer: "a",
+            tip: "No problem",
+          },
+          {
+            lesson: 4,
+            role: "girlChild",
+            speak: "Could I have a banana, please?",
+            choices: [
+              { id: "a", text: "Yes. Here you are." },
+              { id: "b", text: "Calm down." },
+              { id: "c", text: "Look at the plane." },
+            ],
+            answer: "a",
+            tip: "礼貌应答",
+          },
+        ],
+        challenge: {
+          judge: [
+          {
+            lesson: 0,
+            role: "adultFemale",
+            speak: "A nice person should say excuse me and please, and could is more polite than a short order.",
+            show: "判断：礼貌的人不用 please。",
+            answer: false,
+            tip: "挑战：please / could 更礼貌",
+          },
+          ],
+          reply: [
+          {
+            lesson: 0,
+            role: "boyChild",
+            speak: "I want that banana, now!",
+            choices: [
+              { id: "a", text: "Could I have a banana, please?" },
+              { id: "b", text: "Give me that, now!" },
+              { id: "c", text: "Go away!" },
+            ],
+            answer: "a",
+            tip: "挑战：把命令改成礼貌请求",
+          },
+          ],
+        },
+      },
       questions: [
         {
+          lesson: 1,
           ask: "Can you help me, please?",
-          asker: "girlChild",
-          sample: { role: "adultMale", text: "Yes. What can I do for you?" },
-        },
-        {
-          ask: "When do you say sorry?",
-          asker: "adultFemale",
-          sample: { role: "boyChild", text: "I say sorry when I make a mistake." },
-        },
-        {
-          ask: "Could I have a banana / pencil, please?",
           asker: "boyChild",
-          sample: { role: "adultFemale", text: "Yes, please. Here you are." },
+          sample: { role: "girlChild", text: "Yes. You may use my bat." },
+        },
+        {
+          lesson: 2,
+          ask: "Would you open the door, please?",
+          asker: "girlChild",
+          sample: { role: "boyChild", text: "No problem." },
+        },
+        {
+          lesson: 3,
+          ask: "What do you say when you are sorry?",
+          asker: "adultFemale",
+          sample: { role: "boyChild", text: "I'm sorry." },
+        },
+        {
+          lesson: 4,
+          ask: "How do you ask for a banana politely?",
+          asker: "adultFemale",
+          tip: "必须有 please。",
+          sample: { role: "girlChild", text: "Could I have a banana, please?" },
+          extend: true
         },
       ],
-      roleplay: "在家里礼貌点一份食物或借一支笔。",
-      dialogues: [
-        { role: "boyChild", name: "You", text: "Excuse me. Could I have a pencil, please?" },
-        { role: "adultFemale", name: "Mum", text: "Yes. Here you are." },
-        { role: "boyChild", name: "You", text: "Thank you." },
-        { role: "adultFemale", name: "Mum", text: "You're welcome." },
+    },
+    {
+      id: "u4",
+      name: "Unit Four Revision I",
+      lessonCount: 2,
+      lessonStart: 13,
+      lessonTitles: ["Revision A", "Revision B"],
+      focus: [
+        "复习 Unit One 到 Unit Three：心情、帮助、礼貌。",
+        "知识延展：把 because、should、Could I 串成更长的句子。",
       ],
-      readPrompts: [
-        { role: "adultFemale", text: "What does the child ask for?" },
-        { role: "adultMale", text: "Is the child polite?" },
+      words: [
+        { en: "worried", zh: "担心的", src: "课本", lesson: 1, priority: "high" },
+        { en: "together", zh: "一起", src: "课本", lesson: 1, priority: "high" },
+        { en: "angry", zh: "生气的", src: "课本", lesson: 1, priority: "mid" },
+        { en: "should", zh: "应该", src: "课本", lesson: 1, priority: "high" },
+        { en: "share", zh: "分享", src: "课本", lesson: 1, priority: "high" },
+        { en: "please", zh: "请", src: "课本", lesson: 1, priority: "high" },
+        { en: "sorry", zh: "抱歉的", src: "课本", lesson: 1, priority: "high" },
+        { en: "polite", zh: "有礼貌的", src: "课本", lesson: 1, priority: "high" },
+        { en: "because", zh: "因为", src: "课本", lesson: 2, priority: "high", extend: true },
+        { en: "could", zh: "能够（表礼貌）", src: "课本", lesson: 2, priority: "high", extend: true },
+      ],
+      patterns: [
+        {
+          id: "rev-a",
+          lesson: 1,
+          label: "Revision A",
+          frame: "I feel ____. We can ____ together.",
+          steps: [
+            "复习心情",
+            "复习一起做",
+            "复习 please / sorry",
+          ],
+          demos: [
+            { role: "boyChild", text: "I feel better." },
+            { role: "girlChild", text: "We can read it together." },
+            { role: "boyChild", text: "I'm sorry." },
+          ],
+        },
+        {
+          id: "rev-b",
+          lesson: 2,
+          label: "知识延展 三句连说",
+          frame: "I feel ____ because ____. You should ____. Could I ____, please?",
+          steps: [
+            "第一句心情加原因",
+            "第二句 should 建议",
+            "第三句 Could I 礼貌请求",
+          ],
+          demos: [
+            { role: "girlChild", text: "I feel worried because I am late." },
+            { role: "boyChild", text: "You should have a good rest." },
+            { role: "girlChild", text: "Could I use your bat, please?" },
+          ],
+          extend: true,
+        },
+      ],
+      listen: {
+        judge: [
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak: "I'm sorry. Let's look for it together.",
+            show: "判断：他道歉，并提议一起找。",
+            answer: true,
+            tip: "复习 together",
+          },
+          {
+            lesson: 2,
+            role: "girlChild",
+            speak: "I feel sad because my dog is lost, so you should help me, and I could say thank you.",
+            show: "判断：她难过是因为狗丢了，而且希望得到帮助。",
+            answer: true,
+            tip: "延展长句",
+            extend: true,
+          },
+        ],
+        reply: [
+          {
+            lesson: 1,
+            role: "adultFemale",
+            speak: "How do you feel today?",
+            choices: [
+              { id: "a", text: "I feel happy." },
+              { id: "b", text: "Use the fork." },
+              { id: "c", text: "January." },
+            ],
+            answer: "a",
+            tip: "复习心情",
+          },
+        ],
+        challenge: {
+          judge: [
+          {
+            lesson: 0,
+            role: "boyChild",
+            speak: "A good friend should share and help, because a nice person is polite and says please.",
+            show: "判断：好朋友不需要礼貌。",
+            answer: false,
+            tip: "挑战：should + because + polite",
+          },
+          ],
+          reply: [
+          {
+            lesson: 0,
+            role: "girlChild",
+            speak: "I'm worried and the poem is hard.",
+            choices: [
+              { id: "a", text: "You should rest, and I can help you. May I try with you?" },
+              { id: "b", text: "Go away." },
+              { id: "c", text: "I want it now." },
+            ],
+            answer: "a",
+            tip: "挑战：安慰并帮忙",
+          },
+          ],
+        },
+      },
+      questions: [
+        {
+          lesson: 1,
+          ask: "How do you feel, and what can friends do?",
+          asker: "adultFemale",
+          sample: { role: "boyChild", text: "I feel happy. We can read together." },
+        },
+        {
+          lesson: 2,
+          ask: "Say three things: a feeling with because, a should, and a Could I.",
+          asker: "adultFemale",
+          tip: "三句都要说完。",
+          sample: { role: "girlChild", text: "I'm tired because it is late. You should rest. Could I have a banana, please?" },
+          extend: true
+        },
       ],
     },
     {
       id: "u5",
-      name: "Unit 5 Enjoy Eating",
+      name: "Unit Five Enjoy Eating",
       lessonCount: 4,
-      themes: "点餐 · 食物 · 餐桌礼仪",
-      kaixinHint: "开心单词书：点餐 / 食物饮料 / 餐桌",
+      lessonStart: 15,
+      lessonTitles: ["I'd Like Some Chicken", "What Would You Like to Have?", "Please Don't Play with the Chopsticks", "How to Make Fruit Salad"],
+      focus: [
+        "重难点：I'd like some chicken / a sandwich.",
+        "重难点：What would you like to have?",
+        "重难点：Please don't play with the chopsticks.",
+        "复习点餐和餐具；延展 First, next, then, last，以及 ir / ur。",
+      ],
       words: [
-        { en: "chicken", zh: "鸡肉", src: "课本" },
-        { en: "salad", zh: "沙拉", src: "课本" },
-        { en: "chopsticks", zh: "筷子", src: "课本" },
-        { en: "would", zh: "想要（委婉）", src: "课本" },
-        { en: "like", zh: "喜欢；想要", src: "课本" },
-        { en: "drink", zh: "饮料；喝", src: "课本" },
-        { en: "soup", zh: "汤", src: "拓展" },
-        { en: "rice", zh: "米饭", src: "拓展" },
-        { en: "noodles", zh: "面条", src: "拓展" },
-        { en: "fruit", zh: "水果", src: "拓展" },
-        { en: "water", zh: "水", src: "拓展" },
-        { en: "juice", zh: "果汁", src: "拓展" },
-        { en: "clean", zh: "干净的", src: "拓展" },
-        { en: "table", zh: "桌子", src: "拓展" },
+        { en: "chicken", zh: "鸡肉", src: "课本", lesson: 1, priority: "high" },
+        { en: "sandwich", zh: "三明治", src: "课本", lesson: 1, priority: "high" },
+        { en: "tomato", zh: "西红柿", src: "课本", lesson: 1, priority: "mid" },
+        { en: "potato", zh: "土豆", src: "课本", lesson: 2, priority: "mid" },
+        { en: "meatball", zh: "肉丸", src: "课本", lesson: 2, priority: "mid" },
+        { en: "eat", zh: "吃", src: "课本", lesson: 2, priority: "mid" },
+        { en: "steak", zh: "牛排", src: "课本", lesson: 2, priority: "mid" },
+        { en: "soup", zh: "汤", src: "课本", lesson: 2, priority: "high" },
+        { en: "dessert", zh: "甜点", src: "课本", lesson: 2, priority: "mid" },
+        { en: "ice cream", zh: "冰激凌", src: "课本", lesson: 2, priority: "high" },
+        { en: "chopsticks", zh: "筷子", src: "课本", lesson: 3, priority: "high" },
+        { en: "them", zh: "它们", src: "课本", lesson: 3, priority: "mid" },
+        { en: "cut", zh: "切", src: "课本", lesson: 3, priority: "high" },
+        { en: "knife", zh: "餐刀", src: "课本", lesson: 3, priority: "mid" },
+        { en: "fork", zh: "餐叉", src: "课本", lesson: 3, priority: "high" },
+        { en: "right", zh: "右边；正确的", src: "课本", lesson: 3, priority: "mid" },
+        { en: "left", zh: "左边", src: "课本", lesson: 3, priority: "mid" },
+        { en: "apple", zh: "苹果", src: "课本", lesson: 4, priority: "high" },
+        { en: "salad", zh: "沙拉", src: "课本", lesson: 4, priority: "high" },
+        { en: "first", zh: "首先", src: "课本", lesson: 4, priority: "high" },
+        { en: "next", zh: "接下来", src: "课本", lesson: 4, priority: "high" },
+        { en: "then", zh: "然后", src: "课本", lesson: 4, priority: "high" },
+        { en: "last", zh: "最后", src: "课本", lesson: 4, priority: "high" },
+        { en: "girl", zh: "女孩（ir）", src: "课本", lesson: 4, priority: "mid", extend: true },
+        { en: "nurse", zh: "护士（ur）", src: "课本", lesson: 4, priority: "mid", extend: true },
       ],
       patterns: [
         {
-          id: "wouldlike",
-          label: "What would you like…?",
+          id: "like-food",
+          lesson: 1,
+          label: "I'd like some chicken",
+          frame: "I'd like some ____.",
           steps: [
-            "原句：What would you like to have? → I'd like some chicken.",
-            "换词：chicken → salad / soup / noodles",
-            "说自己：今晚想吃什么",
+            "原句：I'd like some chicken.",
+            "换词：sandwich / tomato",
+            "说自己想吃什么",
           ],
-          frame: "I'd like ____.",
+          demos: [
+            { role: "boyChild", text: "I'd like some chicken." },
+            { role: "girlChild", text: "I'd like a sandwich." },
+          ],
+        },
+        {
+          id: "would-like",
+          lesson: 2,
+          label: "What would you like to have?",
+          frame: "What would you like to have? I'd like ____.",
+          steps: [
+            "原句：What would you like to have?",
+            "I'd like some soup.",
+            "点一份甜点或冰激凌",
+          ],
           demos: [
             { role: "adultFemale", text: "What would you like to have?" },
-            { role: "boyChild", text: "I'd like some chicken." },
-            { role: "girlChild", text: "I'd like some fruit salad." },
+            { role: "boyChild", text: "I'd like some soup and ice cream." },
           ],
         },
         {
-          id: "wouldyou",
-          label: "Would you like…?",
-          steps: [
-            "原句：Would you like some water? → Yes, please. / No, thank you.",
-            "换词：water → juice / rice",
-            "说自己：招待家人喝点什么",
-          ],
-          frame: "Would you like ____?",
-          demos: [
-            { role: "adultMale", text: "Would you like some water?" },
-            { role: "girlChild", text: "Yes, please." },
-            { role: "boyChild", text: "No, thank you." },
-          ],
-        },
-        {
-          id: "table",
-          label: "Keep the table clean",
+          id: "chopsticks",
+          lesson: 3,
+          label: "Please don't play with the chopsticks",
+          frame: "Please don't ____. Use the ____.",
           steps: [
             "原句：Please don't play with the chopsticks.",
-            "换词：说一条餐桌礼貌",
-            "说自己：你家饭桌有什么规矩",
+            "Use the knife and fork.",
+            "说左右手怎么用餐具",
           ],
-          frame: "Please ____. / Keep ____ clean.",
           demos: [
             { role: "adultFemale", text: "Please don't play with the chopsticks." },
-            { role: "adultMale", text: "Keep the table clean." },
+            { role: "boyChild", text: "I use the fork in my left hand." },
           ],
         },
+        {
+          id: "salad",
+          lesson: 4,
+          label: "How to make fruit salad",
+          frame: "First, ____. Next, ____. Then, ____. Last, ____.",
+          steps: [
+            "First 洗或切苹果",
+            "Next / Then 混合",
+            "Last 吃沙拉",
+          ],
+          demos: [
+            { role: "girlChild", text: "First, cut the apples. Next, mix them. Then, wait. Last, eat the salad." },
+          ],
+        },
+        {
+          id: "order",
+          lesson: 4,
+          label: "知识延展 顺序 + I'd like",
+          frame: "First I'd like ____. Then I'd like ____.",
+          steps: [
+            "用 First / Then 点两样",
+            "不要只用一个 I'd like",
+            "说完整两句",
+          ],
+          demos: [
+            { role: "boyChild", text: "First I'd like some chicken. Then I'd like some fruit salad." },
+          ],
+          extend: true,
+        },
       ],
+      listen: {
+        judge: [
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak: "I'd like some chicken and a tomato sandwich.",
+            show: "判断：他想要鸡肉和番茄三明治。",
+            answer: true,
+            tip: "课文 I'd like",
+          },
+          {
+            lesson: 2,
+            role: "adultFemale",
+            speak: "What would you like to have? I'd like soup, not steak.",
+            show: "判断：她想要牛排，不想要汤。",
+            answer: false,
+            tip: "not steak",
+          },
+          {
+            lesson: 3,
+            role: "adultFemale",
+            speak: "Please don't play with the chopsticks. Use the knife and fork.",
+            show: "判断：可以用筷子玩耍。",
+            answer: false,
+            tip: "don't play",
+          },
+          {
+            lesson: 4,
+            role: "girlChild",
+            speak: "First, cut the apples. Next, mix them. Last, eat the fruit salad.",
+            show: "判断：做水果沙拉要先切苹果。",
+            answer: true,
+            tip: "first / last",
+          },
+          {
+            lesson: 4,
+            role: "boyChild",
+            speak: "The girl would like fruit salad, and the nurse would like soup.",
+            show: "判断：女孩想要水果沙拉。",
+            answer: true,
+            tip: "延展 ir/ur girl nurse",
+            extend: true,
+          },
+        ],
+        reply: [
+          {
+            lesson: 2,
+            role: "adultFemale",
+            speak: "What would you like to have?",
+            choices: [
+              { id: "a", text: "I'd like some soup." },
+              { id: "b", text: "I feel angry." },
+              { id: "c", text: "Open the door." },
+            ],
+            answer: "a",
+            tip: "点餐",
+          },
+          {
+            lesson: 3,
+            role: "adultFemale",
+            speak: "Please don't play with the chopsticks.",
+            choices: [
+              { id: "a", text: "I'm sorry. I will use the fork." },
+              { id: "b", text: "Woof!" },
+              { id: "c", text: "He is a mouse." },
+            ],
+            answer: "a",
+            tip: "改正用餐",
+          },
+        ],
+        challenge: {
+          judge: [
+          {
+            lesson: 0,
+            role: "girlChild",
+            speak: "First she cuts the apples with a knife, then she mixes the salad, and last she eats it with a fork, not with chopsticks.",
+            show: "判断：她最后用筷子吃沙拉。",
+            answer: false,
+            tip: "挑战：not with chopsticks",
+          },
+          ],
+          reply: [
+          {
+            lesson: 0,
+            role: "adultMale",
+            speak: "What would you like, and how do you make it?",
+            choices: [
+              { id: "a", text: "I'd like fruit salad. First cut the apples, then mix them." },
+              { id: "b", text: "I am late." },
+              { id: "c", text: "May I use your bat?" },
+            ],
+            answer: "a",
+            tip: "挑战：点餐加步骤",
+          },
+          ],
+        },
+      },
       questions: [
         {
+          lesson: 1,
+          ask: "What would you like?",
+          asker: "adultFemale",
+          sample: { role: "boyChild", text: "I'd like some chicken." },
+        },
+        {
+          lesson: 2,
           ask: "What would you like to have?",
           asker: "adultFemale",
-          sample: { role: "boyChild", text: "I'd like some noodles, please." },
+          sample: { role: "girlChild", text: "I'd like some soup." },
         },
         {
-          ask: "Would you like some water?",
+          lesson: 3,
+          ask: "What shouldn't you do with chopsticks?",
           asker: "adultMale",
-          sample: { role: "girlChild", text: "Yes, please. Thank you." },
+          sample: { role: "boyChild", text: "Please don't play with the chopsticks." },
         },
         {
-          ask: "How do you keep the table clean?",
+          lesson: 4,
+          ask: "How do you make fruit salad?",
           asker: "adultFemale",
-          sample: { role: "boyChild", text: "I don't play with the chopsticks." },
+          tip: "按顺序说。",
+          sample: { role: "girlChild", text: "First, cut the apples. Next, mix them. Last, eat the salad." },
+          extend: true
         },
-      ],
-      roleplay: "假装在餐厅点餐，完成 4 个来回。",
-      dialogues: [
-        { role: "adultFemale", name: "Waiter", text: "What would you like to have?" },
-        { role: "boyChild", name: "You", text: "I'd like some chicken, please." },
-        { role: "adultFemale", name: "Waiter", text: "Would you like some juice?" },
-        { role: "boyChild", name: "You", text: "Yes, please." },
-      ],
-      readPrompts: [
-        { role: "adultFemale", text: "What food do they order?" },
-        { role: "adultMale", text: "How do they keep the table clean?" },
       ],
     },
     {
       id: "u6",
-      name: "Unit 6 Get Close to Nature",
+      name: "Unit Six Get Close to Nature",
       lessonCount: 4,
-      themes: "自然 · 农场 · 旅行",
-      kaixinHint: "开心单词书：农场 / 天气 / 动植物",
+      lessonStart: 19,
+      lessonTitles: ["We Can't Live Without Nature", "Feel Nature on the Farm", "Snow Turns into Water", "I Love This Trip"],
+      focus: [
+        "重难点：We can't live without air / nature.",
+        "重难点：I can feed the pigs. I listen and I hear.",
+        "重难点：Snow turns into water.",
+        "复习自然之旅；延展 can't live without … because …，以及 ar / or。",
+      ],
       words: [
-        { en: "nature", zh: "自然", src: "课本" },
-        { en: "farm", zh: "农场", src: "课本" },
-        { en: "snow", zh: "雪", src: "课本" },
-        { en: "water", zh: "水", src: "课本" },
-        { en: "trip", zh: "旅行", src: "课本" },
-        { en: "live", zh: "生活；居住", src: "课本" },
-        { en: "without", zh: "没有", src: "课本" },
-        { en: "plant", zh: "植物", src: "拓展" },
-        { en: "animal", zh: "动物", src: "拓展" },
-        { en: "river", zh: "河", src: "拓展" },
-        { en: "tree", zh: "树", src: "拓展" },
-        { en: "sun", zh: "太阳", src: "拓展" },
-        { en: "wind", zh: "风", src: "拓展" },
-        { en: "love", zh: "爱", src: "拓展" },
+        { en: "nature", zh: "自然", src: "课本", lesson: 1, priority: "high" },
+        { en: "Internet", zh: "互联网", src: "课本", lesson: 1, priority: "mid" },
+        { en: "everything", zh: "一切", src: "课本", lesson: 1, priority: "mid" },
+        { en: "air", zh: "空气", src: "课本", lesson: 1, priority: "high" },
+        { en: "around", zh: "到处；周围", src: "课本", lesson: 1, priority: "mid" },
+        { en: "live", zh: "生活", src: "课本", lesson: 1, priority: "high" },
+        { en: "without", zh: "没有", src: "课本", lesson: 1, priority: "high" },
+        { en: "farm", zh: "农场", src: "课本", lesson: 2, priority: "high" },
+        { en: "feed", zh: "喂养", src: "课本", lesson: 2, priority: "high" },
+        { en: "pig", zh: "猪", src: "课本", lesson: 2, priority: "mid" },
+        { en: "smell", zh: "闻", src: "课本", lesson: 2, priority: "mid" },
+        { en: "listen", zh: "听", src: "课本", lesson: 2, priority: "high" },
+        { en: "hear", zh: "听到", src: "课本", lesson: 2, priority: "high" },
+        { en: "glass", zh: "玻璃", src: "课本", lesson: 3, priority: "mid" },
+        { en: "turn", zh: "变成", src: "课本", lesson: 3, priority: "high" },
+        { en: "after", zh: "在……之后", src: "课本", lesson: 3, priority: "mid" },
+        { en: "sun", zh: "太阳", src: "课本", lesson: 3, priority: "high" },
+        { en: "bad", zh: "糟糕的", src: "课本", lesson: 3, priority: "mid" },
+        { en: "start", zh: "开始", src: "课本", lesson: 4, priority: "high" },
+        { en: "forest", zh: "森林", src: "课本", lesson: 4, priority: "high" },
+        { en: "cross", zh: "穿过", src: "课本", lesson: 4, priority: "high" },
+        { en: "car", zh: "小汽车（ar）", src: "课本", lesson: 4, priority: "mid", extend: true },
+        { en: "horse", zh: "马（or）", src: "课本", lesson: 4, priority: "mid", extend: true },
       ],
       patterns: [
         {
           id: "without",
-          label: "We can't live without…",
-          steps: [
-            "原句：We can't live without nature / water.",
-            "换词：water → air / plants / the sun",
-            "说自己：你觉得什么最不能缺少",
-          ],
+          lesson: 1,
+          label: "We can't live without nature",
           frame: "We can't live without ____.",
-          demos: [
-            { role: "adultMale", text: "We can't live without water." },
-            { role: "adultFemale", text: "We can't live without nature." },
-          ],
-        },
-        {
-          id: "see",
-          label: "I can see…",
           steps: [
-            "原句：在农场 / 自然里看到什么",
-            "换词：trees / animals / snow / a river",
-            "说自己：最近一次户外看见了什么",
+            "原句：We can't live without nature.",
+            "换词：air / water",
+            "说一样生活不能没有的东西",
           ],
-          frame: "I can see ____.",
           demos: [
-            { role: "boyChild", text: "I can see a river." },
-            { role: "girlChild", text: "I can see many trees." },
+            { role: "boyChild", text: "We can't live without air." },
+            { role: "girlChild", text: "Nature is around us." },
           ],
         },
         {
-          id: "like",
-          label: "I like … because…",
+          id: "farm",
+          lesson: 2,
+          label: "Feel nature on the farm",
+          frame: "I can feed the ____. I listen and I hear ____.",
+          steps: [
+            "原句：I can feed the pigs.",
+            "I listen. I hear.",
+            "说农场上你能闻见或听见什么",
+          ],
+          demos: [
+            { role: "boyChild", text: "I can feed the pigs." },
+            { role: "girlChild", text: "I listen and I hear the birds." },
+          ],
+        },
+        {
+          id: "snow",
+          lesson: 3,
+          label: "Snow turns into water",
+          frame: "Snow turns into ____ after the sun.",
+          steps: [
+            "原句：Snow turns into water.",
+            "after the sun",
+            "说一种变化",
+          ],
+          demos: [
+            { role: "girlChild", text: "Snow turns into water after the sun comes out." },
+          ],
+        },
+        {
+          id: "trip",
+          lesson: 4,
+          label: "I love this trip",
+          frame: "I love this trip. We start ____ and cross ____.",
           steps: [
             "原句：I love this trip.",
-            "换词：说明喜欢的原因 because…",
-            "说自己：喜欢自然里的哪一样",
+            "start in the forest",
+            "cross 穿过",
           ],
-          frame: "I like ____ because ____.",
           demos: [
             { role: "boyChild", text: "I love this trip." },
-            { role: "girlChild", text: "I like the farm because I can see animals." },
+            { role: "girlChild", text: "We start in the forest and cross the bridge." },
           ],
         },
+        {
+          id: "because-nature",
+          lesson: 4,
+          label: "知识延展 can't live without … because …",
+          frame: "We can't live without ____ because ____.",
+          steps: [
+            "without 后面说东西",
+            "because 后面说原因",
+            "说自然为什么重要",
+          ],
+          demos: [
+            { role: "boyChild", text: "We can't live without air because we need to breathe." },
+          ],
+          extend: true,
+        },
       ],
+      listen: {
+        judge: [
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak: "We can't live without air. Nature is around us.",
+            show: "判断：没有空气我们也能生活。",
+            answer: false,
+            tip: "can't live without",
+          },
+          {
+            lesson: 2,
+            role: "girlChild",
+            speak: "On the farm I feed the pigs. I listen and I hear them.",
+            show: "判断：她在农场喂猪，并且听见它们。",
+            answer: true,
+            tip: "feed / hear",
+          },
+          {
+            lesson: 3,
+            role: "boyChild",
+            speak: "Snow turns into water after the sun comes out.",
+            show: "判断：雪在太阳出来后变成水。",
+            answer: true,
+            tip: "turns into",
+          },
+          {
+            lesson: 4,
+            role: "girlChild",
+            speak: "I love this trip. We start in the forest and then we cross the river.",
+            show: "判断：旅行从森林开始。",
+            answer: true,
+            tip: "start / cross",
+          },
+          {
+            lesson: 4,
+            role: "boyChild",
+            speak: "We can't live without the farm because the horses and cars cannot make our food.",
+            show: "判断：我们不能没有农场。",
+            answer: true,
+            tip: "延展 because + or/ar",
+            extend: true,
+          },
+        ],
+        reply: [
+          {
+            lesson: 1,
+            role: "adultFemale",
+            speak: "Can we live without air?",
+            choices: [
+              { id: "a", text: "No. We can't live without air." },
+              { id: "b", text: "I'd like some soup." },
+              { id: "c", text: "I'm sorry." },
+            ],
+            answer: "a",
+            tip: "without air",
+          },
+          {
+            lesson: 3,
+            role: "boyChild",
+            speak: "What happens to snow after the sun?",
+            choices: [
+              { id: "a", text: "Snow turns into water." },
+              { id: "b", text: "I use a fork." },
+              { id: "c", text: "May I try?" },
+            ],
+            answer: "a",
+            tip: "turns into",
+          },
+        ],
+        challenge: {
+          judge: [
+          {
+            lesson: 0,
+            role: "girlChild",
+            speak: "People can't live without nature, because air, water and farms are around us, and a short trip cannot replace them.",
+            show: "判断：短途旅行可以代替自然。",
+            answer: false,
+            tip: "挑战：cannot replace nature",
+          },
+          ],
+          reply: [
+          {
+            lesson: 0,
+            role: "adultMale",
+            speak: "Why do we get close to nature?",
+            choices: [
+              { id: "a", text: "We can't live without it, because we need air and farms." },
+              { id: "b", text: "Please open the door." },
+              { id: "c", text: "He is worried." },
+            ],
+            answer: "a",
+            tip: "挑战：without + because",
+          },
+          ],
+        },
+      },
       questions: [
         {
-          ask: "What can you see in nature?",
-          asker: "adultFemale",
-          sample: { role: "boyChild", text: "I can see trees, birds and a river." },
-        },
-        {
+          lesson: 1,
           ask: "What can't we live without?",
-          asker: "adultMale",
-          sample: { role: "girlChild", text: "We can't live without water." },
+          asker: "adultFemale",
+          sample: { role: "boyChild", text: "We can't live without air." },
         },
         {
-          ask: "Do you like the farm / snow? Why?",
-          asker: "adultFemale",
-          sample: { role: "boyChild", text: "I like the farm because I can see animals." },
+          lesson: 2,
+          ask: "What can you do on the farm?",
+          asker: "adultMale",
+          sample: { role: "girlChild", text: "I can feed the pigs." },
         },
-      ],
-      roleplay: "介绍一次去公园或农场，说看到了什么。",
-      dialogues: [
-        { role: "adultMale", name: "Dad", text: "What can you see on the farm?" },
-        { role: "girlChild", name: "You", text: "I can see cows and trees." },
-        { role: "adultFemale", name: "Mum", text: "Do you like this trip?" },
-        { role: "girlChild", name: "You", text: "Yes. I love this trip." },
-      ],
-      readPrompts: [
-        { role: "adultFemale", text: "What can you see?" },
-        { role: "adultMale", text: "Why do you like nature?" },
+        {
+          lesson: 3,
+          ask: "What does snow turn into?",
+          asker: "adultFemale",
+          sample: { role: "boyChild", text: "Snow turns into water." },
+        },
+        {
+          lesson: 4,
+          ask: "Why do you love this trip?",
+          asker: "girlChild",
+          tip: "用 because。",
+          sample: { role: "boyChild", text: "I love this trip because we start in the forest." },
+          extend: true
+        },
       ],
     },
     {
       id: "u7",
-      name: "Unit 7 Be Together",
+      name: "Unit Seven Be Together",
       lessonCount: 4,
-      themes: "新年 · 春节 · 元宵",
-      kaixinHint: "开心单词书：生日 / 春节 / 聚会 / 许愿",
+      lessonStart: 23,
+      lessonTitles: ["Happy New Year!", "Happy Spring Festival!", "Happy Lantern Festival!", "The Story of Nian"],
+      focus: [
+        "重难点：Happy New Year! My goal is …",
+        "重难点：Happy Spring Festival! Lucky money. I wish …",
+        "重难点：Can you guess the riddle?",
+        "复习节日；延展 I wish …，以及 er（her, winter）。",
+      ],
       words: [
-        { en: "new", zh: "新的", src: "课本" },
-        { en: "year", zh: "年", src: "课本" },
-        { en: "festival", zh: "节日", src: "课本" },
-        { en: "spring", zh: "春；春节相关", src: "课本" },
-        { en: "lantern", zh: "灯笼", src: "课本" },
-        { en: "wish", zh: "愿望", src: "课本" },
-        { en: "riddle", zh: "谜语", src: "课本" },
-        { en: "guess", zh: "猜", src: "课本" },
-        { en: "happy", zh: "快乐的", src: "课本" },
-        { en: "family", zh: "家庭", src: "拓展" },
-        { en: "party", zh: "聚会", src: "拓展" },
-        { en: "candle", zh: "蜡烛", src: "拓展" },
-        { en: "together", zh: "一起", src: "拓展" },
-        { en: "story", zh: "故事", src: "拓展" },
+        { en: "gift", zh: "礼物", src: "课本", lesson: 1, priority: "high" },
+        { en: "firework", zh: "烟花", src: "课本", lesson: 1, priority: "mid" },
+        { en: "January", zh: "一月", src: "课本", lesson: 1, priority: "mid" },
+        { en: "goal", zh: "目标", src: "课本", lesson: 1, priority: "high" },
+        { en: "fifty", zh: "五十", src: "课本", lesson: 1, priority: "mid" },
+        { en: "sixty", zh: "六十", src: "课本", lesson: 1, priority: "mid" },
+        { en: "Spring Festival", zh: "春节", src: "课本", lesson: 2, priority: "high" },
+        { en: "Mrs", zh: "太太", src: "课本", lesson: 2, priority: "mid" },
+        { en: "lucky", zh: "幸运的", src: "课本", lesson: 2, priority: "high" },
+        { en: "money", zh: "钱", src: "课本", lesson: 2, priority: "mid" },
+        { en: "wish", zh: "希望；祝愿", src: "课本", lesson: 2, priority: "high" },
+        { en: "mean", zh: "意味着", src: "课本", lesson: 2, priority: "mid" },
+        { en: "Lantern Festival", zh: "元宵节", src: "课本", lesson: 3, priority: "high" },
+        { en: "February", zh: "二月", src: "课本", lesson: 3, priority: "mid" },
+        { en: "riddle", zh: "谜语", src: "课本", lesson: 3, priority: "high" },
+        { en: "guess", zh: "猜测", src: "课本", lesson: 3, priority: "high" },
+        { en: "of", zh: "……的", src: "课本", lesson: 4, priority: "mid" },
+        { en: "loud", zh: "大声的", src: "课本", lesson: 4, priority: "high" },
+        { en: "sound", zh: "声音", src: "课本", lesson: 4, priority: "high" },
+        { en: "run", zh: "跑", src: "课本", lesson: 4, priority: "mid" },
+        { en: "winter", zh: "冬天（er）", src: "课本", lesson: 4, priority: "mid", extend: true },
+        { en: "sister", zh: "姐姐；妹妹（er）", src: "课本", lesson: 4, priority: "mid", extend: true },
       ],
       patterns: [
         {
-          id: "happy",
-          label: "Happy …!",
+          id: "newyear",
+          lesson: 1,
+          label: "Happy New Year!",
+          frame: "Happy New Year! My goal is ____.",
           steps: [
-            "原句：Happy New Year! / Happy Spring Festival!",
-            "换词：换节日或生日 Happy birthday!",
-            "说自己：给家人一句节日祝福",
+            "原句：Happy New Year!",
+            "My goal is …",
+            "说一个新年目标和礼物",
           ],
-          frame: "Happy ____!",
           demos: [
-            { role: "adultMale", text: "Happy New Year!" },
+            { role: "boyChild", text: "Happy New Year!" },
+            { role: "girlChild", text: "My goal is to read fifty books." },
+          ],
+        },
+        {
+          id: "spring",
+          lesson: 2,
+          label: "Happy Spring Festival!",
+          frame: "Happy Spring Festival! I wish ____.",
+          steps: [
+            "原句：Happy Spring Festival!",
+            "Lucky money means good wishes.",
+            "说一句 I wish",
+          ],
+          demos: [
             { role: "adultFemale", text: "Happy Spring Festival!" },
-            { role: "girlChild", text: "Happy birthday!" },
+            { role: "boyChild", text: "I wish we can be together." },
+          ],
+        },
+        {
+          id: "lantern",
+          lesson: 3,
+          label: "Happy Lantern Festival!",
+          frame: "Can you guess the riddle?",
+          steps: [
+            "原句：Happy Lantern Festival!",
+            "Can you guess the riddle?",
+            "出或猜一个简单谜语",
+          ],
+          demos: [
+            { role: "girlChild", text: "Happy Lantern Festival!" },
+            { role: "boyChild", text: "Can you guess the riddle?" },
+          ],
+        },
+        {
+          id: "nian",
+          lesson: 4,
+          label: "The Story of Nian",
+          frame: "Nian is loud. People ____.",
+          steps: [
+            "原句：The sound is loud.",
+            "People run.",
+            "用 of / sound / run 讲一句",
+          ],
+          demos: [
+            { role: "boyChild", text: "The story of Nian is loud." },
+            { role: "girlChild", text: "People run when they hear the sound." },
           ],
         },
         {
           id: "wish",
-          label: "I make a wish…",
-          steps: [
-            "原句：I make a wish.",
-            "换词：说出愿望 I wish I can…",
-            "说自己：你的一个小愿望",
-          ],
+          lesson: 4,
+          label: "知识延展 I wish",
           frame: "I wish ____.",
-          demos: [
-            { role: "boyChild", text: "I make a wish." },
-            { role: "girlChild", text: "I wish I can read more books." },
-          ],
-        },
-        {
-          id: "festival",
-          label: "What do you do at…?",
           steps: [
-            "原句：春节 / 元宵做什么",
-            "换词：eat / visit / guess riddles",
-            "说自己：你家过节的一件事",
+            "I wish 后面说希望",
+            "可以连节日名",
+            "说一个冬天或家人的愿望",
           ],
-          frame: "At ____, we ____.",
           demos: [
-            { role: "adultFemale", text: "What do you do at Spring Festival?" },
-            { role: "boyChild", text: "At Spring Festival, we visit our family." },
+            { role: "girlChild", text: "I wish my sister a happy winter." },
+            { role: "boyChild", text: "I wish we can be together at Spring Festival." },
           ],
+          extend: true,
         },
       ],
+      listen: {
+        judge: [
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak: "Happy New Year! My goal is to read fifty books in January.",
+            show: "判断：他的新年目标是在一月读五十本书。",
+            answer: true,
+            tip: "goal / fifty",
+          },
+          {
+            lesson: 2,
+            role: "adultFemale",
+            speak: "Lucky money means good wishes at Spring Festival.",
+            show: "判断：压岁钱意味着美好祝愿。",
+            answer: true,
+            tip: "mean / wish",
+          },
+          {
+            lesson: 3,
+            role: "girlChild",
+            speak: "At the Lantern Festival in February, we guess riddles.",
+            show: "判断：元宵节在二月，大家猜谜语。",
+            answer: true,
+            tip: "riddle / guess",
+          },
+          {
+            lesson: 4,
+            role: "boyChild",
+            speak: "In the story of Nian, the sound is loud and people run.",
+            show: "判断：年兽的声音很轻，人们不跑。",
+            answer: false,
+            tip: "loud / run",
+          },
+          {
+            lesson: 4,
+            role: "girlChild",
+            speak: "I wish my sister a warm winter and a happy Spring Festival.",
+            show: "判断：她祝姐姐冬天和春节都好。",
+            answer: true,
+            tip: "延展 I wish",
+            extend: true,
+          },
+        ],
+        reply: [
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak: "Happy New Year!",
+            choices: [
+              { id: "a", text: "Happy New Year!" },
+              { id: "b", text: "Use the fork." },
+              { id: "c", text: "Feed the pigs." },
+            ],
+            answer: "a",
+            tip: "节日问候",
+          },
+          {
+            lesson: 2,
+            role: "adultFemale",
+            speak: "What is your wish?",
+            choices: [
+              { id: "a", text: "I wish we can be together." },
+              { id: "b", text: "Snow turns into water." },
+              { id: "c", text: "May I use your bat?" },
+            ],
+            answer: "a",
+            tip: "I wish",
+          },
+          {
+            lesson: 3,
+            role: "girlChild",
+            speak: "Can you guess the riddle?",
+            choices: [
+              { id: "a", text: "Let me try." },
+              { id: "b", text: "I'm a knife." },
+              { id: "c", text: "Sixty doors." },
+            ],
+            answer: "a",
+            tip: "猜谜",
+          },
+        ],
+        challenge: {
+          judge: [
+          {
+            lesson: 0,
+            role: "boyChild",
+            speak: "I wish my family a happy Spring Festival, because being together means more than lucky money or loud fireworks.",
+            show: "判断：他觉得压岁钱和鞭炮比团圆更重要。",
+            answer: false,
+            tip: "挑战：together means more",
+          },
+          ],
+          reply: [
+          {
+            lesson: 0,
+            role: "adultFemale",
+            speak: "Which festival do you like, and what is your wish?",
+            choices: [
+              { id: "a", text: "I like Spring Festival. I wish we can be together." },
+              { id: "b", text: "I'd like a fork." },
+              { id: "c", text: "He is worried." },
+            ],
+            answer: "a",
+            tip: "挑战：节日 + wish",
+          },
+          ],
+        },
+      },
       questions: [
         {
-          ask: "What festival is coming?",
+          lesson: 1,
+          ask: "What is your New Year goal?",
           asker: "adultFemale",
-          sample: { role: "boyChild", text: "Spring Festival is coming." },
+          sample: { role: "boyChild", text: "My goal is to read fifty books." },
         },
         {
-          ask: "What do you do at Spring Festival?",
+          lesson: 2,
+          ask: "What do you say at Spring Festival?",
           asker: "adultMale",
-          sample: { role: "girlChild", text: "We eat together and visit our family." },
+          sample: { role: "girlChild", text: "Happy Spring Festival! I wish you happy." },
         },
         {
-          ask: "What is your wish?",
+          lesson: 3,
+          ask: "What do you do at the Lantern Festival?",
           asker: "adultFemale",
-          sample: { role: "boyChild", text: "I wish I can be a good friend." },
+          sample: { role: "boyChild", text: "We guess riddles." },
+        },
+        {
+          lesson: 4,
+          ask: "What is your wish for your family?",
+          asker: "girlChild",
+          tip: "用 I wish。",
+          sample: { role: "boyChild", text: "I wish we can be together." },
+          extend: true
         },
       ],
-      roleplay: "介绍你们家过节的一天，说三件事。",
-      dialogues: [
-        { role: "adultMale", name: "Dad", text: "Happy Spring Festival!" },
-        { role: "girlChild", name: "You", text: "Happy Spring Festival, Dad!" },
-        { role: "adultFemale", name: "Mum", text: "What is your wish?" },
-        { role: "girlChild", name: "You", text: "I wish we can be together." },
+    },
+    {
+      id: "u8",
+      name: "Unit Eight Revision II",
+      lessonCount: 2,
+      lessonStart: 27,
+      lessonTitles: ["Revision A", "Revision B"],
+      focus: [
+        "复习 Unit Five 到 Unit Seven：饮食、自然、节日。",
+        "知识延展：I'd like、can't live without、I wish 连成一段话。",
       ],
-      readPrompts: [
-        { role: "adultFemale", text: "What festival is it?" },
-        { role: "adultMale", text: "What is the wish?" },
+      words: [
+        { en: "chicken", zh: "鸡肉", src: "课本", lesson: 1, priority: "high" },
+        { en: "chopsticks", zh: "筷子", src: "课本", lesson: 1, priority: "mid" },
+        { en: "first", zh: "首先", src: "课本", lesson: 1, priority: "high" },
+        { en: "nature", zh: "自然", src: "课本", lesson: 1, priority: "high" },
+        { en: "without", zh: "没有", src: "课本", lesson: 1, priority: "high" },
+        { en: "farm", zh: "农场", src: "课本", lesson: 1, priority: "mid" },
+        { en: "wish", zh: "希望", src: "课本", lesson: 1, priority: "high" },
+        { en: "Spring Festival", zh: "春节", src: "课本", lesson: 1, priority: "high" },
+        { en: "because", zh: "因为", src: "课本", lesson: 2, priority: "high", extend: true },
+        { en: "last", zh: "最后", src: "课本", lesson: 2, priority: "high", extend: true },
+      ],
+      patterns: [
+        {
+          id: "rev2a",
+          lesson: 1,
+          label: "Revision A",
+          frame: "I'd like ____. We can't live without ____. I wish ____.",
+          steps: [
+            "点一样食物",
+            "说一样不能没有的东西",
+            "说一个节日愿望",
+          ],
+          demos: [
+            { role: "boyChild", text: "I'd like some chicken." },
+            { role: "girlChild", text: "We can't live without air." },
+            { role: "boyChild", text: "I wish we can be together." },
+          ],
+        },
+        {
+          id: "rev2b",
+          lesson: 2,
+          label: "知识延展 一段话",
+          frame: "First, ____. Then, ____. I wish ____ because ____.",
+          steps: [
+            "用 First / Then 说两步",
+            "I wish 加 because",
+            "把吃、自然、节日连起来",
+          ],
+          demos: [
+            { role: "girlChild", text: "First I'd like fruit salad. Then I want to see the farm. I wish we can be together because Spring Festival is coming." },
+          ],
+          extend: true,
+        },
+      ],
+      listen: {
+        judge: [
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak: "I'd like some soup. We can't live without water. I wish you a happy New Year.",
+            show: "判断：这三句分别是食物、自然和节日。",
+            answer: true,
+            tip: "复习三类",
+          },
+          {
+            lesson: 2,
+            role: "girlChild",
+            speak: "First we make fruit salad, then we go to the farm, and I wish we stay together because family means more than gifts.",
+            show: "判断：她觉得礼物比家人在一起更重要。",
+            answer: false,
+            tip: "延展：together means more",
+            extend: true,
+          },
+        ],
+        reply: [
+          {
+            lesson: 1,
+            role: "adultFemale",
+            speak: "What would you like?",
+            choices: [
+              { id: "a", text: "I'd like some chicken." },
+              { id: "b", text: "I am a mouse." },
+              { id: "c", text: "Open your mouth." },
+            ],
+            answer: "a",
+            tip: "复习点餐",
+          },
+        ],
+        challenge: {
+          judge: [
+          {
+            lesson: 0,
+            role: "boyChild",
+            speak: "We can't live without nature, so last I wish every family a green Spring Festival, not just loud fireworks.",
+            show: "判断：他最后的愿望只是更响的烟花。",
+            answer: false,
+            tip: "挑战：不是只要烟花",
+          },
+          ],
+          reply: [
+          {
+            lesson: 0,
+            role: "adultFemale",
+            speak: "Tell me your food, your nature idea, and your wish.",
+            choices: [
+              { id: "a", text: "I'd like salad. We can't live without air. I wish we can be together." },
+              { id: "b", text: "May I use your bat?" },
+              { id: "c", text: "He looks sad." },
+            ],
+            answer: "a",
+            tip: "挑战：三块都要说到",
+          },
+          ],
+        },
+      },
+      questions: [
+        {
+          lesson: 1,
+          ask: "What would you like, and what can't we live without?",
+          asker: "adultFemale",
+          sample: { role: "boyChild", text: "I'd like some chicken. We can't live without air." },
+        },
+        {
+          lesson: 2,
+          ask: "Make a short talk: food, nature, and a wish with because.",
+          asker: "adultFemale",
+          tip: "三段都说。",
+          sample: { role: "girlChild", text: "I'd like fruit salad. We can't live without farms. I wish we can be together because I love my family." },
+          extend: true
+        },
       ],
     },
   ],
@@ -934,6 +1869,71 @@ window.ENGLISH_DESK_DATA = {
     return (DATA.sessions && DATA.sessions[id]) || DATA.sessions.weekdayListen;
   }
 
+  function lessonNo(unit, store) {
+    store = store || {};
+    const id = String(store.currentPathId || "");
+    const m = id.match(new RegExp("^" + unit.id + "-L(\\d+)$"));
+    if (m) return Number(m[1]);
+    return 1;
+  }
+
+  function isReviewLesson(unit, n) {
+    return n === (unit.lessonCount || 4);
+  }
+
+  function wordsForLesson(unit, store) {
+    const n = lessonNo(unit, store);
+    const all = unit.words || [];
+    if (isReviewLesson(unit, n)) return all.slice();
+    return all.filter(function (w) { return w.lesson === n && !w.extend; });
+  }
+
+  function patternsFor(unit, store, extendOnly) {
+    const all = unit.patterns || [];
+    if (extendOnly) {
+      const ext = all.filter(function (p) { return p.extend; });
+      return ext.length ? ext : all;
+    }
+    const n = lessonNo(unit, store);
+    if (isReviewLesson(unit, n)) {
+      const own = all.filter(function (p) { return p.lesson === n || p.extend; });
+      return own.length ? own : all;
+    }
+    const mine = all.filter(function (p) { return p.lesson === n && !p.extend; });
+    return mine.length ? mine : all.filter(function (p) { return !p.extend; });
+  }
+
+  function listenFor(unit, store, kind, hard) {
+    const L = (unit.listen && unit.listen[kind]) || [];
+    if (hard) {
+      const ch = (unit.listen && unit.listen.challenge && unit.listen.challenge[kind]) || [];
+      if (ch.length) return ch;
+      return L.filter(function (x) { return x.extend; });
+    }
+    const n = lessonNo(unit, store);
+    if (isReviewLesson(unit, n)) {
+      const own = L.filter(function (x) { return x.lesson === n || x.extend; });
+      return own.length ? own : L;
+    }
+    const mine = L.filter(function (x) { return x.lesson === n && !x.extend; });
+    return mine.length ? mine : L.filter(function (x) { return !x.extend; });
+  }
+
+  function questionsFor(unit, store, extendOnly) {
+    const all = unit.questions || [];
+    if (extendOnly) {
+      const ext = all.filter(function (q) { return q.extend; });
+      return ext.length ? ext : all;
+    }
+    const n = lessonNo(unit, store);
+    if (isReviewLesson(unit, n)) {
+      const own = all.filter(function (q) { return q.lesson === n || q.extend; });
+      return own.length ? own : all;
+    }
+    const mine = all.filter(function (q) { return q.lesson === n; });
+    return mine.length ? mine : all;
+  }
+
   function pickWords(unit, store, n, preferRetry) {
     const custom = (store.customWords && store.customWords[unit.id]) || [];
     const retry = ((store.retryWords || []).filter((w) => w.unitId === unit.id) || []).map((r) => ({
@@ -942,7 +1942,7 @@ window.ENGLISH_DESK_DATA = {
       src: "错词",
       priority: "high",
     }));
-    const pool = (unit.words || []).concat(custom);
+    const pool = wordsForLesson(unit, store).concat(custom);
     const high = shuffle(pool.filter((w) => w.priority === "high"));
     const rest = shuffle(pool.filter((w) => w.priority !== "high"));
     let picked = [];
@@ -1008,8 +2008,8 @@ window.ENGLISH_DESK_DATA = {
     };
   }
 
-  function patternCard(unit, index) {
-    const list = unit.patterns || [];
+  function patternCard(unit, index, store) {
+    const list = patternsFor(unit, store || {}, false);
     const p = list[typeof index === "number" ? index : 0] || null;
     if (!p) return null;
     const demos = (p.demos || []).map((d) => ({
@@ -1030,8 +2030,8 @@ window.ENGLISH_DESK_DATA = {
     };
   }
 
-  function sentenceCard(unit, index) {
-    const list = unit.patterns || [];
+  function sentenceCard(unit, index, store) {
+    const list = patternsFor(unit, store || {}, true);
     const p = list[typeof index === "number" ? index : 0] || list[0];
     if (!p) return null;
     const demo = (p.demos && p.demos[0] && p.demos[0].text) || "I'm happy because I can play.";
@@ -1135,15 +2135,15 @@ window.ENGLISH_DESK_DATA = {
       pickWords(unit, store, 5, 1).forEach((w, i) => {
         cards.push(wordCard(w, i % 2 === 0 ? "dictation" : "zh2en"));
       });
-      const judges = shuffle((unit.listen && unit.listen.judge) || []).slice(0, 1);
-      const replies = shuffle((unit.listen && unit.listen.reply) || []).slice(0, 1);
+      const judges = shuffle(listenFor(unit, store, "judge")).slice(0, 1);
+      const replies = shuffle(listenFor(unit, store, "reply")).slice(0, 1);
       judges.forEach((j) => cards.push(listenCard(j, "judge")));
       replies.forEach((r) => cards.push(listenCard(r, "reply")));
-      const pat = patternCard(unit);
+      const pat = patternCard(unit, 0, store);
       if (pat) cards.push(pat);
     } else if (sessionId === "weekdayOral") {
       pickWords(unit, store, 2, 2).forEach((w) => cards.push(wordCard(w, "zh2en")));
-      (unit.questions || []).slice(0, 3).forEach((q, i) => cards.push(oralCard(q, i)));
+      questionsFor(unit, store).slice(0, 3).forEach((q, i) => cards.push(oralCard(q, i)));
       const d = dialogueCard(unit);
       if (d) cards.push(d);
     } else if (sessionId === "retry") {
@@ -1155,9 +2155,9 @@ window.ENGLISH_DESK_DATA = {
       if (s) cards.push(s);
       const w = writeCard(unit);
       if (w) cards.push(w);
-      const j = ((unit.listen && unit.listen.judge) || [])[0];
+      const j = listenFor(unit, store, "judge")[0];
       if (j) cards.push(listenCard(j, "judge"));
-      const q = (unit.questions || [])[0];
+      const q = questionsFor(unit, store)[0];
       if (q) cards.push(oralCard(q, 0));
       cards.push(readCard(unit));
     }
@@ -1184,18 +2184,13 @@ window.ENGLISH_DESK_DATA = {
   function buildChallengeCards(unit, store) {
     store = store || {};
     const cards = [];
-    const ch = (unit.listen && unit.listen.challenge) || {};
-    const hardJudges = ch.judge && ch.judge.length ? ch.judge : (unit.listen && unit.listen.judge) || [];
-    const hardReplies = ch.reply && ch.reply.length ? ch.reply : (unit.listen && unit.listen.reply) || [];
+    const hardWords = (unit.words || []).filter(function (w) { return w.extend || w.priority === "high"; });
+    shuffle(hardWords.length ? hardWords : (unit.words || [])).slice(0, 6).forEach((w) => cards.push(wordCard(w, "dictation")));
 
-    // 词：高难听写（优先高频卷面词）
-    pickWords(unit, store, 4, 2).forEach((w) => cards.push(wordCard(w, "dictation")));
-
-    // 听力：比卷面更长句 + 无中文提示判断 + 更多应答
-    shuffle(hardJudges).slice(0, 4).forEach((j) => {
+    shuffle(listenFor(unit, store, "judge", true)).slice(0, 4).forEach((j) => {
       cards.push(listenCard(j, "judge", { hard: true }));
     });
-    shuffle(hardReplies).slice(0, 2).forEach((r) => {
+    shuffle(listenFor(unit, store, "reply", true)).slice(0, 2).forEach((r) => {
       cards.push(listenCard(r, "reply", { hard: true }));
     });
 
@@ -1207,8 +2202,8 @@ window.ENGLISH_DESK_DATA = {
     }
 
     // 造句：because + when 各一句
-    const sent1 = sentenceCard(unit, 0);
-    const sent2 = sentenceCard(unit, 1);
+    const sent1 = sentenceCard(unit, 0, store);
+    const sent2 = sentenceCard(unit, 1, store);
     if (sent1) cards.push(sent1);
     if (sent2) cards.push(sent2);
 
@@ -1220,7 +2215,7 @@ window.ENGLISH_DESK_DATA = {
     }
 
     // 口语：完整句 + 需开口说
-    shuffle(unit.questions || []).slice(0, 3).forEach((q, i) => {
+    shuffle(questionsFor(unit, store, true)).slice(0, 3).forEach((q, i) => {
       cards.push(oralCard(q, i, { challenge: true }));
     });
 

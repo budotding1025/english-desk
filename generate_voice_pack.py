@@ -17,18 +17,27 @@ MANIFEST = ROOT / "audio" / "manifest.json"
 
 VOICES = {
     "en-US": {
-        "adultMale": ("en-US-GuyNeural", "+0Hz", "+0%"),
-        "adultFemale": ("en-US-JennyNeural", "+0Hz", "+0%"),
-        # Andrew = young adult male (distinct from Ana child girl)
-        "boyChild": ("en-US-AndrewNeural", "+12Hz", "+5%"),
-        "girlChild": ("en-US-AnaNeural", "+0Hz", "+0%"),
+        # Dad / adult man. Clear General American, natural pace.
+        "adultMale": ("en-US-GuyNeural", "+0Hz", "-4%"),
+        # Mum / Miss Wang.
+        "adultFemale": ("en-US-JennyNeural", "+0Hz", "-4%"),
+        # Boy students (Maomao, Mike, Baobao, Yangyang). Young male, not pitch-shifted.
+        "boyChild": ("en-US-AndrewNeural", "+0Hz", "-6%"),
+        # Girl students (Lingling, Guoguo, Sara). Real child neural voice.
+        "girlChild": ("en-US-AnaNeural", "+0Hz", "-4%"),
     },
     "en-GB": {
-        "adultMale": ("en-GB-RyanNeural", "+0Hz", "+0%"),
-        "adultFemale": ("en-GB-SoniaNeural", "+0Hz", "+0%"),
-        "boyChild": ("en-GB-ThomasNeural", "+10Hz", "+5%"),
-        "girlChild": ("en-GB-MaisieNeural", "+0Hz", "+0%"),
+        "adultMale": ("en-GB-RyanNeural", "+0Hz", "-4%"),
+        "adultFemale": ("en-GB-SoniaNeural", "+0Hz", "-4%"),
+        "boyChild": ("en-GB-ThomasNeural", "+0Hz", "-6%"),
+        "girlChild": ("en-GB-MaisieNeural", "+0Hz", "-4%"),
     },
+}
+
+# Short words Andrew/Thomas often smear. Speak them with the clear adult male, slightly slower.
+FRAGILE = {
+    "should", "friend", "polite", "together", "would", "could",
+    "mouth", "these", "live", "feel", "look", "soup", "cute", "full",
 }
 
 PREVIEW = [
@@ -117,12 +126,24 @@ def collect_from_data_js(src: str) -> set[tuple[str, str]]:
     return items
 
 
-async def synth_one(path: Path, text: str, voice: str, pitch: str, rate: str) -> None:
+async def synth_one(path: Path, text: str, voice: str, pitch: str, rate: str, force: bool = False) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    if path.exists() and path.stat().st_size > 500:
+    if path.exists() and path.stat().st_size > 800 and not force:
         return
+    if path.exists():
+        path.unlink()
     communicate = edge_tts.Communicate(text, voice, pitch=pitch, rate=rate)
     await communicate.save(str(path))
+
+
+def voice_for(accent: str, role: str, text: str):
+    tokens = re.findall(r"[A-Za-z']+", text)
+    bare = " ".join(tokens).lower()
+    if role == "boyChild" and bare in FRAGILE:
+        if accent == "en-US":
+            return ("en-US-GuyNeural", "+2Hz", "-10%"), True
+        return ("en-GB-RyanNeural", "+0Hz", "-10%"), True
+    return VOICES[accent][role], False
 
 
 async def main() -> None:
@@ -137,7 +158,7 @@ async def main() -> None:
             accent: {role: meta[0] for role, meta in roles.items()}
             for accent, roles in VOICES.items()
         },
-        "note": "girlChild uses true child neural (Ana/Maisie); boyChild uses distinct young male neural (Andrew/Thomas), not pitch-shifted girl.",
+        "note": "Dialogue cast: Dad/Guy, Mum and Miss Wang/Jenny, boys/Andrew, girls/Ana. Short fragile words use Guy/Ryan so they stay clear. No cartoon pitch shift.",
         "clips": {},
     }
 
@@ -161,13 +182,14 @@ async def main() -> None:
                     role_use = "adultFemale"
             else:
                 role_use = role
-            voice, pitch, rate = roles[role_use]
+            picked, force = voice_for(accent, role_use, text)
+            voice, pitch, rate = picked
             fid = file_id(accent, role_use, text)
             rel = f"audio/{accent}/{role_use}/{fid}.mp3"
             abs_path = ROOT / rel
             key = f"{accent}|{role_use}|{text}"
             manifest["clips"][key] = rel.replace("\\", "/")
-            tasks.append(synth_one(abs_path, text, voice, pitch, rate))
+            tasks.append(synth_one(abs_path, text, voice, pitch, rate, force))
 
     # concurrency limit
     sem = asyncio.Semaphore(6)

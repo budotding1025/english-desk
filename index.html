@@ -7,12 +7,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Noto+Sans+SC:wght@500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./theme-duo.css?v=17" />
+  <link rel="stylesheet" href="./theme-duo.css?v=22" />
   <script src="./assets/vendor/lottie.min.js"></script>
 </head>
 <body>
   <div class="coin-toast hidden" id="coinToast" aria-live="polite">
-    <span class="coin-toast-icon" aria-hidden="true">🪙</span>
+    <span class="coin-toast-icon" aria-hidden="true"><img class="mark" src="./assets/icons/coin.svg" alt="" /></span>
     <span id="coinToastText">+10</span>
   </div>
 
@@ -20,8 +20,8 @@
     <div class="top">
       <div class="brand">翻翻英语</div>
       <div class="top-wallet">
-        <span class="wallet-pill coin" id="homeCoins" title="金币">🪙 0</span>
-        <span class="wallet-pill gem" id="homeGems" title="宝石">💎 0</span>
+        <span class="wallet-pill coin" id="homeCoins" title="金币"><img class="mark" src="./assets/icons/coin.svg" alt="" /><b>0</b></span>
+        <span class="wallet-pill gem" id="homeGems" title="宝石"><img class="mark" src="./assets/icons/gem.svg" alt="" /><b>0</b></span>
         <button type="button" class="icon-btn" id="btnSettings" aria-label="设置">⚙</button>
       </div>
     </div>
@@ -41,6 +41,7 @@
       </div>
       <p class="mascot-line" id="mascotLine">每天进步一点点，有一天比兔子跑得还远。</p>
       <p class="streak" id="streakLine">连续 <strong>0</strong> 天</p>
+      <p class="rank-line" id="rankLine">Sprout · 新芽</p>
       <div class="today-card">
         <p class="eyebrow" id="sessionEyebrow">今天</p>
         <h1 id="sessionTitle">词听练习</h1>
@@ -58,7 +59,7 @@
     <div class="path-top">
       <button type="button" class="icon-btn" id="btnClosePath" aria-label="关闭">×</button>
       <h1>学期学习路径</h1>
-      <div class="wallet-pill coin" id="pathCoins">🪙 0</div>
+      <div class="wallet-pill coin" id="pathCoins"><img class="mark" src="./assets/icons/coin.svg" alt="" /><b>0</b></div>
     </div>
     <p class="path-meta" id="pathMeta">本学期共 0 课 · 已学 0 课</p>
     <div class="path-scroll" id="pathList"></div>
@@ -72,10 +73,12 @@
     <div class="path-top">
       <button type="button" class="icon-btn" id="btnCloseRecords" aria-label="关闭">×</button>
       <h1>Records</h1>
-      <div class="wallet-pill gem" id="recordsGems">💎 0</div>
+      <div class="wallet-pill gem" id="recordsGems"><img class="mark" src="./assets/icons/gem.svg" alt="" /><b>0</b></div>
     </div>
     <div class="records-score" id="recordsScore"></div>
     <div class="records-actions" id="recordsActions"></div>
+    <div id="rankPanel"></div>
+    <div id="shopPanel"></div>
     <p class="path-meta" id="recordsMeta">错题本</p>
     <div class="path-scroll" id="recordsList"></div>
     <div class="path-footer">
@@ -86,11 +89,20 @@
   <!-- LESSON -->
   <div class="screen hidden" id="screenLesson">
     <div class="lesson-top">
-      <button type="button" class="icon-btn" id="btnCloseLesson" aria-label="关闭">×</button>
+      <button type="button" class="home-nav-btn" id="btnCloseLesson" aria-label="Home">Home</button>
       <div class="progress" aria-hidden="true"><i id="progressFill"></i></div>
       <div class="lesson-wallet">
-        <span class="wallet-pill coin sm" id="lessonCoinsHud">🪙 0</span>
+        <span class="wallet-pill coin sm" id="lessonCoinsHud"><img class="mark" src="./assets/icons/coin.svg" alt="" /><b>+0</b></span>
         <button type="button" class="icon-btn" id="btnMute" aria-label="静音" title="语音开闭">♪</button>
+      </div>
+    </div>
+    <div class="lesson-head" id="lessonHead">
+      <p class="lesson-unit" id="lessonUnitTitle">Unit</p>
+      <p class="lesson-name" id="lessonNameTitle">Lesson</p>
+      <p class="lesson-focus" id="lessonFocus"></p>
+      <div class="challenge-clock hidden" id="challengeClock">
+        <span class="challenge-time" id="challengeTime">0:00</span>
+        <button type="button" class="btn-gem-time" id="btnGemTime">1 宝石 +30 秒</button>
       </div>
     </div>
     <div class="lesson-body">
@@ -156,9 +168,9 @@
     </button>
   </nav>
 
-  <script src="./data.js"></script>
-  <script src="./progress.js"></script>
-  <script src="./voice.js"></script>
+  <script src="./data.js?v=8"></script>
+  <script src="./progress.js?v=8"></script>
+  <script src="./voice.js?v=7"></script>
   <script>
     (function () {
       const DATA = window.ENGLISH_DESK_DATA;
@@ -227,6 +239,36 @@
       let homeAudioDone = null;
       let cancelHomeIntro = function () {};
       let startHomeMascotLoop = function () {};
+      const homeSloganSaid = { turtle: false, bee: false };
+      let fxAudio = null;
+      let fxToken = 0;
+      function pauseFx() {
+        if (!fxAudio) return;
+        try {
+          fxAudio.onended = null;
+          fxAudio.pause();
+          fxAudio.src = "";
+        } catch (e) {}
+        fxAudio = null;
+      }
+      function stopFx() {
+        fxToken += 1;
+        pauseFx();
+      }
+      function playFx(name, seconds) {
+        if (V && !V.isEnabled()) return;
+        stopFx();
+        const token = fxToken;
+        const a = new Audio("./audio/fx/" + name + ".wav?v=1");
+        fxAudio = a;
+        a.volume = 0.9;
+        const started = a.play();
+        if (started && started.catch) started.catch(function () {});
+        setTimeout(function () {
+          if (token !== fxToken || fxAudio !== a) return;
+          pauseFx();
+        }, Math.round(seconds * 1000));
+      }
       function stopHomeAudio() {
         const done = homeAudioDone;
         homeAudioDone = null;
@@ -253,6 +295,8 @@
         const showNav = name === "home" || name === "path" || name === "records";
         if ($("appNav")) $("appNav").classList.toggle("hidden", !showNav);
         syncNav(name === "path" || name === "home" || name === "records" ? name : null);
+        stopFx();
+        stopMascotLine();
         if (name !== "home") {
           cancelHomeIntro();
           stopHomeAudio();
@@ -260,6 +304,7 @@
           startHomeMascotLoop();
           playNavHome();
         }
+        if (name !== "lesson") stopChallengeTimer();
         if (name !== "lesson" && V) V.stop();
       }
 
@@ -317,18 +362,78 @@
 
       function syncWalletUI() {
         const s = walletStore();
-        if ($("homeCoins")) $("homeCoins").textContent = "🪙 " + s.coins;
-        if ($("homeGems")) $("homeGems").textContent = "💎 " + s.gems;
-        if ($("pathCoins")) $("pathCoins").textContent = "🪙 " + s.coins;
-        if ($("recordsGems")) $("recordsGems").textContent = "💎 " + s.gems;
-        if ($("lessonCoinsHud")) {
-          $("lessonCoinsHud").textContent = "🪙 +" + (state.lessonCoins || 0);
+        function setCount(id, text) {
+          const el = $(id);
+          if (!el) return;
+          const b = el.querySelector("b");
+          if (b) b.textContent = text;
+        }
+        setCount("homeCoins", String(s.coins));
+        setCount("homeGems", String(s.gems));
+        setCount("pathCoins", String(s.coins));
+        setCount("recordsGems", String(s.gems));
+        setCount("lessonCoinsHud", "+" + (state.lessonCoins || 0));
+        const rank = Progress.currentRank(s);
+        const nxt = Progress.nextRank(s);
+        if ($("rankLine")) {
+          $("rankLine").textContent = nxt
+            ? rank.en + " · " + rank.zh + "  ·  下一级要 " + Progress.coinNeed(s, nxt) + " 金币、" + nxt.lessons + " 课"
+            : rank.en + " · " + rank.zh;
         }
         const done = Progress.completedCount(s.completedLessons);
         const total = Progress.pathTotal();
         if ($("pathSummary")) {
           $("pathSummary").textContent = "本学期已学 " + done + " / " + total + " 课 · 多学/复习可拿附加金币";
         }
+      }
+
+      function persistWallet(store) {
+        saveStore({
+          coins: store.coins,
+          gems: store.gems,
+          rank: store.rank,
+          gemCut: store.gemCut,
+        });
+      }
+
+      let challengeTimer = null;
+      function formatClock(sec) {
+        sec = Math.max(0, sec | 0);
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return m + ":" + (s < 10 ? "0" : "") + s;
+      }
+      function paintChallengeClock() {
+        const el = $("challengeTime");
+        if (el) el.textContent = formatClock(state.challengeLeft || 0);
+        const btn = $("btnGemTime");
+        if (!btn) return;
+        const gems = walletStore().gems;
+        btn.disabled = gems < 1;
+        btn.textContent = gems < 1 ? "没有宝石" : "1 宝石 +" + Progress.GEM_TIME + " 秒";
+      }
+      function stopChallengeTimer() {
+        if (challengeTimer) {
+          clearInterval(challengeTimer);
+          challengeTimer = null;
+        }
+        const box = $("challengeClock");
+        if (box) box.classList.add("hidden");
+      }
+      function startChallengeTimer(seconds) {
+        stopChallengeTimer();
+        state.challengeLeft = seconds;
+        const box = $("challengeClock");
+        if (box) box.classList.remove("hidden");
+        paintChallengeClock();
+        challengeTimer = setInterval(() => {
+          state.challengeLeft -= 1;
+          paintChallengeClock();
+          if (state.challengeLeft <= 0) {
+            stopChallengeTimer();
+            finishLesson();
+          }
+        }, 1000);
       }
 
       function showCoinToast(amount) {
@@ -346,26 +451,64 @@
         }, 900);
       }
 
-      function praiseVoice() {
-        if (V) V.speak("你真是太棒了！再接再厉！", "girlChild");
+      let mascotAudio = null;
+      function stopMascotLine() {
+        if (!mascotAudio) return;
+        try {
+          mascotAudio.onended = null;
+          mascotAudio.onerror = null;
+          mascotAudio.pause();
+          mascotAudio.src = "";
+        } catch (e) {}
+        mascotAudio = null;
       }
-      function encourageVoice() {
-        if (V) V.speak("不要紧，马上改，下次你一定行！", "girlChild");
+      function playMascotLine(clip, role, text) {
+        if (V && !V.isEnabled()) return;
+        stopMascotLine();
+        if (V) V.stop();
+        const a = new Audio("./audio/cheer/" + clip + ".mp3?v=1");
+        mascotAudio = a;
+        let fell = false;
+        const fallback = function () {
+          if (fell) return;
+          fell = true;
+          if (mascotAudio === a) mascotAudio = null;
+          if (V) V.speak(text, role);
+        };
+        a.onerror = fallback;
+        const started = a.play();
+        if (started && started.catch) started.catch(fallback);
       }
-
+      function cueReward(fxName, fxSeconds, clip, role, text, voiceMs) {
+        playFx(fxName, fxSeconds);
+        const token = fxToken;
+        state.praiseWait = 1000 + voiceMs;
+        setTimeout(function () {
+          if (token !== fxToken) return;
+          if (state.view !== "lesson") return;
+          playMascotLine(clip, role, text);
+        }, 1000);
+      }
       function onCorrectReward() {
         const gain = Progress.COIN_CORRECT;
         state.lessonCoins = (state.lessonCoins || 0) + gain;
         state.correctInLesson = (state.correctInLesson || 0) + 1;
+        state.correctStreak = (state.correctStreak || 0) + 1;
         showCoinToast(gain);
         syncWalletUI();
-        if (state.correctInLesson % Progress.PRAISE_EVERY === 0) {
-          setTimeout(praiseVoice, 350);
+        const n = state.correctStreak;
+        if (n === 5) {
+          cueReward("sparkle", 2.6, "streak5", "girlChild", "我说什么来着！你比你自己想象的要厉害得多！", 5200);
+        } else if (n === 2) {
+          cueReward("sparkle", 2.6, "streak2", "girlChild", "哇！你又答对了！厉害！", 3000);
+        } else {
+          cueReward("sparkle", 2.6, "ok", "girlChild", "赞！", 900);
         }
       }
 
       function onWrongReward() {
-        encourageVoice();
+        state.correctStreak = 0;
+        cueReward("bug", 0.8, "wrong", "boyChild", "没关系，错了就改。加油！下一次你一定行！", 5200);
       }
 
       function mountCoinsLottie(host, loop) {
@@ -399,10 +542,12 @@
         }
         const sess = Lesson.sessionMeta(state.sessionId);
         const u = unit();
-        $("sessionEyebrow").textContent = "今天 · " + (node ? node.label : "自动安排");
-        $("sessionTitle").textContent = sess.label.replace(/^工作日① |^工作日② /, "") || sess.label;
-        $("sessionMeta").textContent = "约 " + sess.minutes + " 分钟 · 答对拿金币 · 五题语音表扬";
-        $("unitLine").textContent = u.name + (node ? " · 第" + node.lesson + "课" : "");
+        const bookNo = node.bookLesson || node.lesson;
+        const focus = (u.focus && u.focus[node.lesson - 1]) || "";
+        $("sessionEyebrow").textContent = node ? node.unitTitle : "今天";
+        $("sessionTitle").textContent = node ? ("Lesson " + bookNo + " · " + node.lessonTitle) : (sess.label || "Today");
+        $("sessionMeta").textContent = "约 " + sess.minutes + " 分钟 · 答对拿金币";
+        $("unitLine").textContent = focus || u.name;
         $("streakLine").innerHTML = "连续 <strong>" + streakDays() + "</strong> 天";
         syncWalletUI();
       }
@@ -428,7 +573,8 @@
             : state.lessonMode === "challenge"
               ? "challenge"
               : state.sessionId || Lesson.todaySessionId();
-        state.cards = Lesson.buildCards(unit(), sessionId, store);
+        const cardStore = Object.assign({}, store, { currentPathId: state.pathId });
+        state.cards = Lesson.buildCards(unit(), sessionId, cardStore);
         state.sessionId = sessionId;
         state.index = 0;
         state.results = [];
@@ -436,7 +582,10 @@
         state.listenLocked = false;
         state.lessonCoins = 0;
         state.correctInLesson = 0;
+        state.correctStreak = 0;
+        state.praiseWait = 0;
         state.lastSettle = null;
+        stopChallengeTimer();
         if (!state.cards.length) {
           if (state.lessonMode === "retry") alert("暂时没有错题，先去上课积累几道吧。");
           else alert("本单元暂无练习内容。");
@@ -444,6 +593,7 @@
         }
         showView("lesson");
         syncWalletUI();
+        if (state.lessonMode === "challenge") startChallengeTimer(Progress.challengeSeconds(state.cards.length));
         renderCard(true);
       }
 
@@ -456,17 +606,27 @@
         syncWalletUI();
         const list = $("pathList");
         list.innerHTML = "";
+        let lastUnit = "";
         path.forEach((node, i) => {
+          if (node.unitId !== lastUnit) {
+            lastUnit = node.unitId;
+            const head = document.createElement("h2");
+            head.className = "path-unit";
+            head.textContent = node.unitTitle || node.unitName || "";
+            list.appendChild(head);
+          }
           const rec = store.completedLessons[node.id];
           const done = !!(rec && rec.count > 0);
           const current = store.currentPathId === node.id;
           const btn = document.createElement("button");
           btn.type = "button";
           btn.className = "path-node" + (done ? " is-done" : "") + (current ? " is-current" : "");
+          const bookNo = node.bookLesson || node.lesson;
           btn.innerHTML =
-            '<span class="path-dot">' + (done ? "✓" : i + 1) + "</span>" +
-            '<span class="path-copy"><strong>' + node.label + "</strong>" +
-            "<small>" + (done ? "已学 · 复习 +" + 25 + " 币" : current ? "下一课 · 首通 +" + 50 + " 币" : "待解锁奖励") +
+            '<span class="path-dot">' + (done ? "✓" : bookNo) + "</span>" +
+            '<span class="path-copy"><strong>' + node.lessonTitle + "</strong>" +
+            "<small>" + (node.unitTitle || "") + "</small>" +
+            "<small>" + (done ? "已学 · 复习 +" + 25 + " 币" : current ? "Lesson " + bookNo + " · 下一课 · 首通 +" + 50 + " 币" : "Lesson " + bookNo) +
             "</small></span>";
           btn.addEventListener("click", () => {
             startLesson(node.id);
@@ -475,9 +635,166 @@
         });
       }
 
+      function renderRankShop(store) {
+        const rankBox = $("rankPanel");
+        const shopBox = $("shopPanel");
+        if (!rankBox) return;
+        const cur = Progress.currentRank(store);
+        const nxt = Progress.nextRank(store);
+        const done = Progress.completedCount(store.completedLessons);
+        rankBox.innerHTML = "";
+        const card = document.createElement("div");
+        card.className = "rank-card";
+        if (!nxt) {
+          card.innerHTML =
+            '<p class="score-label">当前等级</p>' +
+            '<p class="rank-name">' + cur.en + " · " + cur.zh + "</p>" +
+            '<p class="rank-cost">已是最高等级</p>';
+        } else {
+          const need = Progress.coinNeed(store, nxt);
+          const coinPct = need <= 0 ? 100 : Math.min(100, Math.round((store.coins / need) * 100));
+          const lessonPct = nxt.lessons <= 0 ? 100 : Math.min(100, Math.round((done / nxt.lessons) * 100));
+          const cutNote = store.gemCut ? "（宝石已抵 " + store.gemCut + "）" : "";
+          card.innerHTML =
+            '<p class="score-label">当前等级</p>' +
+            '<p class="rank-name">' + cur.en + " · " + cur.zh + "</p>" +
+            '<p class="rank-cost">下一级 ' + nxt.en + " · " + nxt.zh + " · 金币和已学课数都要够</p>" +
+            '<p class="rank-need">金币 ' + store.coins + " / " + need + cutNote + "</p>" +
+            '<div class="rank-bar"><i style="width:' + coinPct + '%"></i></div>' +
+            '<p class="rank-need">进度 ' + done + " / " + nxt.lessons + " 课</p>" +
+            '<div class="rank-bar"><i style="width:' + lessonPct + '%"></i></div>';
+        }
+        rankBox.appendChild(card);
+        if (nxt) {
+          const need = Progress.coinNeed(store, nxt);
+          const ready = store.coins >= need && done >= nxt.lessons;
+          const up = document.createElement("button");
+          up.type = "button";
+          up.className = "btn-start rank-up";
+          up.textContent = ready ? "升级到 " + nxt.en : "金币和进度都够才能升级";
+          up.disabled = !ready;
+          up.addEventListener("click", () => {
+            const res = Progress.upgradeRank(walletStore());
+            persistWallet(res.store);
+            syncWalletUI();
+            renderRecords();
+            if (!res.ok) alert(res.reason);
+          });
+          rankBox.appendChild(up);
+          const gem = document.createElement("button");
+          gem.type = "button";
+          gem.className = "btn-ok rank-up";
+          gem.textContent = "用 1 宝石抵 " + Progress.GEM_CUT + " 金币";
+          gem.disabled = store.gems < 1 || need <= 0;
+          gem.addEventListener("click", () => {
+            const res = Progress.spendGemBoost(walletStore());
+            persistWallet(res.store);
+            syncWalletUI();
+            renderRecords();
+            if (!res.ok) alert(res.reason);
+          });
+          rankBox.appendChild(gem);
+        }
+        if (shopBox) {
+          shopBox.innerHTML =
+            '<p class="shop-note">宝石不降低学习难度。在这里用宝石抵金币，升级更快；限时挑战里用宝石加时间。慢速按钮是普通控制，不花金币也不花宝石。</p>';
+        }
+        return;
+        const cur = Progress.currentRank(store);
+        const nxt = Progress.nextRank(store);
+        const pct = nxt ? Math.min(100, Math.round((store.coins / nxt.cost) * 100)) : 100;
+        rankBox.innerHTML =
+          '<div class="rank-card">' +
+          '<p class="score-label">当前等级</p>' +
+          '<p class="rank-name">' + cur.en + " · " + cur.zh + "</p>" +
+          '<p class="rank-perk">' + cur.perk + "</p>" +
+          (nxt
+            ? '<div class="rank-bar"><i style="width:' + pct + '%"></i></div>' +
+              '<p class="rank-cost">下一级 ' + nxt.en + " · " + nxt.zh + " · 花费 " + nxt.cost + " 金币</p>"
+            : '<p class="rank-cost">已是最高等级</p>') +
+          "</div>";
+        if (nxt) {
+          const up = document.createElement("button");
+          up.type = "button";
+          up.className = "btn-start rank-up";
+          up.textContent = store.coins >= nxt.cost ? "升级到 " + nxt.en : "金币还不够";
+          up.disabled = store.coins < nxt.cost;
+          up.addEventListener("click", () => {
+            const res = Progress.upgradeRank(walletStore());
+            persistWallet(res.store);
+            syncWalletUI();
+            renderRecords();
+            if (!res.ok) alert(res.reason);
+          });
+          rankBox.appendChild(up);
+        }
+
+        shopBox.innerHTML = '<h2 class="shop-title">换特权</h2><p class="shop-note">券放进背包，慢听和双倍要点「下一课用」。提示、护盾、跳过在做题时用。</p>';
+        function addRow(item, kind) {
+          const row = document.createElement("div");
+          row.className = "shop-row";
+          const owned = kind === "perm" ? store.perms[item.id] : (store.bag[item.id] || 0);
+          const price = kind === "perm"
+            ? item.gems + " 宝石 · 需要 " + Progress.currentRank({ rank: item.needRank }).en
+            : item.cost + (item.currency === "gems" ? " 宝石" : " 金币");
+          row.innerHTML =
+            '<div class="shop-copy"><strong>' + item.name + "</strong><span>" + item.desc + "</span>" +
+            "<small>" + price + (kind === "ticket" ? " · 拥有 " + owned : owned ? " · 已拥有" : "") + "</small></div>";
+          const actions = document.createElement("div");
+          actions.className = "shop-btns";
+          if (kind === "perm" && owned) {
+            const done = document.createElement("span");
+            done.className = "shop-owned";
+            done.textContent = "已解锁";
+            actions.appendChild(done);
+          } else {
+            const buy = document.createElement("button");
+            buy.type = "button";
+            buy.className = "btn-ok sm";
+            buy.textContent = "兑换";
+            buy.addEventListener("click", () => {
+              const res = Progress.buyItem(walletStore(), item.id);
+              persistWallet(res.store);
+              syncWalletUI();
+              renderRecords();
+              if (!res.ok) alert(res.reason);
+            });
+            actions.appendChild(buy);
+          }
+          if (kind === "ticket" && (item.id === "slow" || item.id === "double") && owned) {
+            const arm = document.createElement("button");
+            arm.type = "button";
+            arm.className = "btn-speak secondary sm";
+            arm.textContent = "下一课用";
+            arm.addEventListener("click", () => {
+              const res = Progress.armTicket(walletStore(), item.id);
+              persistWallet(res.store);
+              syncWalletUI();
+              renderRecords();
+              if (!res.ok) alert(res.reason);
+            });
+            actions.appendChild(arm);
+          }
+          row.appendChild(actions);
+          shopBox.appendChild(row);
+        }
+        Progress.TICKETS.forEach((t) => addRow(t, "ticket"));
+        Progress.PERMS.forEach((p) => addRow(p, "perm"));
+        const armed = [];
+        if (store.buffs.slowLesson || store.perms.permSlow) armed.push("慢听");
+        if (store.buffs.doubleLesson) armed.push("双倍金币");
+        if (armed.length) {
+          const note = document.createElement("p");
+          note.className = "shop-note";
+          note.textContent = "下一课已准备：" + armed.join("、");
+          shopBox.appendChild(note);
+        }
+      }
+
       function renderRecords() {
         const store = walletStore();
         syncWalletUI();
+        renderRankShop(store);
         const acc = Progress.accuracyPct(store);
         const floatAcc = Progress.floatAccuracyPct(store);
         const answered = (store.stats && store.stats.answered) || 0;
@@ -572,6 +889,7 @@
         $("cardSub").textContent = c.tip || c.sub || "";
         $("cardExtra").innerHTML = "";
         $("cardActions").innerHTML = "";
+        paintLessonHead();
 
         if (c.type === "word") renderWordCard(c);
         else if (c.type === "listen") renderListenCard(c);
@@ -585,9 +903,53 @@
 
         if (autoSpeak && c.autoPlay) {
           setTimeout(() => {
-            if (V && V.isEnabled()) speakCard(c);
+            if (V && V.isEnabled()) speakCard(c, state.slowOn ? 0.5 : undefined);
           }, 280);
         }
+        maybeSkipButton();
+      }
+
+      function paintLessonHead() {
+        const node = Progress.nodeById(state.pathId);
+        const u = unit();
+        if ($("lessonUnitTitle")) {
+          $("lessonUnitTitle").textContent = (node && node.unitTitle) || (u && u.name) || "";
+        }
+        if ($("lessonNameTitle")) {
+          if (state.lessonMode === "retry") $("lessonNameTitle").textContent = "Review · 错题复习";
+          else if (state.lessonMode === "challenge") $("lessonNameTitle").textContent = "Challenge · 难度挑战";
+          else if (node) $("lessonNameTitle").textContent = "Lesson " + (node.bookLesson || node.lesson) + " · " + node.lessonTitle;
+          else $("lessonNameTitle").textContent = "";
+        }
+        if ($("lessonFocus")) {
+          const focus = (u && u.focus && node && u.focus[node.lesson - 1]) || "";
+          if (state.lessonMode === "challenge") {
+            $("lessonFocus").textContent = "比课本再难一点：长句听力、延展句型、要开口说完";
+          } else if (node && u && node.lesson === u.lessonCount) {
+            $("lessonFocus").textContent = "本单元复习 · 知识延展 · " + focus;
+          } else {
+            $("lessonFocus").textContent = focus;
+          }
+        }
+      }
+
+      function maybeSkipButton() {
+        const s = walletStore();
+        if (!s.bag || !s.bag.skip || !$("cardActions")) return;
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "btn-speak secondary";
+        b.textContent = "用跳过券（" + s.bag.skip + "）";
+        b.addEventListener("click", () => {
+          const res = Progress.takeSkip(walletStore());
+          if (!res.ok) return;
+          persistWallet(res.store);
+          syncWalletUI();
+          state.index += 1;
+          if (state.index >= state.cards.length) finishLesson();
+          else renderCard(true);
+        });
+        $("cardActions").appendChild(b);
       }
 
       function setCoachTalking(on) {
@@ -601,7 +963,7 @@
         if (!V || !c) return;
         setCoachTalking(true);
         const done = () => setTimeout(() => setCoachTalking(false), 200);
-        const opts = rate && rate !== 1 ? { rate: rate } : undefined;
+        const opts = rate && rate !== 1 ? { rate: rate } : (state.slowOn ? { rate: 0.5 } : undefined);
         let p;
         if (c.type === "dialogue" && c.lines) {
           p = V.speakSequence(c.lines.map((l) => ({ role: l.role, text: l.text, rate: opts && opts.rate })));
@@ -889,6 +1251,22 @@
           showAnswerThenContinue(c, false);
         });
         $("cardActions").appendChild(confirm);
+        const hintBtn = document.createElement("button");
+        hintBtn.type = "button";
+        hintBtn.className = "btn-speak secondary";
+        hintBtn.textContent = "看首字母";
+        hintBtn.addEventListener("click", () => {
+          const res = Progress.takeHint(walletStore());
+          if (!res.ok) {
+            $("cardSub").textContent = res.reason || "去 Records 用金币换提示券";
+            return;
+          }
+          persistWallet(res.store);
+          syncWalletUI();
+          $("cardSub").textContent = "首字母是 " + String(c.en || "").charAt(0);
+          hintBtn.disabled = true;
+        });
+        extra.appendChild(hintBtn);
         actionSpeakPair(isDictation ? "再听一遍" : "听发音", (rate) => wordSpeak(c, rate));
 
         inputEl.addEventListener("keydown", (e) => {
@@ -1292,8 +1670,8 @@
         if (ok) onCorrectReward();
         else onWrongReward();
         state.index += 1;
-        const praiseHit = ok && state.correctInLesson % Progress.PRAISE_EVERY === 0;
-        const delay = !ok ? 1000 : praiseHit ? 1800 : 700;
+        const delay = state.praiseWait || (ok ? 900 : 1200);
+        state.praiseWait = 0;
         setTimeout(() => {
           if (state.index >= state.cards.length) finishLesson();
           else renderCard(true);
@@ -1305,15 +1683,26 @@
         const total = state.results.length;
         const egg = Lesson.eggLine(unit());
         const store0 = walletStore();
+        const lessonCoins = state.lessonCoins || 0;
         const settle =
           state.lessonMode === "retry" || state.lessonMode === "challenge"
-            ? Progress.settlePractice(store0, state.lessonCoins || 0, todayKey(), state.lessonMode)
+            ? Progress.settlePractice(store0, lessonCoins, todayKey(), state.lessonMode)
             : Progress.settleLesson(
                 store0,
                 state.pathId || store0.currentPathId,
-                state.lessonCoins || 0,
+                lessonCoins,
                 todayKey()
               );
+        if (state.doubleOn) {
+          settle.store.coins += settle.earned;
+          settle.earned *= 2;
+          settle.lessonCoins *= 2;
+          settle.bonus *= 2;
+          if (settle.rankBonus) settle.rankBonus *= 2;
+          settle.totalCoins = settle.store.coins;
+          settle.double = true;
+          state.doubleOn = false;
+        }
         state.lastSettle = settle;
         const logs = settle.store.logs || loadStore().logs || {};
         logs[todayKey()] = Object.assign({}, logs[todayKey()] || {}, {
@@ -1370,12 +1759,24 @@
         earned.innerHTML =
           '<div class="earn-row"><span>答题金币</span><strong>+' + settle.lessonCoins + "</strong></div>" +
           '<div class="earn-row"><span>' + settle.bonusLabel + '</span><strong>+' + settle.bonus + "</strong></div>" +
-          '<div class="earn-row gem"><span>宝石</span><strong>+' + settle.gems + " 💎</strong></div>" +
+          (settle.rankBonus ? '<div class="earn-row"><span>等级加成</span><strong>+' + settle.rankBonus + "</strong></div>" : "") +
+          (settle.double ? '<div class="earn-row"><span>双倍券</span><strong>已翻倍</strong></div>' : "") +
+          '<div class="earn-row gem"><span>宝石</span><strong>+' + settle.gems + "</strong></div>" +
           '<div class="earn-total"><span>本课合计</span><strong>+' + settle.earned + " 🪙</strong></div>" +
           '<div class="earn-total all"><span>总金币</span><strong>' + settle.totalCoins + " 🪙</strong></div>";
         wrap.appendChild(earned);
 
-        if (V) V.speak("你真是太棒了！再接再厉！", "girlChild");
+        const doneFx = settle.practiceKind === "challenge" ? "cheer" : "applause";
+        const doneLine = settle.practiceKind === "challenge"
+          ? ["challenge", "girlChild", "没想到你居然是一个学习的天才，效率太惊人啦！"]
+          : ["lesson", "boyChild", "你又前进了一步，我为你感到自豪！"];
+        playFx(doneFx, 3);
+        const praiseToken = fxToken;
+        setTimeout(function () {
+          if (praiseToken !== fxToken) return;
+          if (state.view !== "done") return;
+          playMascotLine(doneLine[0], doneLine[1], doneLine[2]);
+        }, 3100);
 
         function addBtn(label, cls, fn) {
           const b = document.createElement("button");
@@ -1873,21 +2274,24 @@
           cancelHomeIntro();
           stopHomeAudio();
           const token = ++introToken;
-          const spoken = { turtle: false, bee: false };
-          function showAndMaybeSpeak(who) {
-            showHomeMascot(who);
-            if (!spoken[who]) {
-              spoken[who] = true;
-              playHomeClip(who);
+          showHomeMascot("turtle");
+          function sayOnce(who) {
+            if (!homeAlive(token)) return;
+            if (homeSloganSaid[who]) {
+              if (who === "turtle") sayOnce("bee");
+              return;
             }
+            homeSloganSaid[who] = true;
+            playHomeClip(who).then(() => {
+              if (who === "turtle") sayOnce("bee");
+            });
           }
-          showAndMaybeSpeak("turtle");
+          sayOnce("turtle");
           function scheduleNext() {
             if (!homeAlive(token)) return;
             homeTimer = setTimeout(() => {
               if (!homeAlive(token)) return;
-              stopHomeAudio();
-              showAndMaybeSpeak(homeWho === "turtle" ? "bee" : "turtle");
+              showHomeMascot(homeWho === "turtle" ? "bee" : "turtle");
               scheduleNext();
             }, 5000);
           }
