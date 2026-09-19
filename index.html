@@ -552,6 +552,7 @@
         state.praiseWait = 1000 + voiceMs;
         setTimeout(function () {
           if (token !== fxToken) return;
+          if ((clip === "streak2" || clip === "streak5") && fxAudio) fxAudio.volume = 0.18;
           if (state.view !== "lesson") return;
           playMascotLine(clip, role, text);
         }, 1000);
