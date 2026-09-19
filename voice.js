@@ -290,6 +290,28 @@
     stop();
   }
 
+  let primer = null;
+  function prime() {
+    return new Promise((resolve) => {
+      try {
+        if (!primer) {
+          primer = new Audio("./audio/fx/sparkle.wav");
+          primer.preload = "auto";
+          primer.volume = 0.001;
+        }
+        const started = primer.play();
+        if (started && started.then) {
+          started.then(() => {
+            try { primer.pause(); primer.currentTime = 0; } catch (e) {}
+            resolve(true);
+          }).catch(() => resolve(false));
+        } else resolve(true);
+      } catch (e) {
+        resolve(false);
+      }
+    });
+  }
+
   function setEnabled(on) {
     enabled = !!on;
     if (!enabled) stop();
@@ -313,6 +335,7 @@
     ROLES: ROLE_META,
     normRole,
     speak,
+    prime,
     speakSequence,
     stop,
     refresh,
