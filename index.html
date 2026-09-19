@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Noto+Sans+SC:wght@500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./theme-duo.css?v=24" />
+  <link rel="stylesheet" href="./theme-duo.css?v=25" />
   <script src="./assets/vendor/lottie.min.js"></script>
 </head>
 <body>
@@ -51,6 +51,7 @@
       </div>
       <p class="unit-line" id="unitLine">Unit 1</p>
       <p class="path-summary" id="pathSummary">本学期 0 / 0 课</p>
+      <div class="huiwen-note hidden" id="huiwenHome"></div>
     </div>
   </div>
 
@@ -79,7 +80,8 @@
     <div class="records-actions" id="recordsActions"></div>
     <div id="rankPanel"></div>
     <div id="shopPanel"></div>
-    <p class="path-meta" id="recordsMeta">错题本</p>
+    <p class="path-meta" id="recordsMeta">错题记录</p>
+    <div class="huiwen-note hidden" id="huiwenRecords"></div>
     <div class="path-scroll" id="recordsList"></div>
     <div class="path-footer">
       <button type="button" class="btn-start" id="btnRecordsToPath">去学期路径</button>
@@ -168,7 +170,7 @@
     </button>
   </nav>
 
-  <script src="./data.js?v=12"></script>
+  <script src="./data.js?v=13"></script>
   <script src="./progress.js?v=8"></script>
   <script src="./voice.js?v=7"></script>
   <script>
@@ -385,6 +387,71 @@
         if ($("pathSummary")) {
           $("pathSummary").textContent = "本学期已学 " + done + " / " + total + " 课 · 多学/复习可拿附加金币";
         }
+        syncRetryBadge(s);
+      }
+
+      function syncRetryBadge(store) {
+        const btn = $("navRecords");
+        if (!btn) return;
+        const n = ((store || walletStore()).retryWords || []).length;
+        let badge = btn.querySelector(".nav-badge");
+        if (!n) {
+          if (badge) badge.remove();
+          btn.setAttribute("aria-label", "Records");
+          return;
+        }
+        if (!badge) {
+          badge = document.createElement("span");
+          badge.className = "nav-badge";
+          btn.appendChild(badge);
+        }
+        badge.textContent = n > 99 ? "99+" : String(n);
+        btn.setAttribute("aria-label", "Records，" + n + " 道错题");
+      }
+
+      function huiwenDue(store) {
+        store = store || walletStore();
+        const recent = (store.stats && store.stats.recent) || [];
+        const floatAcc = Progress.floatAccuracyPct(store);
+        const acc = Progress.accuracyPct(store);
+        const holding = recent.length >= Progress.FLOAT_WINDOW && floatAcc >= 95 && acc >= 95;
+        if (!holding) {
+          if (store.huiwenWatch) saveStore({ huiwenWatch: null });
+          return false;
+        }
+        const today = todayKey();
+        const watch = store.huiwenWatch || { since: today, days: [], dismissed: false };
+        let changed = !store.huiwenWatch;
+        if (watch.days.indexOf(today) < 0) {
+          watch.days.push(today);
+          changed = true;
+        }
+        if (changed) saveStore({ huiwenWatch: watch });
+        if (watch.dismissed) return false;
+        const span = Math.round((new Date(today + "T12:00:00") - new Date(watch.since + "T12:00:00")) / 86400000);
+        return watch.days.length >= 3 || span >= 7;
+      }
+
+      function paintHuiwen(store) {
+        const show = huiwenDue(store);
+        ["huiwenHome", "huiwenRecords"].forEach((id) => {
+          const el = $(id);
+          if (!el) return;
+          el.classList.toggle("hidden", !show);
+          if (!show) {
+            el.innerHTML = "";
+            return;
+          }
+          el.innerHTML =
+            "<p>最近正确率已经稳住 95%。可以考虑接入汇文南的提升内容。</p>" +
+            '<button type="button" data-huiwen-dismiss>知道了</button>';
+          el.querySelector("[data-huiwen-dismiss]").addEventListener("click", () => {
+            const cur = walletStore();
+            const watch = Object.assign({}, cur.huiwenWatch || {}, { dismissed: true });
+            saveStore({ huiwenWatch: watch });
+            paintHuiwen(walletStore());
+          });
+        });
       }
 
       function persistWallet(store) {
@@ -555,6 +622,7 @@
         }
         $("streakLine").innerHTML = "连续 <strong>" + streakDays() + "</strong> 天";
         syncWalletUI();
+        paintHuiwen(walletStore());
       }
 
       function startLesson(pathId, opts) {
@@ -710,6 +778,7 @@
       function renderRecords() {
         const store = walletStore();
         syncWalletUI();
+        paintHuiwen(store);
         renderRankShop(store);
         const acc = Progress.accuracyPct(store);
         const floatAcc = Progress.floatAccuracyPct(store);
@@ -751,8 +820,8 @@
         }
         if ($("recordsMeta")) {
           $("recordsMeta").textContent = retries.length
-            ? "错题本 · 点一项可单练，或上方整组复习"
-            : "还没有错题，完成练习后答错的词会出现在这里";
+            ? "错题记录 · " + retries.length + " 道，点一项可单练"
+            : "错题记录 · 答错后会出现在这里";
         }
         const list = $("recordsList");
         if (!list) return;
@@ -760,7 +829,7 @@
         if (!retries.length) {
           const empty = document.createElement("p");
           empty.className = "records-empty";
-          empty.textContent = "答错的单词会自动进错题本，方便反复练。";
+          empty.textContent = "答错的题会记在这里。复习做对后，红色数字会变小或消失。";
           list.appendChild(empty);
           return;
         }
@@ -1664,26 +1733,54 @@
       }
 
       function pushRetry(c) {
-        if (!c || !c.retryWord) return;
+        if (!c) return;
+        const isListen = c.type === "listen" && c.speakText;
+        const en = isListen ? c.speakText : c.retryWord && c.retryWord.en;
+        if (!en) return;
+        const zh = isListen ? c.zh || "" : (c.retryWord && c.retryWord.zh) || "";
         const store = loadStore();
         let retry = store.retryWords || [];
-        retry = retry.filter((r) => !(r.unitId === state.unitId && r.en === c.retryWord.en));
-        retry.push({
+        retry = retry.filter((r) => !(r.unitId === state.unitId && r.en === en));
+        const rec = {
           unitId: state.unitId,
-          en: c.retryWord.en,
-          zh: c.retryWord.zh,
+          en: en,
+          zh: zh,
+          type: isListen ? "listen" : "word",
           date: todayKey(),
-        });
+        };
+        if (isListen) {
+          rec.card = {
+            type: "listen",
+            kind: c.kind,
+            title: c.title,
+            prompt: c.prompt,
+            speakText: c.speakText,
+            speakRole: c.speakRole,
+            coach: c.coach,
+            autoPlay: true,
+            answer: c.answer,
+            tip: c.tip,
+            zh: c.zh || "",
+            answerZh: c.answerZh || "",
+            choices: c.choices || [],
+            retryWord: { en: en, zh: zh },
+          };
+        }
+        retry.push(rec);
         saveStore({ retryWords: retry });
+        syncRetryBadge();
       }
 
       function clearRetry(c) {
-        if (!c || !c.retryWord) return;
+        if (!c) return;
+        const en = (c.retryWord && c.retryWord.en) || (c.type === "listen" ? c.speakText : "");
+        if (!en) return;
         const store = loadStore();
         const retry = (store.retryWords || []).filter(
-          (r) => !(r.unitId === state.unitId && r.en === c.retryWord.en)
+          (r) => !(r.unitId === state.unitId && r.en === en)
         );
         saveStore({ retryWords: retry });
+        syncRetryBadge();
       }
 
       function scoreAnswer(ok, c) {

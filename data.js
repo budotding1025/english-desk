@@ -2227,15 +2227,14 @@ window.ENGLISH_DESK_DATA = {
     store = store || {};
     const retry = ((store.retryWords || []).filter((w) => w.unitId === unit.id) || []);
     const allRetry = store.retryWords || [];
-    const pool = (retry.length ? retry : allRetry).map((r) => ({
-      en: r.en,
-      zh: r.zh,
-      src: "错词",
-      priority: "high",
-    }));
+    const pool = (retry.length ? retry : allRetry).slice(-8);
     const cards = [];
-    shuffle(pool).slice(0, 8).forEach((w, i) => {
-      cards.push(wordCard(w, i % 3 === 0 ? "zh2en" : "dictation"));
+    pool.forEach((r, i) => {
+      if (r.type === "listen" && r.card) {
+        cards.push(r.card);
+        return;
+      }
+      cards.push(wordCard({ en: r.en, zh: r.zh, src: "错词", priority: "high" }, i % 2 === 0 ? "dictation" : "zh2en"));
     });
     return cards;
   }
