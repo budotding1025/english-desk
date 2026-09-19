@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Noto+Sans+SC:wght@500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./theme-duo.css?v=22" />
+  <link rel="stylesheet" href="./theme-duo.css?v=23" />
   <script src="./assets/vendor/lottie.min.js"></script>
 </head>
 <body>
@@ -43,8 +43,8 @@
       <p class="streak" id="streakLine">连续 <strong>0</strong> 天</p>
       <p class="rank-line" id="rankLine">Sprout · 新芽</p>
       <div class="today-card">
-        <p class="eyebrow" id="sessionEyebrow">今天</p>
-        <h1 id="sessionTitle">词听练习</h1>
+        <p class="eyebrow" id="sessionEyebrow">Unit One Share and Care</p>
+        <h1 id="sessionTitle">How Do You Feel Today?</h1>
         <p class="meta" id="sessionMeta">约 18 分钟 · Agent 带练</p>
         <button type="button" class="btn-start" id="btnStart">开始</button>
         <button type="button" class="btn-path" id="btnOpenPath">看学期路径</button>
@@ -542,12 +542,17 @@
         }
         const sess = Lesson.sessionMeta(state.sessionId);
         const u = unit();
-        const bookNo = node.bookLesson || node.lesson;
-        const focus = (u.focus && u.focus[node.lesson - 1]) || "";
-        $("sessionEyebrow").textContent = node ? node.unitTitle : "今天";
-        $("sessionTitle").textContent = node ? ("Lesson " + bookNo + " · " + node.lessonTitle) : (sess.label || "Today");
-        $("sessionMeta").textContent = "约 " + sess.minutes + " 分钟 · 答对拿金币";
-        $("unitLine").textContent = focus || u.name;
+        const bookNo = node ? (node.bookLesson || node.lesson) : "";
+        const unitTitle = (node && node.unitTitle) || (u && u.name) || "";
+        const lessonTitle = (node && node.lessonTitle) || "";
+        if ($("sessionEyebrow")) $("sessionEyebrow").textContent = unitTitle;
+        if ($("sessionTitle")) $("sessionTitle").textContent = lessonTitle;
+        if ($("sessionMeta")) {
+          $("sessionMeta").textContent = (bookNo ? "Lesson " + bookNo + " · " : "") + "约 " + sess.minutes + " 分钟";
+        }
+        if ($("unitLine")) {
+          $("unitLine").textContent = unitTitle + (lessonTitle ? " · " + lessonTitle : "");
+        }
         $("streakLine").innerHTML = "连续 <strong>" + streakDays() + "</strong> 天";
         syncWalletUI();
       }
@@ -2078,6 +2083,7 @@
       }
 
       function init() {
+        try { renderHome(); } catch (e) {}
         let store = Progress.ensureProgress(loadStore());
         localStorage.setItem(STORE_KEY, JSON.stringify(store));
         if (store.unitId && DATA.units.some((u) => u.id === store.unitId)) {
