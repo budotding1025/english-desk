@@ -207,11 +207,13 @@
     return Math.round((hit / recent.length) * 100);
   }
 
-  function settlePractice(store, lessonCoins, todayKey, kind) {
+  function settlePractice(store, lessonCoins, todayKey, kind, opts) {
     store = ensureProgress(store);
-    const bonus = kind === "challenge" ? 40 : 20;
-    const bonusLabel = kind === "challenge" ? "限时挑战奖励" : "错题复习奖励";
-    const gems = kind === "challenge" ? 1 : 0;
+    opts = opts || {};
+    const timedOut = kind === "challenge" && !!opts.timedOut;
+    const bonus = timedOut ? 0 : kind === "challenge" ? 40 : 20;
+    const bonusLabel = timedOut ? "" : kind === "challenge" ? "限时挑战奖励" : "错题复习奖励";
+    const gems = timedOut ? 0 : kind === "challenge" ? 1 : 0;
     const earned = (lessonCoins || 0) + bonus;
     store.coins += earned;
     store.gems += gems;
@@ -228,6 +230,7 @@
       next: null,
       pathId: store.currentPathId,
       practiceKind: kind,
+      timedOut: timedOut,
     };
   }
 

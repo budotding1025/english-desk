@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Noto+Sans+SC:wght@500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./theme-duo.css?v=25" />
+  <link rel="stylesheet" href="./theme-duo.css?v=26" />
   <script src="./assets/vendor/lottie.min.js"></script>
 </head>
 <body>
@@ -104,6 +104,7 @@
       <p class="lesson-focus" id="lessonFocus"></p>
       <div class="challenge-clock hidden" id="challengeClock">
         <span class="challenge-time" id="challengeTime">0:00</span>
+        <span class="challenge-hold hidden" id="challengeHold">跟读不计时</span>
         <button type="button" class="btn-gem-time" id="btnGemTime">1 宝石 +30 秒</button>
       </div>
     </div>
@@ -171,7 +172,7 @@
   </nav>
 
   <script src="./data.js?v=13"></script>
-  <script src="./progress.js?v=8"></script>
+  <script src="./progress.js?v=9"></script>
   <script src="./voice.js?v=8"></script>
   <script>
     (function () {
@@ -480,6 +481,8 @@
       function paintChallengeClock() {
         const el = $("challengeTime");
         if (el) el.textContent = formatClock(state.challengeLeft || 0);
+        const hold = $("challengeHold");
+        if (hold) hold.classList.toggle("hidden", !state.challengeHold);
         const btn = $("btnGemTime");
         if (!btn) return;
         const gems = walletStore().gems;
@@ -491,8 +494,44 @@
           clearInterval(challengeTimer);
           challengeTimer = null;
         }
+        state.challengeHold = false;
         const box = $("challengeClock");
         if (box) box.classList.add("hidden");
+        paintChallengeClock();
+      }
+      function tickChallenge() {
+        state.challengeLeft -= 1;
+        paintChallengeClock();
+        if (state.challengeLeft <= 0) {
+          stopChallengeTimer();
+          finishLesson("timeout");
+        }
+      }
+      function armChallengeInterval() {
+        if (challengeTimer) clearInterval(challengeTimer);
+        challengeTimer = setInterval(tickChallenge, 1000);
+      }
+      function pauseChallengeClock() {
+        if (state.lessonMode !== "challenge" || state.view !== "lesson") return;
+        if (challengeTimer) {
+          clearInterval(challengeTimer);
+          challengeTimer = null;
+        }
+        state.challengeHold = true;
+        const box = $("challengeClock");
+        if (box) box.classList.remove("hidden");
+        paintChallengeClock();
+      }
+      function resumeChallengeClock() {
+        if (!state.challengeHold) return;
+        state.challengeHold = false;
+        paintChallengeClock();
+        if (state.lessonMode !== "challenge" || state.view !== "lesson") return;
+        if ((state.challengeLeft || 0) <= 0) {
+          finishLesson("timeout");
+          return;
+        }
+        armChallengeInterval();
       }
       function startChallengeTimer(seconds) {
         stopChallengeTimer();
@@ -500,14 +539,7 @@
         const box = $("challengeClock");
         if (box) box.classList.remove("hidden");
         paintChallengeClock();
-        challengeTimer = setInterval(() => {
-          state.challengeLeft -= 1;
-          paintChallengeClock();
-          if (state.challengeLeft <= 0) {
-            stopChallengeTimer();
-            finishLesson();
-          }
-        }, 1000);
+        armChallengeInterval();
       }
 
       function showCoinToast(amount) {
@@ -806,7 +838,8 @@
             '<div class="rec-stat"><strong>' + (acc == null ? "—" : acc + "%") + "</strong><span>正确率</span><small>" + correct + "/" + answered + "</small></div>" +
             '<div class="rec-stat float"><strong>' + (floatAcc == null ? "—" : floatAcc + "%") + "</strong><span>浮动正确率</span><small>近 " + (recentN || Progress.FLOAT_WINDOW) + " 题</small></div>" +
             '<div class="rec-stat"><strong>' + retries.length + "</strong><span>错题待练</span><small>错词本</small></div>" +
-            "</div>";
+            "</div>" +
+            '<p class="score-sub">上课和错题复习计入正确率。难度挑战不算。</p>';
         }
         if ($("recordsActions")) {
           $("recordsActions").innerHTML = "";
@@ -1148,13 +1181,20 @@
         opts = opts || {};
         const manual = !!opts.manualDone;
         let count = 0;
+        let leftFollow = false;
+        pauseChallengeClock();
+        function leaveFollow() {
+          if (leftFollow) return;
+          leftFollow = true;
+          resumeChallengeClock();
+          onDone();
+        }
         $("cardActions").innerHTML = "";
         const tip = document.createElement("p");
         tip.className = "follow-tip";
         tip.id = "followTip";
-        tip.textContent = opts.tip || "听正确读音，再跟读 3 遍";
+        tip.textContent = opts.tip || "大声跟读 3 遍";
         $("cardExtra").appendChild(tip);
-        actionSpeakPair(opts.lead || "听正确读音", (rate) => wordSpeak(c, rate));
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "btn-ok";
@@ -1171,12 +1211,12 @@
             done.type = "button";
             done.className = "btn-ok";
             done.textContent = "完成";
-            done.addEventListener("click", () => onDone());
+            done.addEventListener("click", () => leaveFollow());
             $("cardActions").appendChild(done);
             return;
           }
           tip.textContent = "跟读完成，继续下一题";
-          setTimeout(() => onDone(), 700);
+          setTimeout(() => leaveFollow(), 700);
         });
         $("cardActions").appendChild(btn);
         setTimeout(() => wordSpeak(c, 1), 200);
@@ -1274,15 +1314,14 @@
           peek.className = "answer-peek" + (ok ? " ok" : "");
           peek.textContent = (ok ? "对了！ " : "正确答案：") + c.en;
           extra.appendChild(peek);
-          $("cardSub").textContent = "先听鼓励，再听正确读音，大声跟读 3 遍";
+          $("cardSub").textContent = "先听鼓励，再大声跟读 3 遍";
           $("cardActions").innerHTML = "";
           const wait = scoreAnswer(ok, c);
           state.praiseWait = 0;
           setTimeout(() => {
             if (state.view !== "lesson" || card() !== c) return;
             startFollowRead(c, () => advance(ok, c), {
-              tip: "听正确读音，大声跟读 3 遍",
-              lead: "听正确读音",
+              tip: "大声跟读 3 遍",
             });
           }, wait);
         });
@@ -1446,7 +1485,6 @@
             manualDone: true,
             tip: "大声跟读 3 遍。读完自己点「完成」。",
             doneTip: "声音真棒！点「完成」就过关。",
-            lead: "再听一遍",
           });
           return;
         }
@@ -1798,8 +1836,10 @@
         state.scored = true;
         const cur = c || card();
         state.results.push(!!ok);
-        const tracked = Progress.recordAnswer(walletStore(), !!ok);
-        saveStore({ stats: tracked.stats });
+        if (state.lessonMode !== "challenge") {
+          const tracked = Progress.recordAnswer(walletStore(), !!ok);
+          saveStore({ stats: tracked.stats });
+        }
         if (!ok && cur && cur.retryWord) pushRetry(cur);
         if (ok && cur && cur.retryWord) clearRetry(cur);
         if (ok) onCorrectReward();
@@ -1819,7 +1859,8 @@
         }, delay);
       }
 
-      function finishLesson() {
+      function finishLesson(reason) {
+        const timedOut = reason === "timeout" && state.lessonMode === "challenge";
         const ok = state.results.filter(Boolean).length;
         const total = state.results.length;
         const egg = Lesson.eggLine(unit());
@@ -1827,7 +1868,7 @@
         const lessonCoins = state.lessonCoins || 0;
         const settle =
           state.lessonMode === "retry" || state.lessonMode === "challenge"
-            ? Progress.settlePractice(store0, lessonCoins, todayKey(), state.lessonMode)
+            ? Progress.settlePractice(store0, lessonCoins, todayKey(), state.lessonMode, { timedOut: timedOut })
             : Progress.settleLesson(
                 store0,
                 state.pathId || store0.currentPathId,
@@ -1879,9 +1920,27 @@
         wrap.appendChild(coinHost);
         mountCoinsLottie(coinHost, true);
 
+        const challengeDone = settle.practiceKind === "challenge" && !settle.timedOut;
+        const challengeLate = settle.practiceKind === "challenge" && !!settle.timedOut;
+        let beeAvatar = null;
+        if (settle.practiceKind === "challenge") {
+          const stage = document.createElement("div");
+          stage.className = "done-bee";
+          beeAvatar = coachAvatar("bee");
+          stage.appendChild(beeAvatar);
+          const say = document.createElement("p");
+          say.className = "bee-say";
+          say.textContent = challengeLate
+            ? "不要紧，下次准备好再来，我看好你哦！"
+            : "没想到你居然是一个学习的天才，效率太惊人啦！";
+          stage.appendChild(say);
+          wrap.appendChild(stage);
+        }
+
         const title = document.createElement("h1");
-        title.textContent =
-          settle.practiceKind === "challenge"
+        title.textContent = challengeLate
+          ? "时间到了"
+          : challengeDone
             ? "挑战完成！"
             : settle.practiceKind === "retry"
               ? "错题复习完成！"
@@ -1892,32 +1951,39 @@
 
         const score = document.createElement("p");
         score.className = "meta";
-        score.textContent = "做对 " + ok + " / " + total;
+        score.textContent = challengeLate ? "做对 " + ok + " 题" : "做对 " + ok + " / " + total;
         wrap.appendChild(score);
 
         const earned = document.createElement("div");
         earned.className = "done-earn";
         earned.innerHTML =
           '<div class="earn-row"><span>答题金币</span><strong>+' + settle.lessonCoins + "</strong></div>" +
-          '<div class="earn-row"><span>' + settle.bonusLabel + '</span><strong>+' + settle.bonus + "</strong></div>" +
+          (settle.bonus ? '<div class="earn-row"><span>' + settle.bonusLabel + '</span><strong>+' + settle.bonus + "</strong></div>" : "") +
           (settle.rankBonus ? '<div class="earn-row"><span>等级加成</span><strong>+' + settle.rankBonus + "</strong></div>" : "") +
           (settle.double ? '<div class="earn-row"><span>双倍券</span><strong>已翻倍</strong></div>' : "") +
-          '<div class="earn-row gem"><span>宝石</span><strong>+' + settle.gems + "</strong></div>" +
+          (settle.gems ? '<div class="earn-row gem"><span>宝石</span><strong>+' + settle.gems + "</strong></div>" : "") +
           '<div class="earn-total"><span>本课合计</span><strong>+' + settle.earned + " 🪙</strong></div>" +
           '<div class="earn-total all"><span>总金币</span><strong>' + settle.totalCoins + " 🪙</strong></div>";
         wrap.appendChild(earned);
 
-        const doneFx = settle.practiceKind === "challenge" ? "cheer" : "applause";
-        const doneLine = settle.practiceKind === "challenge"
-          ? ["challenge", "girlChild", "没想到你居然是一个学习的天才，效率太惊人啦！"]
-          : ["lesson", "boyChild", "你又前进了一步，我为你感到自豪！"];
-        playFx(doneFx, 3);
+        const doneFx = challengeDone ? "cheer" : challengeLate ? "" : "applause";
+        const doneLine = challengeLate
+          ? ["timeout", "girlChild", "不要紧，下次准备好再来，我看好你哦！"]
+          : challengeDone
+            ? ["challenge", "girlChild", "没想到你居然是一个学习的天才，效率太惊人啦！"]
+            : ["lesson", "boyChild", "你又前进了一步，我为你感到自豪！"];
+        const voiceAt = challengeDone || !challengeLate ? 3100 : 400;
+        if (doneFx) playFx(doneFx, 3);
         const praiseToken = fxToken;
         setTimeout(function () {
-          if (praiseToken !== fxToken) return;
+          if (praiseToken !== fxToken && doneFx) return;
           if (state.view !== "done") return;
+          if (beeAvatar) {
+            beeAvatar.classList.add("is-talking");
+            beeAvatar.classList.remove("is-idle");
+          }
           playMascotLine(doneLine[0], doneLine[1], doneLine[2]);
-        }, 3100);
+        }, voiceAt);
 
         function addBtn(label, cls, fn) {
           const b = document.createElement("button");
@@ -2049,28 +2115,16 @@
         box.appendChild(actions);
 
         let follow = 0;
-        const leadBtn = document.createElement("button");
-        leadBtn.type = "button";
-        leadBtn.className = "btn-speak";
-        leadBtn.textContent = "听翻翻龟领读";
-        const slowBtn = document.createElement("button");
-        slowBtn.type = "button";
-        slowBtn.className = "btn-speak secondary";
-        slowBtn.textContent = "慢速 0.5×";
         const followBtn = document.createElement("button");
         followBtn.type = "button";
         followBtn.className = "btn-ok";
         followBtn.textContent = "跟读并检测（0 / 3）";
-        followBtn.disabled = true;
 
         function playLead(rate) {
           if (V) V.speak(egg, "boyChild", rate && rate !== 1 ? { rate: rate } : undefined);
-          followBtn.disabled = false;
           tip.textContent = "点「跟读并检测」：说出整句，系统检查是否说对（免费，不耗 token）";
         }
 
-        leadBtn.addEventListener("click", () => playLead(1));
-        slowBtn.addEventListener("click", () => playLead(0.5));
         followBtn.addEventListener("click", () => {
           if (followBtn.disabled) return;
           followBtn.disabled = true;
@@ -2103,15 +2157,11 @@
 
         function afterFollow() {
           followBtn.disabled = true;
-          leadBtn.disabled = true;
-          slowBtn.disabled = true;
           tip.className = "follow-tip ok";
           tip.textContent = "跟读完成！试着模仿造句，自己说一遍";
           startSayStep();
         }
 
-        actions.appendChild(leadBtn);
-        actions.appendChild(slowBtn);
         actions.appendChild(followBtn);
         setTimeout(() => playLead(1), 200);
 
@@ -2370,20 +2420,13 @@
         function homeAlive(token) {
           return token === introToken && $("screenHome") && !$("screenHome").classList.contains("hidden");
         }
-        function playHomeFile(who, finish) {
-          const src = homeClips[who];
-          if (!src) { finish(false); return; }
-          const a = new Audio(src + "?v=2");
-          homeAudio = a;
-          a.onended = () => finish(true);
-          a.onerror = () => finish(false);
-          const started = a.play();
-          if (started && started.then) started.then(() => {}).catch(() => finish(false));
-        }
-        function playHomeClip(who) {
+        function playHomeFile(who) {
           return new Promise((resolve) => {
-            if (!V || !V.isEnabled()) { resolve(false); return; }
             if (!$("screenHome") || $("screenHome").classList.contains("hidden")) { resolve(false); return; }
+            const src = homeClips[who];
+            if (!src) { resolve(false); return; }
+            const a = new Audio(src + "?v=3");
+            homeAudio = a;
             let settled = false;
             const finish = (ok) => {
               if (settled) return;
@@ -2392,39 +2435,45 @@
               resolve(!!ok);
             };
             homeAudioDone = finish;
-            const host = location.hostname;
-            if (host !== "localhost" && host !== "127.0.0.1") {
-              playHomeFile(who, finish);
-              return;
-            }
-            const ctrl = new AbortController();
-            const timer = setTimeout(() => ctrl.abort(), 400);
-            fetch("http://127.0.0.1:8731/api/play?who=" + encodeURIComponent(who), { cache: "no-store", signal: ctrl.signal })
-              .then((r) => {
-                clearTimeout(timer);
-                if (!r.ok) throw new Error("speaker");
-                finish(true);
-              })
-              .catch(() => {
-                clearTimeout(timer);
-                if (!settled) playHomeFile(who, finish);
-              });
+            a.onended = () => finish(true);
+            a.onerror = () => finish(false);
+            const started = a.play();
+            if (started && started.then) started.then(() => {}).catch(() => finish(false));
           });
         }
-        function playPendingSlogan() {
+        let sloganNeedGesture = false;
+        function playHomeSlogans() {
           if (homeSloganBusy) return;
           if (!V || !V.isEnabled()) return;
           if (!$("screenHome") || $("screenHome").classList.contains("hidden")) return;
-          const who = !homeSloganSaid.turtle ? "turtle" : !homeSloganSaid.bee ? "bee" : "";
-          if (!who) return;
           const gen = ++sloganGen;
           homeSloganBusy = true;
-          playHomeClip(who).then((ok) => {
+          sloganNeedGesture = false;
+          homeSloganSaid.turtle = false;
+          homeSloganSaid.bee = false;
+          showHomeMascot("turtle");
+          playHomeFile("turtle").then((ok) => {
             if (gen !== sloganGen) return;
-            homeSloganBusy = false;
-            if (!ok) return;
-            homeSloganSaid[who] = true;
-            if (who === "turtle") playPendingSlogan();
+            if (!ok) {
+              homeSloganBusy = false;
+              sloganNeedGesture = true;
+              return;
+            }
+            homeSloganSaid.turtle = true;
+            if (!$("screenHome") || $("screenHome").classList.contains("hidden")) {
+              homeSloganBusy = false;
+              return;
+            }
+            showHomeMascot("bee");
+            playHomeFile("bee").then((ok2) => {
+              if (gen !== sloganGen) return;
+              homeSloganBusy = false;
+              if (!ok2) {
+                sloganNeedGesture = true;
+                return;
+              }
+              homeSloganSaid.bee = true;
+            });
           });
         }
         function setHomeLine(who) {
@@ -2444,12 +2493,12 @@
           stopHomeAudio();
           const token = ++introToken;
           showHomeMascot("turtle");
-          playPendingSlogan();
+          playHomeSlogans();
           function scheduleNext() {
             if (!homeAlive(token)) return;
             homeTimer = setTimeout(() => {
               if (!homeAlive(token)) return;
-              showHomeMascot(homeWho === "turtle" ? "bee" : "turtle");
+              if (!homeSloganBusy) showHomeMascot(homeWho === "turtle" ? "bee" : "turtle");
               scheduleNext();
             }, 5000);
           }
@@ -2460,7 +2509,7 @@
           if (!audioPrimed && V && V.prime) {
             V.prime().then((ok) => { if (ok) audioPrimed = true; });
           }
-          playPendingSlogan();
+          if (sloganNeedGesture) playHomeSlogans();
         }
         document.addEventListener("pointerdown", onUserGesture, true);
         document.addEventListener("keydown", onUserGesture, true);
