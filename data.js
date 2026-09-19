@@ -11,9 +11,9 @@ window.ENGLISH_DESK_DATA = {
   sessions: {
     weekdayListen: {
       id: "weekdayListen",
-      label: "工作日① 词听",
+      label: "每课 18 分钟",
       minutes: 18,
-      blurb: "5 词检测 + 听力长句/应答 + 句型 1–2 步",
+      blurb: "看中文写词、听写、听力判断、听力对话、跟读重点句",
       steps: ["check"],
       showListen: true,
       showSort: false,
@@ -1962,7 +1962,7 @@ window.ENGLISH_DESK_DATA = {
     return {
       type: "word",
       mode: dictation ? "dictation" : "zh2en",
-      title: dictation ? "听写" : "认词",
+      title: dictation ? "听写" : "看中文写词",
       prompt: dictation ? "听「翻翻龟」读，写出英文" : w.zh,
       answer: w.en,
       zh: w.zh,
@@ -1973,6 +1973,55 @@ window.ENGLISH_DESK_DATA = {
       autoPlay: dictation,
       retryWord: { en: w.en, zh: w.zh },
     };
+  }
+
+  function lineZh(text) {
+    const map = {
+      "How do you feel today?": "你今天感觉怎么样？",
+      "What's the matter?": "怎么了？",
+      "How do you feel now?": "你现在感觉怎么样？",
+      "You look angry. What's the matter?": "你看起来很生气。怎么了？",
+      "Can we read it together?": "我们可以一起读吗？",
+      "Yangyang is ill. What should he do?": "阳阳病了。他应该怎么做？",
+      "I can't remember the poem. It's too hard.": "我记不住这首诗。太难了。",
+      "Can you help me, please?": "请问你能帮我吗？",
+      "Would you open the door, please?": "请你开一下门好吗？",
+      "Could I have a banana, please?": "请问我可以吃一根香蕉吗？",
+      "I want that banana, now!": "我现在就要那根香蕉！",
+      "I'm worried and the poem is hard.": "我很担心，这首诗很难。",
+      "How do you feel today?": "你今天感觉怎么样？",
+      "What would you like to have?": "你想吃什么？",
+      "Please don't play with the chopsticks.": "请不要玩筷子。",
+      "What would you like, and how do you make it?": "你想吃什么？怎么做？",
+      "Can we live without air?": "没有空气我们能生活吗？",
+      "What happens to snow after the sun?": "太阳出来后，雪会怎样？",
+      "Why do we get close to nature?": "我们为什么要亲近自然？",
+      "Happy New Year!": "新年快乐！",
+      "What is your wish?": "你的愿望是什么？",
+      "Can you guess the riddle?": "你能猜出这个谜语吗？",
+      "Which festival do you like, and what is your wish?": "你喜欢哪个节日？你的愿望是什么？",
+      "What would you like?": "你想要什么？",
+      "Tell me your food, your nature idea, and your wish.": "说说你想吃的、你对自然的想法，还有你的愿望。",
+      "I'm so happy.": "我非常开心。",
+      "I can't find my dog.": "我找不到我的狗。",
+      "I feel better.": "我感觉好些了。",
+      "My model plane is broken. Let's fix it.": "我的飞机模型坏了。我们来修吧。",
+      "Yes. The story is interesting.": "是的。这个故事很有趣。",
+      "He should have a good rest.": "他应该好好休息。",
+      "Let me help you. May I try with you?": "让我来帮你。我可以和你一起试吗？",
+      "Yes. You may use my bat.": "可以。你可以用我的球拍。",
+      "No problem.": "没问题。",
+      "Yes. Here you are.": "好的，给你。",
+      "Could I have a banana, please?": "请问我可以吃一根香蕉吗？",
+      "You should rest, and I can help you. May I try with you?": "你应该休息，我可以帮你。我可以和你一起试吗？",
+      "I'd like some soup.": "我想要一些汤。",
+      "I'm sorry. I will use the fork.": "对不起。我用叉子。",
+      "No. We can't live without air.": "不能。没有空气我们不能生活。",
+      "Snow turns into water.": "雪会变成水。",
+      "I wish we can be together.": "我希望我们能在一起。",
+      "I'd like some chicken.": "我想要一些鸡肉。",
+    };
+    return map[text] || "";
   }
 
   function listenCard(item, kind, opts) {
@@ -1989,7 +2038,7 @@ window.ENGLISH_DESK_DATA = {
       type: "listen",
       kind: kind,
       hard: hard,
-      title: hard ? (isJudge ? "听力挑战·判断" : "听力挑战·应答") : isJudge ? "听力判断" : "听应答",
+      title: hard ? (isJudge ? "听力挑战·判断" : "听力挑战·应答") : isJudge ? "听力判断" : "听力对话",
       prompt: prompt,
       speakText: item.speak,
       speakRole: isJudge ? (item.role || "girlChild") : item.role || "adultFemale",
@@ -1997,6 +2046,8 @@ window.ENGLISH_DESK_DATA = {
       autoPlay: true,
       answer: item.answer,
       tip: (item.tip || "") + (hard ? " · 先听再选" : ""),
+      zh: item.zh || String(item.show || "").replace(/^判断[:：]\s*/, "") || lineZh(item.speak),
+      answerZh: item.answerZh || lineZh(((item.choices || []).filter((ch) => String(ch.id) === String(item.answer))[0] || {}).text || ""),
       meaning: item.meaning || "",
       choices:
         isJudge
@@ -2008,24 +2059,26 @@ window.ENGLISH_DESK_DATA = {
     };
   }
 
-  function patternCard(unit, index, store) {
-    const list = patternsFor(unit, store || {}, false);
+  function patternCard(unit, index, store, extendFirst) {
+    const list = patternsFor(unit, store || {}, !!extendFirst);
     const p = list[typeof index === "number" ? index : 0] || null;
     if (!p) return null;
     const demos = (p.demos || []).map((d) => ({
       role: d.role || "girlChild",
       text: d.text,
     }));
+    const student = demos.filter((d) => d.role === "boyChild" || d.role === "girlChild")[0] || demos[0];
     return {
       type: "pattern",
-      title: "跟说句型",
-      prompt: p.label + "\n" + (p.frame || ""),
+      title: "跟读练习",
+      prompt: (extendFirst ? "复习加一句\n" : "") + p.label + "\n" + (student ? student.text : p.frame || ""),
       demos: demos,
-      speakText: demos[0] ? demos[0].text : p.label,
-      speakRole: "girlChild",
+      speakText: student ? student.text : p.label,
+      speakRole: (student && student.role) || "girlChild",
       coach: "bee",
-      tip: (p.steps && p.steps[2]) || "用自己的话再说一遍",
+      tip: extendFirst ? "复习课，大声读。这句会了，单元测试更有把握。" : "先听，再跟着读 3 遍。读出来就算会了。",
       autoPlay: true,
+      followRead: true,
       frame: p.frame || "",
     };
   }
@@ -2131,21 +2184,27 @@ window.ENGLISH_DESK_DATA = {
   function buildCards(unit, sessionId, store) {
     store = store || {};
     const cards = [];
-    if (sessionId === "weekdayListen") {
-      pickWords(unit, store, 5, 1).forEach((w, i) => {
-        cards.push(wordCard(w, i % 2 === 0 ? "dictation" : "zh2en"));
-      });
-      const judges = shuffle(listenFor(unit, store, "judge")).slice(0, 1);
-      const replies = shuffle(listenFor(unit, store, "reply")).slice(0, 1);
-      judges.forEach((j) => cards.push(listenCard(j, "judge")));
-      replies.forEach((r) => cards.push(listenCard(r, "reply")));
-      const pat = patternCard(unit, 0, store);
+    if (sessionId === "weekdayListen" || sessionId === "weekend" || sessionId === "weekdayOral") {
+      // 15–20 分钟：先看中文写对，再听写，然后判断、选答语、跟读。复习课跟读用延展句。
+      const review = isReviewLesson(unit, lessonNo(unit, store));
+      let words = pickWords(unit, store, 4, 1);
+      if (review) {
+        const ext = (unit.words || []).filter((w) => w.extend);
+        const core = words.filter((w) => !w.extend);
+        if (ext.length && core.length) words = core.slice(0, 3).concat([ext[0]]).slice(0, 4);
+      }
+      const see = words.slice(0, 2);
+      const hear = words.slice(2, 4);
+      (see.length ? see : words).forEach((w) => cards.push(wordCard(w, "zh2en")));
+      (hear.length ? hear : see).slice(0, 2).forEach((w) => cards.push(wordCard(w, "dictation")));
+      const judgeList = listenFor(unit, store, "judge");
+      const replyList = listenFor(unit, store, "reply");
+      const judge = review ? (judgeList.filter((x) => x.extend)[0] || judgeList[0]) : judgeList[0];
+      const reply = review ? (replyList.filter((x) => x.extend)[0] || replyList[0]) : replyList[0];
+      if (judge) cards.push(listenCard(judge, "judge"));
+      if (reply) cards.push(listenCard(reply, "reply"));
+      const pat = patternCard(unit, 0, store, review);
       if (pat) cards.push(pat);
-    } else if (sessionId === "weekdayOral") {
-      pickWords(unit, store, 2, 2).forEach((w) => cards.push(wordCard(w, "zh2en")));
-      questionsFor(unit, store).slice(0, 3).forEach((q, i) => cards.push(oralCard(q, i)));
-      const d = dialogueCard(unit);
-      if (d) cards.push(d);
     } else if (sessionId === "retry") {
       return buildRetryCards(unit, store);
     } else if (sessionId === "challenge") {

@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Noto+Sans+SC:wght@500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./theme-duo.css?v=23" />
+  <link rel="stylesheet" href="./theme-duo.css?v=24" />
   <script src="./assets/vendor/lottie.min.js"></script>
 </head>
 <body>
@@ -168,7 +168,7 @@
     </button>
   </nav>
 
-  <script src="./data.js?v=8"></script>
+  <script src="./data.js?v=12"></script>
   <script src="./progress.js?v=8"></script>
   <script src="./voice.js?v=7"></script>
   <script>
@@ -540,7 +540,7 @@
           state.pathId = node.id;
           state.unitId = node.unitId;
         }
-        const sess = Lesson.sessionMeta(state.sessionId);
+        const sess = Lesson.sessionMeta("weekdayListen");
         const u = unit();
         const bookNo = node ? (node.bookLesson || node.lesson) : "";
         const unitTitle = (node && node.unitTitle) || (u && u.name) || "";
@@ -577,7 +577,7 @@
             ? "retry"
             : state.lessonMode === "challenge"
               ? "challenge"
-              : state.sessionId || Lesson.todaySessionId();
+              : "weekdayListen";
         const cardStore = Object.assign({}, store, { currentPathId: state.pathId });
         state.cards = Lesson.buildCards(unit(), sessionId, cardStore);
         state.sessionId = sessionId;
@@ -589,6 +589,7 @@
         state.correctInLesson = 0;
         state.correctStreak = 0;
         state.praiseWait = 0;
+        state.scored = false;
         state.lastSettle = null;
         stopChallengeTimer();
         if (!state.cards.length) {
@@ -796,6 +797,7 @@
         }
         state.revealed = false;
         state.listenLocked = false;
+        state.scored = false;
         state.sortAssign = {};
         state.sortActive = null;
         $("progressFill").style.width = progressPct() + "%";
@@ -1063,32 +1065,82 @@
         $("cardActions").appendChild(go);
       }
 
-      function startFollowRead(c, onDone) {
+      function startFollowRead(c, onDone, opts) {
+        opts = opts || {};
+        const manual = !!opts.manualDone;
         let count = 0;
         $("cardActions").innerHTML = "";
         const tip = document.createElement("p");
         tip.className = "follow-tip";
         tip.id = "followTip";
-        tip.textContent = "跟「翻翻龟」读 3 遍，点一下跟读一遍";
+        tip.textContent = opts.tip || "听正确读音，再跟读 3 遍";
         $("cardExtra").appendChild(tip);
-        actionSpeakPair("听翻翻龟领读", (rate) => wordSpeak(c, rate));
+        actionSpeakPair(opts.lead || "听正确读音", (rate) => wordSpeak(c, rate));
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "btn-ok";
         btn.textContent = "跟读（0 / 3）";
         btn.addEventListener("click", () => {
-          if (!V) return;
           count += 1;
           btn.textContent = "跟读（" + count + " / 3）";
           wordSpeak(c, 1);
-          if (count >= 3) {
-            btn.disabled = true;
-            tip.textContent = "跟读完成，继续下一题";
-            setTimeout(() => onDone(), 700);
+          if (count < 3) return;
+          btn.disabled = true;
+          if (manual) {
+            tip.textContent = opts.doneTip || "读得很棒！点「完成」";
+            const done = document.createElement("button");
+            done.type = "button";
+            done.className = "btn-ok";
+            done.textContent = "完成";
+            done.addEventListener("click", () => onDone());
+            $("cardActions").appendChild(done);
+            return;
           }
+          tip.textContent = "跟读完成，继续下一题";
+          setTimeout(() => onDone(), 700);
         });
         $("cardActions").appendChild(btn);
         setTimeout(() => wordSpeak(c, 1), 200);
+      }
+
+      function fillHighlight(el, text, key) {
+        const raw = String(text || "");
+        const focus = String(key || "").trim();
+        const at = focus ? raw.toLowerCase().indexOf(focus.toLowerCase()) : -1;
+        el.textContent = "";
+        if (at < 0) {
+          el.textContent = raw;
+          return;
+        }
+        el.appendChild(document.createTextNode(raw.slice(0, at)));
+        const mark = document.createElement("mark");
+        mark.textContent = raw.slice(at, at + focus.length);
+        el.appendChild(mark);
+        el.appendChild(document.createTextNode(raw.slice(at + focus.length)));
+      }
+
+      function listenFocus(c) {
+        const choice = (c.choices || []).filter((ch) => String(ch.id) === String(c.answer))[0];
+        const answerEn = c.kind === "reply" && choice ? choice.label : "";
+        const tipEn = String(c.tip || "").match(/[A-Za-z][A-Za-z'’ .,!?]*/);
+        let key = tipEn ? tipEn[0].trim().replace(/[.?!,\s]+$/, "") : "";
+        if (!key) key = answerEn;
+        return {
+          original: c.speakText || "",
+          key: key,
+          answerEn: answerEn,
+          zh: c.zh || "",
+          answerZh: c.answerZh || "",
+        };
+      }
+
+      function replayListenFocus(c, focus) {
+        if (!V) return;
+        const role = c.speakRole || "girlChild";
+        const again = V.speak(focus.original, role);
+        if (again && again.then && focus.answerEn && focus.answerEn !== focus.original) {
+          again.then(() => V.speak(focus.answerEn, "girlChild"));
+        }
       }
 
       function renderWordCard(c) {
@@ -1135,35 +1187,25 @@
             if (input) input.focus();
             return;
           }
-          if (typed === right) {
-            state.revealed = true;
-            const peek = document.createElement("div");
-            peek.className = "answer-peek ok";
-            peek.textContent = "对了！ " + c.en;
-            extra.appendChild(peek);
-            confirm.disabled = true;
-            if (input) input.disabled = true;
-            wordSpeak(c, 1);
-            $("cardActions").innerHTML = "";
-            showAnswerThenContinue(c, true);
-            return;
-          }
+          const ok = typed === right;
           state.revealed = true;
-          if (input) input.disabled = true;
           confirm.disabled = true;
+          if (input) input.disabled = true;
           const peek = document.createElement("div");
-          peek.className = "answer-peek";
-          peek.textContent = "正确答案：" + c.en;
+          peek.className = "answer-peek" + (ok ? " ok" : "");
+          peek.textContent = (ok ? "对了！ " : "正确答案：") + c.en;
           extra.appendChild(peek);
-          if (isDictation) {
-            $("cardSub").textContent = "先听翻翻龟领读，再跟读 3 遍";
-            $("cardActions").innerHTML = "";
-            startFollowRead(c, () => advance(false, c));
-            return;
-          }
-          $("cardSub").textContent = "听一遍正确答案，会了再继续";
-          wordSpeak(c, 1);
-          showAnswerThenContinue(c, false);
+          $("cardSub").textContent = "先听鼓励，再听正确读音，大声跟读 3 遍";
+          $("cardActions").innerHTML = "";
+          const wait = scoreAnswer(ok, c);
+          state.praiseWait = 0;
+          setTimeout(() => {
+            if (state.view !== "lesson" || card() !== c) return;
+            startFollowRead(c, () => advance(ok, c), {
+              tip: "听正确读音，大声跟读 3 遍",
+              lead: "听正确读音",
+            });
+          }, wait);
         });
         $("cardActions").appendChild(confirm);
         const hintBtn = document.createElement("button");
@@ -1228,10 +1270,67 @@
             box.querySelectorAll(".choice").forEach((el, i) => {
               if (String(c.choices[i].id) === String(c.answer)) el.classList.add("correct");
             });
-            let tip = (ok ? "对了。 " : "再听会更准。 ") + (c.tip || "");
-            if (c.hard && c.meaning) tip += " 原意：" + c.meaning;
-            $("cardSub").textContent = tip;
-            setTimeout(() => advance(ok), 700);
+            if (ok) {
+              $("cardSub").textContent = "对了。 " + (c.tip || "");
+              setTimeout(() => advance(true), 700);
+              return;
+            }
+            const focus = listenFocus(c);
+            const wait = scoreAnswer(false, c);
+            state.praiseWait = 0;
+            $("cardSub").textContent = "先听鼓励。再看英文和中文，听懂。";
+            const panel = document.createElement("div");
+            panel.className = "listen-repair";
+            const lab = document.createElement("p");
+            lab.className = "repair-label";
+            lab.textContent = "英文原文和中文，认真看";
+            const en = document.createElement("p");
+            en.className = "repair-en";
+            fillHighlight(en, focus.original, focus.key);
+            panel.appendChild(lab);
+            panel.appendChild(en);
+            if (focus.zh) {
+              const zh = document.createElement("p");
+              zh.className = "repair-zh";
+              zh.textContent = "中文：" + focus.zh;
+              panel.appendChild(zh);
+            }
+            if (focus.answerEn) {
+              const ans = document.createElement("p");
+              ans.className = "repair-en";
+              ans.appendChild(document.createTextNode("正确答语："));
+              const mark = document.createElement("mark");
+              mark.textContent = focus.answerEn;
+              ans.appendChild(mark);
+              panel.appendChild(ans);
+              if (focus.answerZh) {
+                const az = document.createElement("p");
+                az.className = "repair-zh";
+                az.textContent = "中文：" + focus.answerZh;
+                panel.appendChild(az);
+              }
+            } else if (focus.key) {
+              const keyLine = document.createElement("p");
+              keyLine.className = "repair-key";
+              keyLine.appendChild(document.createTextNode("重点："));
+              const mark = document.createElement("mark");
+              mark.textContent = focus.key;
+              keyLine.appendChild(mark);
+              panel.appendChild(keyLine);
+            }
+            extra.appendChild(panel);
+            $("cardActions").innerHTML = "";
+            actionSpeak("再听英文", () => replayListenFocus(c, focus));
+            const go = document.createElement("button");
+            go.type = "button";
+            go.className = "btn-ok";
+            go.textContent = "听懂了";
+            go.addEventListener("click", () => advance(false));
+            $("cardActions").appendChild(go);
+            setTimeout(() => {
+              if (state.view !== "lesson" || card() !== c) return;
+              replayListenFocus(c, focus);
+            }, wait);
           });
           box.appendChild(b);
         });
@@ -1260,6 +1359,18 @@
         const extra = $("cardExtra");
         extra.innerHTML = "";
         $("cardActions").innerHTML = "";
+        if (c.followRead) {
+          extra.appendChild(coachBanner("bee", "大声读出来。跟 3 遍，然后自己点完成"));
+          $("cardPrompt").textContent = c.speakText || c.prompt || "";
+          $("cardSub").textContent = c.tip || "大声跟读 3 遍，读完自己点完成";
+          startFollowRead(c, () => advance(true, c), {
+            manualDone: true,
+            tip: "大声跟读 3 遍。读完自己点「完成」。",
+            doneTip: "声音真棒！点「完成」就过关。",
+            lead: "再听一遍",
+          });
+          return;
+        }
         extra.appendChild(coachBanner("bee", "听双人对话示范，再自己说一遍"));
         const target =
           (c.demos && c.demos[0] && c.demos[0].text) ||
@@ -1575,7 +1686,9 @@
         saveStore({ retryWords: retry });
       }
 
-      function advance(ok, c) {
+      function scoreAnswer(ok, c) {
+        if (state.scored) return state.praiseWait || 0;
+        state.scored = true;
         const cur = c || card();
         state.results.push(!!ok);
         const tracked = Progress.recordAnswer(walletStore(), !!ok);
@@ -1584,8 +1697,14 @@
         if (ok && cur && cur.retryWord) clearRetry(cur);
         if (ok) onCorrectReward();
         else onWrongReward();
+        return state.praiseWait || (ok ? 900 : 1200);
+      }
+
+      function advance(ok, c) {
+        if (!state.scored) scoreAnswer(ok, c);
+        state.scored = false;
         state.index += 1;
-        const delay = state.praiseWait || (ok ? 900 : 1200);
+        const delay = state.praiseWait || 400;
         state.praiseWait = 0;
         setTimeout(() => {
           if (state.index >= state.cards.length) finishLesson();
