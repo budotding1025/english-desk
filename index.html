@@ -174,7 +174,7 @@
     </button>
   </nav>
 
-  <script src="./data.js?v=14"></script>
+  <script src="./data.js?v=15"></script>
   <script src="./progress.js?v=10"></script>
   <script src="./voice.js?v=8"></script>
   <script>
@@ -1172,10 +1172,16 @@
       function wordSpeak(c, rate) {
         if (V && V.prime) V.prime();
         if (!V || !c) return;
-        const text = String(c.en || c.speakText || "").trim();
-        if (!text || text === "null" || text === "undefined") return;
         const role = c.speakRole || (c.mode === "dictation" ? "boyChild" : "adultMale");
-        V.speak(text, role, rate && rate !== 1 ? { rate: rate } : undefined);
+        const opts = rate && rate !== 1 ? { rate: rate } : undefined;
+        const words = (c.followWords || []).map((w) => String(w || "").trim()).filter(Boolean);
+        if (words.length >= 2) {
+          V.speakSequence(words.map((text) => ({ role: role, text: text, rate: opts && opts.rate })));
+          return;
+        }
+        const text = String(c.en || c.speakText || words[0] || "").trim();
+        if (!text || text === "null" || text === "undefined") return;
+        V.speak(text, role, opts);
       }
       function actionOkBad(onOk, onBad) {
         const row = document.createElement("div");
@@ -1386,6 +1392,17 @@
         }, 120);
       }
 
+      function phonicsFollowCard(c) {
+        const left = (c.left && c.left.en) || "";
+        const right = (c.right && c.right.en) || "";
+        return {
+          en: left + " · " + right,
+          speakText: left + " " + right,
+          speakRole: "girlChild",
+          followWords: [left, right].filter(Boolean),
+        };
+      }
+
       function renderPhonicsCard(c) {
         const extra = $("cardExtra");
         extra.innerHTML = "";
@@ -1441,11 +1458,9 @@
             got.className = "btn-ok";
             got.textContent = "听懂了";
             got.addEventListener("click", () => {
-              startFollowRead(
-                { en: c.speakFollow || c.en, speakText: c.speakFollow || c.en, speakRole: "girlChild" },
-                () => advance(ok, c),
-                { tip: "大声跟读这个音的词 3 遍" }
-              );
+              startFollowRead(phonicsFollowCard(c), () => advance(ok, c), {
+                tip: "大声跟读这两个词 3 遍",
+              });
             });
             $("cardActions").appendChild(got);
             return;
@@ -1453,11 +1468,9 @@
           $("cardSub").textContent = "对了！" + (c.rule ? " " + c.rule : "");
           setTimeout(() => {
             if (state.view !== "lesson" || card() !== c) return;
-            startFollowRead(
-              { en: c.speakFollow || c.en, speakText: c.speakFollow || c.en, speakRole: "girlChild" },
-              () => advance(ok, c),
-              { tip: "大声跟读这个音的词 3 遍" }
-            );
+            startFollowRead(phonicsFollowCard(c), () => advance(ok, c), {
+              tip: "大声跟读这两个词 3 遍",
+            });
           }, wait);
         }
 

@@ -2409,9 +2409,10 @@ window.ENGLISH_DESK_DATA = {
       speakRole: "girlChild",
       coach: "bee",
       autoPlay: true,
-      en: p.follow || p.left.en,
+      en: p.left.en + " · " + p.right.en,
       followRead: true,
-      speakFollow: p.follow || p.left.en,
+      followWords: [p.left.en, p.right.en],
+      speakFollow: p.left.en + " " + p.right.en,
     }));
   }
 
