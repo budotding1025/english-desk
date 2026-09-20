@@ -2344,77 +2344,117 @@ window.ENGLISH_DESK_DATA = {
       follow: "look",
     },
     {
-      id: "i-same",
-      needLesson: 5,
-      left: { en: "ill", mark: "i" },
-      right: { en: "pig", mark: "i" },
+      id: "i_e-like",
+      needLesson: 8,
+      left: { en: "like", mark: "i" },
+      right: { en: "time", mark: "i" },
       same: true,
-      sound: "/ɪ/",
-      rule: "ill、pig 里的 i，常读短音 /ɪ/。",
-      follow: "ill",
+      sound: "/aɪ/",
+      rule: "i_e 常读 /aɪ/。like、time 都是这个音。",
+      follow: "like",
+    },
+    {
+      id: "o-hot",
+      needLesson: 8,
+      left: { en: "hot", mark: "o" },
+      right: { en: "dog", mark: "o" },
+      same: true,
+      sound: "/ɒ/",
+      rule: "hot、dog 里的 o，常读短音 /ɒ/。",
+      follow: "hot",
+    },
+    {
+      id: "ar-hard",
+      needLesson: 6,
+      left: { en: "hard", mark: "ar" },
+      right: { en: "start", mark: "ar" },
+      same: true,
+      sound: "/ɑː/",
+      rule: "hard、start 里的 ar，常读 /ɑː/。",
+      follow: "hard",
+    },
+    {
+      id: "sh-share",
+      needLesson: 8,
+      left: { en: "share", mark: "sh" },
+      right: { en: "should", mark: "sh" },
+      same: true,
+      sound: "/ʃ/",
+      rule: "share、should 开头的 sh，读 /ʃ/。",
+      follow: "share",
+    },
+    {
+      id: "ea-please",
+      needLesson: 9,
+      left: { en: "please", mark: "ea" },
+      right: { en: "eat", mark: "ea" },
+      same: true,
+      sound: "/iː/",
+      rule: "please、eat 里的 ea，常读 /iː/。",
+      follow: "please",
+    },
+    {
+      id: "o_e-hope",
+      needLesson: 12,
+      left: { en: "hope", mark: "o" },
+      right: { en: "home", mark: "o" },
+      same: true,
+      sound: "/əʊ/",
+      rule: "o_e 常读 /əʊ/。hope、home 都是这个音。",
+      follow: "hope",
+    },
+    {
+      id: "u_e-cute",
+      needLesson: 12,
+      left: { en: "cute", mark: "u" },
+      right: { en: "use", mark: "u" },
+      same: true,
+      sound: "/juː/",
+      rule: "cute、use 里的 u_e，常读 /juː/。",
+      follow: "cute",
+    },
+    {
+      id: "ae-bat",
+      needLesson: 9,
+      left: { en: "bat", mark: "a" },
+      right: { en: "cat", mark: "a" },
+      same: true,
+      sound: "/æ/",
+      rule: "bat、cat 里的 a，都读 /æ/。",
+      follow: "bat",
+    },
+    {
+      id: "e-get",
+      needLesson: 11,
+      left: { en: "get", mark: "e" },
+      right: { en: "bed", mark: "e" },
+      same: true,
+      sound: "/e/",
+      rule: "get、bed 里的 e，都读短音 /e/。",
+      follow: "get",
     },
     {
       id: "i-diff",
-      needLesson: 5,
-      left: { en: "ill", mark: "i" },
-      right: { en: "like", mark: "i" },
+      needLesson: 8,
+      left: { en: "like", mark: "i" },
+      right: { en: "ill", mark: "i" },
       same: false,
-      sound: "/ɪ/ ≠ /aɪ/",
-      rule: "ill 的 i 读 /ɪ/，like 的 i_e 读 /aɪ/。不一样。",
-      follow: "ill",
+      sound: "/aɪ/ ≠ /ɪ/",
+      rule: "like 的 i 读 /aɪ/，ill 的 i 读短音 /ɪ/。不一样。",
+      follow: "like",
     },
     {
-      id: "or-door",
-      needLesson: 9,
-      left: { en: "door", mark: "oor" },
-      right: { en: "fork", mark: "or" },
-      same: true,
-      sound: "/ɔː/",
-      rule: "door、fork 里的 or/oor，常读 /ɔː/。",
-      follow: "door",
+      id: "o-diff",
+      needLesson: 12,
+      left: { en: "hope", mark: "o" },
+      right: { en: "hot", mark: "o" },
+      same: false,
+      sound: "/əʊ/ ≠ /ɒ/",
+      rule: "hope 的 o 读 /əʊ/，hot 的 o 读 /ɒ/。不一样。",
+      follow: "hope",
     },
     {
-      id: "a-apple",
-      needLesson: 13,
-      left: { en: "apple", mark: "a" },
-      right: { en: "happy", mark: "a" },
-      same: true,
-      sound: "/æ/",
-      rule: "apple、happy 里的 a，常读 /æ/。",
-      follow: "apple",
-    },
-    {
-      id: "u-cut",
-      needLesson: 13,
-      left: { en: "cut", mark: "u" },
-      right: { en: "but", mark: "u" },
-      same: true,
-      sound: "/ʌ/",
-      rule: "cut、but 里的 u，常读短音 /ʌ/。",
-      follow: "cut",
-    },
-    {
-      id: "ar-farm",
-      needLesson: 17,
-      left: { en: "farm", mark: "ar" },
-      right: { en: "car", mark: "ar" },
-      same: true,
-      sound: "/ɑː/",
-      rule: "farm、car 里的 ar，常读 /ɑː/。",
-      follow: "farm",
-    },
-    {
-      id: "ow-snow",
-      needLesson: 17,
-      left: { en: "snow", mark: "ow" },
-      right: { en: "go", mark: "o" },
-      same: true,
-      sound: "/əʊ/",
-      rule: "snow、go 常读长音 /əʊ/。",
-      follow: "snow",
-    },
-    {
-      id: "th-same",
+      id: "th-these",
       needLesson: 4,
       left: { en: "these", mark: "th" },
       right: { en: "the", mark: "th" },
@@ -2422,26 +2462,6 @@ window.ENGLISH_DESK_DATA = {
       sound: "/ð/",
       rule: "these、the 开头的 th，常读浊音 /ð/。",
       follow: "these",
-    },
-    {
-      id: "sh-share",
-      needLesson: 8,
-      left: { en: "share", mark: "sh" },
-      right: { en: "she", mark: "sh" },
-      same: true,
-      sound: "/ʃ/",
-      rule: "share、she 里的 sh，常读 /ʃ/。",
-      follow: "share",
-    },
-    {
-      id: "ch-chicken",
-      needLesson: 13,
-      left: { en: "chicken", mark: "ch" },
-      right: { en: "chopsticks", mark: "ch" },
-      same: true,
-      sound: "/tʃ/",
-      rule: "chicken、chopsticks 里的 ch，常读 /tʃ/。",
-      follow: "chicken",
     },
   ];
 
@@ -2468,7 +2488,7 @@ window.ENGLISH_DESK_DATA = {
         if (book > max) max = book;
       }
     }
-    // 卷面常考 U1 拼读，至少开放到 Lesson 4 的词
+    // 卷面常考拼读；至少开放到当前课，且不低于 Lesson 4
     return Math.max(max, 4);
   }
 
@@ -2491,7 +2511,7 @@ window.ENGLISH_DESK_DATA = {
     store = store || {};
     const unlock = phonicsUnlockLesson(store);
     const pool = PHONICS_PAIRS.filter((p) => (p.needLesson || 1) <= unlock);
-    const picked = shuffle(pool.length ? pool : PHONICS_PAIRS).slice(0, 5);
+    const picked = shuffle(pool.length ? pool : PHONICS_PAIRS).slice(0, 6);
     return picked.map((p) => ({
       type: "phonics",
       title: "发音判断",
@@ -2520,20 +2540,24 @@ window.ENGLISH_DESK_DATA = {
     store = store || {};
     const cards = [];
     const hardWords = (unit.words || []).filter(function (w) { return w.extend || w.priority === "high"; });
-    // 先听写，再口语：题量偏短，跟读暂停计时也不至于一次太累
-    shuffle(hardWords.length ? hardWords : (unit.words || [])).slice(0, 2).forEach((w) => cards.push(wordCard(w, "dictation")));
+    shuffle(hardWords.length ? hardWords : (unit.words || [])).slice(0, 3).forEach((w) => cards.push(wordCard(w, "dictation")));
 
-    shuffle(listenFor(unit, store, "judge", true)).slice(0, 1).forEach((j) => {
+    shuffle(listenFor(unit, store, "judge", true)).slice(0, 2).forEach((j) => {
       cards.push(listenCard(j, "judge", { hard: true }));
     });
-    shuffle(listenFor(unit, store, "reply", true)).slice(0, 1).forEach((r) => {
-      cards.push(listenCard(r, "reply", { hard: true }));
-    });
+    const replyOne = shuffle(listenFor(unit, store, "reply", true))[0];
+    if (replyOne) cards.push(listenCard(replyOne, "reply", { hard: true }));
+
+    const s = sortCard(unit);
+    if (s) {
+      s.title = "词分类挑战";
+      cards.push(s);
+    }
 
     const sent1 = sentenceCard(unit, 0, store);
     if (sent1) cards.push(sent1);
 
-    shuffle(questionsFor(unit, store, true)).slice(0, 1).forEach((q, i) => {
+    shuffle(questionsFor(unit, store, true)).slice(0, 2).forEach((q, i) => {
       cards.push(oralCard(q, i, { challenge: true }));
     });
 

@@ -1058,7 +1058,6 @@ button { cursor: pointer; border: none; background: none; }
   margin: 0 16px 12px;
 }
 .rec-action {
-  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -1071,14 +1070,9 @@ button { cursor: pointer; border: none; background: none; }
   font-weight: 800;
 }
 .rec-action strong { font-size: 0.95rem; color: var(--ink); }
-.rec-action span:not(.nav-badge) { font-size: 0.72rem; color: var(--muted); font-weight: 700; }
+.rec-action span { font-size: 0.72rem; color: var(--muted); font-weight: 700; }
 .rec-action.challenge { border-color: #ffc800; background: #fff9e6; }
 .rec-action:disabled { opacity: 0.45; }
-.rec-action .nav-badge.rec-badge {
-  top: -6px;
-  right: -6px;
-  left: auto;
-}
 .records-empty {
   margin: 24px 16px;
   text-align: center;
@@ -1138,6 +1132,23 @@ button { cursor: pointer; border: none; background: none; }
   font-size: 0.82rem;
   font-weight: 700;
 }
+.shop-note.rules {
+  list-style: none;
+  padding: 10px 12px;
+  margin: 4px 16px 12px;
+  background: #f7faf2;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  line-height: 1.55;
+}
+.shop-note.rules li {
+  margin: 0 0 6px;
+  padding-left: 0;
+  color: #3c3c3c;
+  font-weight: 800;
+  font-size: 0.88rem;
+}
+.shop-note.rules li:last-child { margin-bottom: 0; }
 .rank-card .rank-perk, .rank-card .rank-cost { margin: 4px 0; }
 .rank-bar {
   height: 10px;
@@ -1155,19 +1166,7 @@ button { cursor: pointer; border: none; background: none; }
 .shop-copy span, .shop-copy small { color: var(--muted); font-weight: 700; font-size: 0.75rem; }
 .shop-btns { display: flex; flex-direction: column; gap: 6px; }
 .btn-ok.sm, .btn-speak.sm { min-height: 36px; padding: 6px 10px; font-size: 0.8rem; }
-.shop-note.rules {
-  margin: 8px 0 0;
-  padding: 10px 12px 10px 28px;
-  list-style: disc;
-  background: #f7fff0;
-  border: 2px solid #d7efb8;
-  border-radius: 12px;
-  color: #3c3c3c;
-  font-weight: 700;
-  font-size: 0.88rem;
-  line-height: 1.55;
-}
-.shop-note.rules li { margin: 2px 0; }
+.shop-owned { font-weight: 800; color: var(--accent-deep); font-size: 0.8rem; }
 .challenge-clock {
   display: flex;
   align-items: center;
