@@ -2209,6 +2209,8 @@ window.ENGLISH_DESK_DATA = {
       return buildRetryCards(unit, store);
     } else if (sessionId === "challenge") {
       return buildChallengeCards(unit, store);
+    } else if (sessionId === "phonics") {
+      return buildPhonicsCards(store);
     } else {
       const s = sortCard(unit);
       if (s) cards.push(s);
@@ -2237,6 +2239,180 @@ window.ENGLISH_DESK_DATA = {
       cards.push(wordCard({ en: r.en, zh: r.zh, src: "错词", priority: "high" }, i % 2 === 0 ? "dictation" : "zh2en"));
     });
     return cards;
+  }
+
+  /** 发音小站：用课本词练「画线部分发音是否相同」（卷面题型） */
+  const PHONICS_PAIRS = [
+    {
+      id: "a_e-same",
+      needLesson: 3,
+      left: { en: "cake", mark: "a" },
+      right: { en: "plane", mark: "a" },
+      same: true,
+      sound: "/eɪ/",
+      rule: "a_e 常读 /eɪ/。cake、plane、late 都是这个音。",
+      follow: "cake",
+    },
+    {
+      id: "a_e-late",
+      needLesson: 1,
+      left: { en: "late", mark: "a" },
+      right: { en: "cake", mark: "a" },
+      same: true,
+      sound: "/eɪ/",
+      rule: "late 和 cake 中间的 a，都读 /eɪ/。",
+      follow: "late",
+    },
+    {
+      id: "ae-same",
+      needLesson: 2,
+      left: { en: "sad", mark: "a" },
+      right: { en: "angry", mark: "a" },
+      same: true,
+      sound: "/æ/",
+      rule: "sad、angry、happy 里的 a，常读 /æ/，嘴巴张大一点。",
+      follow: "sad",
+    },
+    {
+      id: "ae-happy",
+      needLesson: 1,
+      left: { en: "happy", mark: "a" },
+      right: { en: "cat", mark: "a" },
+      same: true,
+      sound: "/æ/",
+      rule: "happy 和 cat 里的 a，都读 /æ/。",
+      follow: "happy",
+    },
+    {
+      id: "ee-same",
+      needLesson: 1,
+      left: { en: "he", mark: "e" },
+      right: { en: "she", mark: "e" },
+      same: true,
+      sound: "/iː/",
+      rule: "he、she 里的 e，常读长音 /iː/。",
+      follow: "he",
+    },
+    {
+      id: "ee-feel",
+      needLesson: 1,
+      left: { en: "feel", mark: "ee" },
+      right: { en: "these", mark: "e" },
+      same: true,
+      sound: "/iː/",
+      rule: "feel 的 ee、these 的 e，都读 /iː/。",
+      follow: "feel",
+    },
+    {
+      id: "e-diff",
+      needLesson: 1,
+      left: { en: "bed", mark: "e" },
+      right: { en: "me", mark: "e" },
+      same: false,
+      sound: "/e/ ≠ /iː/",
+      rule: "bed 的 e 读短音 /e/，me 的 e 读长音 /iː/。不一样。",
+      follow: "bed",
+    },
+    {
+      id: "a-diff",
+      needLesson: 1,
+      left: { en: "late", mark: "a" },
+      right: { en: "sad", mark: "a" },
+      same: false,
+      sound: "/eɪ/ ≠ /æ/",
+      rule: "late 的 a 读 /eɪ/，sad 的 a 读 /æ/。不一样。",
+      follow: "late",
+    },
+    {
+      id: "o-same",
+      needLesson: 2,
+      left: { en: "dog", mark: "o" },
+      right: { en: "model", mark: "o" },
+      same: true,
+      sound: "/ɒ/",
+      rule: "dog、model 里的 o，常读短音 /ɒ/。",
+      follow: "dog",
+    },
+    {
+      id: "oo-look",
+      needLesson: 2,
+      left: { en: "look", mark: "oo" },
+      right: { en: "good", mark: "oo" },
+      same: true,
+      sound: "/ʊ/",
+      rule: "look、good 里的 oo，常读短音 /ʊ/。",
+      follow: "look",
+    },
+  ];
+
+  function phonicsUnlockLesson(store) {
+    store = store || {};
+    let max = 0;
+    const done = store.completedLessons || {};
+    (DATA.units || []).forEach((u) => {
+      const n = u.lessonCount || 4;
+      for (let i = 1; i <= n; i++) {
+        const id = u.id + "-L" + i;
+        if (done[id] && done[id].count > 0) {
+          const book = (u.lessonStart || 1) + i - 1;
+          if (book > max) max = book;
+        }
+      }
+    });
+    const cur = store.currentPathId || "";
+    const m = cur.match(/^u(\d+)-L(\d+)$/);
+    if (m) {
+      const u = (DATA.units || []).filter((x) => x.id === "u" + m[1])[0];
+      if (u) {
+        const book = (u.lessonStart || 1) + Number(m[2]) - 1;
+        if (book > max) max = book;
+      }
+    }
+    // 卷面常考 U1 拼读，至少开放到 Lesson 4 的词
+    return Math.max(max, 4);
+  }
+
+  function markWordHtml(en, mark) {
+    const word = String(en || "");
+    const m = String(mark || "");
+    if (!m) return word;
+    const at = word.toLowerCase().indexOf(m.toLowerCase());
+    if (at < 0) return word;
+    return (
+      word.slice(0, at) +
+      "<mark>" +
+      word.slice(at, at + m.length) +
+      "</mark>" +
+      word.slice(at + m.length)
+    );
+  }
+
+  function buildPhonicsCards(store) {
+    store = store || {};
+    const unlock = phonicsUnlockLesson(store);
+    const pool = PHONICS_PAIRS.filter((p) => (p.needLesson || 1) <= unlock);
+    const picked = shuffle(pool.length ? pool : PHONICS_PAIRS).slice(0, 5);
+    return picked.map((p) => ({
+      type: "phonics",
+      title: "发音判断",
+      prompt: "听一听，画线部分发音相同吗？",
+      tip: "相同画 √，不相同画 ×",
+      left: p.left,
+      right: p.right,
+      leftHtml: markWordHtml(p.left.en, p.left.mark),
+      rightHtml: markWordHtml(p.right.en, p.right.mark),
+      same: !!p.same,
+      answer: !!p.same,
+      sound: p.sound || "",
+      rule: p.rule || "",
+      speakText: p.left.en + ". " + p.right.en,
+      speakRole: "girlChild",
+      coach: "bee",
+      autoPlay: true,
+      en: p.follow || p.left.en,
+      followRead: true,
+      speakFollow: p.follow || p.left.en,
+    }));
   }
 
   function buildChallengeCards(unit, store) {
@@ -2286,6 +2462,7 @@ window.ENGLISH_DESK_DATA = {
     buildCards,
     buildRetryCards,
     buildChallengeCards,
+    buildPhonicsCards,
     eggLine,
     shuffle,
   };

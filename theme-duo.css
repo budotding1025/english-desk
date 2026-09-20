@@ -310,12 +310,36 @@ button { cursor: pointer; border: none; background: none; }
   color: #3c3c3c;
 }
 .repair-zh { font-size: 1rem; color: #5c4a32; }
-.listen-repair mark {
+.listen-repair mark,
+.phonics-word mark {
   background: #ffe14a;
   color: #3c3c3c;
   font-weight: 800;
   padding: 0 4px;
   border-radius: 4px;
+}
+.phonics-pair {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin: 12px 0 4px;
+  padding: 14px 12px;
+  border-radius: 16px;
+  background: #fff8dc;
+  border: 2px solid #f0d878;
+}
+.phonics-word {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #3c3c3c;
+  letter-spacing: 0.02em;
+}
+.phonics-vs {
+  font-weight: 800;
+  color: var(--muted);
+  font-size: 1.2rem;
 }
 .coach-banner {
   display: flex;
@@ -1059,10 +1083,26 @@ button { cursor: pointer; border: none; background: none; }
 
 .mark { width: 18px; height: 18px; display: block; }
 .home-nav-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  min-width: 48px;
+  padding: 2px 4px;
   font-weight: 800;
   color: var(--accent-deep);
-  font-size: 0.95rem;
-  padding: 4px 0;
+  font-size: 0.72rem;
+  line-height: 1.1;
+  background: transparent;
+  border: 0;
+}
+.home-nav-btn .nav-lottie {
+  width: 32px;
+  height: 32px;
+}
+.home-nav-btn .nav-label {
+  letter-spacing: 0.02em;
 }
 .lesson-top { grid-template-columns: auto 1fr auto; }
 .lesson-head { padding: 10px 16px 0; }

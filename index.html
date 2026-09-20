@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Noto+Sans+SC:wght@500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./theme-duo.css?v=26" />
+  <link rel="stylesheet" href="./theme-duo.css?v=28" />
   <script src="./assets/vendor/lottie.min.js"></script>
 </head>
 <body>
@@ -91,7 +91,10 @@
   <!-- LESSON -->
   <div class="screen hidden" id="screenLesson">
     <div class="lesson-top">
-      <button type="button" class="home-nav-btn" id="btnCloseLesson" aria-label="Home">Home</button>
+      <button type="button" class="home-nav-btn" id="btnCloseLesson" aria-label="Home">
+        <span class="nav-lottie" id="lessonHomeLottie" aria-hidden="true"></span>
+        <span class="nav-label">Home</span>
+      </button>
       <div class="progress" aria-hidden="true"><i id="progressFill"></i></div>
       <div class="lesson-wallet">
         <span class="wallet-pill coin sm" id="lessonCoinsHud"><img class="mark" src="./assets/icons/coin.svg" alt="" /><b>+0</b></span>
@@ -171,8 +174,8 @@
     </button>
   </nav>
 
-  <script src="./data.js?v=13"></script>
-  <script src="./progress.js?v=9"></script>
+  <script src="./data.js?v=14"></script>
+  <script src="./progress.js?v=10"></script>
   <script src="./voice.js?v=8"></script>
   <script>
     (function () {
@@ -316,49 +319,60 @@
         }
         if (name !== "lesson") stopChallengeTimer();
         if (name !== "lesson" && V) V.stop();
+        if (name === "lesson") playLessonHome();
       }
 
-      let navHomeAnim = null;
-      function mountNavHome() {
-        const host = $("navHomeLottie");
-        if (!host || navHomeAnim) return;
+      const homeAnims = {};
+      function mountHomeLottie(hostId) {
+        const host = $(hostId);
+        if (!host || homeAnims[hostId]) return homeAnims[hostId] || null;
         if (!window.lottie || location.protocol === "file:") {
           host.textContent = "🏠";
           host.classList.add("nav-fallback");
-          return;
+          return null;
         }
         try {
-          navHomeAnim = window.lottie.loadAnimation({
+          const anim = window.lottie.loadAnimation({
             container: host,
             renderer: "svg",
             loop: true,
             autoplay: true,
             path: "./assets/lottie/home-in-out.json?v=2",
           });
-          navHomeAnim.addEventListener("DOMLoaded", () => {
-            try { navHomeAnim.play(); } catch (e) {}
+          homeAnims[hostId] = anim;
+          anim.addEventListener("DOMLoaded", () => {
+            try { anim.play(); } catch (e) {}
           });
-          navHomeAnim.addEventListener("data_failed", () => {
+          anim.addEventListener("data_failed", () => {
             host.textContent = "🏠";
             host.classList.add("nav-fallback");
-            navHomeAnim = null;
+            homeAnims[hostId] = null;
           });
+          return anim;
         } catch (e) {
           host.textContent = "🏠";
           host.classList.add("nav-fallback");
+          return null;
         }
       }
-      function playNavHome() {
-        if (!navHomeAnim) {
-          mountNavHome();
-        }
-        if (!navHomeAnim) return;
+      function mountNavHome() {
+        mountHomeLottie("navHomeLottie");
+        mountHomeLottie("lessonHomeLottie");
+      }
+      function playHomeLottie(hostId) {
+        let anim = homeAnims[hostId];
+        if (!anim) anim = mountHomeLottie(hostId);
+        if (!anim) return;
         try {
-          if (navHomeAnim.isPaused) navHomeAnim.play();
-          else {
-            navHomeAnim.goToAndPlay(0, true);
-          }
+          if (anim.isPaused) anim.play();
+          else anim.goToAndPlay(0, true);
         } catch (e) {}
+      }
+      function playNavHome() {
+        playHomeLottie("navHomeLottie");
+      }
+      function playLessonHome() {
+        playHomeLottie("lessonHomeLottie");
       }
       function syncNav(active) {
         document.querySelectorAll(".nav-item").forEach((el) => {
@@ -686,7 +700,9 @@
             ? "retry"
             : state.lessonMode === "challenge"
               ? "challenge"
-              : "weekdayListen";
+              : state.lessonMode === "phonics"
+                ? "phonics"
+                : "weekdayListen";
         const cardStore = Object.assign({}, store, { currentPathId: state.pathId });
         state.cards = Lesson.buildCards(unit(), sessionId, cardStore);
         state.sessionId = sessionId;
@@ -703,6 +719,7 @@
         stopChallengeTimer();
         if (!state.cards.length) {
           if (state.lessonMode === "retry") alert("暂时没有错题，先去上课积累几道吧。");
+          else if (state.lessonMode === "phonics") alert("发音小站还在准备词，先去上一课吧。");
           else alert("本单元暂无练习内容。");
           return;
         }
@@ -839,7 +856,7 @@
             '<div class="rec-stat float"><strong>' + (floatAcc == null ? "—" : floatAcc + "%") + "</strong><span>浮动正确率</span><small>近 " + (recentN || Progress.FLOAT_WINDOW) + " 题</small></div>" +
             '<div class="rec-stat"><strong>' + retries.length + "</strong><span>错题待练</span><small>错词本</small></div>" +
             "</div>" +
-            '<p class="score-sub">上课和错题复习计入正确率。难度挑战不算。</p>';
+            '<p class="score-sub">上课和错题复习计入正确率。发音小站、难度挑战不算。</p>';
         }
         if ($("recordsActions")) {
           $("recordsActions").innerHTML = "";
@@ -857,7 +874,13 @@
           challengeBtn.className = "rec-action challenge";
           challengeBtn.innerHTML = "<strong>难度挑战</strong><span>加长听力 · 造句 · 口语</span>";
           challengeBtn.addEventListener("click", () => startLesson(null, { mode: "challenge" }));
+          const phonicsBtn = document.createElement("button");
+          phonicsBtn.type = "button";
+          phonicsBtn.className = "rec-action";
+          phonicsBtn.innerHTML = "<strong>发音小站</strong><span>听熟词 · 判 √× · 跟读画线音</span>";
+          phonicsBtn.addEventListener("click", () => startLesson(null, { mode: "phonics" }));
           $("recordsActions").appendChild(retryBtn);
+          $("recordsActions").appendChild(phonicsBtn);
           $("recordsActions").appendChild(challengeBtn);
         }
         if ($("recordsMeta")) {
@@ -923,6 +946,7 @@
         else if (c.type === "listen") renderListenCard(c);
         else if (c.type === "pattern") renderPatternCard(c);
         else if (c.type === "oral") renderOralCard(c);
+        else if (c.type === "phonics") renderPhonicsCard(c);
         else if (c.type === "dialogue") renderDialogueCard(c);
         else if (c.type === "sort") renderSortCard(c);
         else if (c.type === "write") renderWriteCard(c);
@@ -941,11 +965,13 @@
         const node = Progress.nodeById(state.pathId);
         const u = unit();
         if ($("lessonUnitTitle")) {
-          $("lessonUnitTitle").textContent = (node && node.unitTitle) || (u && u.name) || "";
+          if (state.lessonMode === "phonics") $("lessonUnitTitle").textContent = "发音小站";
+          else $("lessonUnitTitle").textContent = (node && node.unitTitle) || (u && u.name) || "";
         }
         if ($("lessonNameTitle")) {
           if (state.lessonMode === "retry") $("lessonNameTitle").textContent = "Review · 错题复习";
           else if (state.lessonMode === "challenge") $("lessonNameTitle").textContent = "Challenge · 难度挑战";
+          else if (state.lessonMode === "phonics") $("lessonNameTitle").textContent = "Phonics · 发音小站";
           else if (node) $("lessonNameTitle").textContent = "Lesson " + (node.bookLesson || node.lesson) + " · " + node.lessonTitle;
           else $("lessonNameTitle").textContent = "";
         }
@@ -953,6 +979,8 @@
           const focus = (u && u.focus && node && u.focus[node.lesson - 1]) || "";
           if (state.lessonMode === "challenge") {
             $("lessonFocus").textContent = "比课本再难一点：长句听力、延展句型、要开口说完";
+          } else if (state.lessonMode === "phonics") {
+            $("lessonFocus").textContent = "听熟词，判断画线部分发音相同还是不同，再跟读";
           } else if (node && u && node.lesson === u.lessonCount) {
             $("lessonFocus").textContent = "本单元复习 · 知识延展 · " + focus;
           } else {
@@ -1006,6 +1034,11 @@
         } else if (c.type === "write" && c.passage) {
           const parts = c.passage.split(/\n+/).map((s) => s.trim()).filter(Boolean);
           p = V.speakSequence(parts.map((text) => ({ role: c.narratorRole || "boyChild", text: text, rate: opts && opts.rate })));
+        } else if (c.type === "phonics" && c.left && c.right) {
+          p = V.speakSequence([
+            { role: c.speakRole || "girlChild", text: c.left.en, rate: opts && opts.rate },
+            { role: c.speakRole || "girlChild", text: c.right.en, rate: opts && opts.rate },
+          ]);
         } else if (c.speakText) {
           p = V.speak(c.speakText, c.speakRole || "adultFemale", opts);
         }
@@ -1351,6 +1384,104 @@
           inputEl.value = "";
           inputEl.focus();
         }, 120);
+      }
+
+      function renderPhonicsCard(c) {
+        const extra = $("cardExtra");
+        extra.innerHTML = "";
+        $("cardActions").innerHTML = "";
+        $("cardPrompt").textContent = c.prompt || "听一听，画线部分发音相同吗？";
+        $("cardSub").textContent = c.tip || "相同画 √，不相同画 ×";
+        extra.appendChild(coachBanner("bee", "听两个熟词，再判断画线音"));
+
+        const pair = document.createElement("div");
+        pair.className = "phonics-pair";
+        pair.innerHTML =
+          '<span class="phonics-word">' +
+          (c.leftHtml || (c.left && c.left.en) || "") +
+          "</span>" +
+          '<span class="phonics-vs">·</span>' +
+          '<span class="phonics-word">' +
+          (c.rightHtml || (c.right && c.right.en) || "") +
+          "</span>";
+        extra.appendChild(pair);
+
+        function speakPair(rate) {
+          speakCard(c, rate);
+        }
+        actionSpeak("再听一遍", () => speakPair(1));
+        actionSpeak("慢速 0.5×", () => speakPair(0.5), true);
+
+        function afterJudge(ok) {
+          state.listenLocked = true;
+          const wait = scoreAnswer(ok, c);
+          state.praiseWait = 0;
+          $("cardActions").innerHTML = "";
+          if (!ok) {
+            $("cardSub").textContent = "先听鼓励。再看规律，听懂。";
+            const panel = document.createElement("div");
+            panel.className = "listen-repair";
+            panel.innerHTML =
+              '<p class="repair-label">画线部分</p>' +
+              '<p class="repair-en">' +
+              (c.leftHtml || "") +
+              " · " +
+              (c.rightHtml || "") +
+              "</p>" +
+              (c.sound ? '<p class="repair-key">音：' + c.sound + "</p>" : "") +
+              (c.rule ? '<p class="repair-zh">' + c.rule + "</p>" : "") +
+              '<p class="repair-zh">正确答案：' + (c.same ? "相同 √" : "不相同 ×") + "</p>";
+            extra.appendChild(panel);
+            setTimeout(() => {
+              if (state.view !== "lesson" || card() !== c) return;
+              speakPair(1);
+            }, wait);
+            const got = document.createElement("button");
+            got.type = "button";
+            got.className = "btn-ok";
+            got.textContent = "听懂了";
+            got.addEventListener("click", () => {
+              startFollowRead(
+                { en: c.speakFollow || c.en, speakText: c.speakFollow || c.en, speakRole: "girlChild" },
+                () => advance(ok, c),
+                { tip: "大声跟读这个音的词 3 遍" }
+              );
+            });
+            $("cardActions").appendChild(got);
+            return;
+          }
+          $("cardSub").textContent = "对了！" + (c.rule ? " " + c.rule : "");
+          setTimeout(() => {
+            if (state.view !== "lesson" || card() !== c) return;
+            startFollowRead(
+              { en: c.speakFollow || c.en, speakText: c.speakFollow || c.en, speakRole: "girlChild" },
+              () => advance(ok, c),
+              { tip: "大声跟读这个音的词 3 遍" }
+            );
+          }, wait);
+        }
+
+        const row = document.createElement("div");
+        row.className = "row2";
+        const sameBtn = document.createElement("button");
+        sameBtn.type = "button";
+        sameBtn.className = "btn-ok";
+        sameBtn.textContent = "相同 √";
+        sameBtn.addEventListener("click", () => {
+          if (state.listenLocked) return;
+          afterJudge(!!c.same);
+        });
+        const diffBtn = document.createElement("button");
+        diffBtn.type = "button";
+        diffBtn.className = "btn-bad";
+        diffBtn.textContent = "不相同 ×";
+        diffBtn.addEventListener("click", () => {
+          if (state.listenLocked) return;
+          afterJudge(!c.same);
+        });
+        row.appendChild(sameBtn);
+        row.appendChild(diffBtn);
+        $("cardActions").appendChild(row);
       }
 
       function renderListenCard(c) {
@@ -1836,7 +1967,7 @@
         state.scored = true;
         const cur = c || card();
         state.results.push(!!ok);
-        if (state.lessonMode !== "challenge") {
+        if (state.lessonMode !== "challenge" && state.lessonMode !== "phonics") {
           const tracked = Progress.recordAnswer(walletStore(), !!ok);
           saveStore({ stats: tracked.stats });
         }
@@ -1867,7 +1998,9 @@
         const store0 = walletStore();
         const lessonCoins = state.lessonCoins || 0;
         const settle =
-          state.lessonMode === "retry" || state.lessonMode === "challenge"
+          state.lessonMode === "retry" ||
+          state.lessonMode === "challenge" ||
+          state.lessonMode === "phonics"
             ? Progress.settlePractice(store0, lessonCoins, todayKey(), state.lessonMode, { timedOut: timedOut })
             : Progress.settleLesson(
                 store0,
@@ -1942,11 +2075,13 @@
           ? "时间到了"
           : challengeDone
             ? "挑战完成！"
-            : settle.practiceKind === "retry"
-              ? "错题复习完成！"
-              : settle.isReview
-                ? "复习完成！"
-                : "本课完成！";
+            : settle.practiceKind === "phonics"
+              ? "发音小站完成！"
+              : settle.practiceKind === "retry"
+                ? "错题复习完成！"
+                : settle.isReview
+                  ? "复习完成！"
+                  : "本课完成！";
         wrap.appendChild(title);
 
         const score = document.createElement("p");
@@ -1996,14 +2131,17 @@
         addBtn(
           settle.practiceKind === "challenge"
             ? "再挑战一次"
-            : settle.practiceKind === "retry"
-              ? "继续错题"
-              : settle.next
-                ? "下一课 · " + settle.next.label
-                : "看学期路径",
+            : settle.practiceKind === "phonics"
+              ? "再练发音"
+              : settle.practiceKind === "retry"
+                ? "继续错题"
+                : settle.next
+                  ? "下一课 · " + settle.next.label
+                  : "看学期路径",
           "btn-start",
           () => {
             if (settle.practiceKind === "challenge") startLesson(null, { mode: "challenge" });
+            else if (settle.practiceKind === "phonics") startLesson(null, { mode: "phonics" });
             else if (settle.practiceKind === "retry") startLesson(null, { mode: "retry" });
             else if (settle.next) startLesson(settle.next.id);
             else {
