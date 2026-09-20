@@ -2235,9 +2235,21 @@
         });
         $("btnCloseLesson").addEventListener("click", () => {
           if (V) V.stop();
-          if (confirm("结束今天的练习？未完成不记本课积分。")) {
-            showView("home");
-            renderHome();
+          const fromRecords =
+            state.lessonMode === "retry" ||
+            state.lessonMode === "challenge" ||
+            state.lessonMode === "phonics";
+          const tip = fromRecords
+            ? "结束练习？未完成不记积分。"
+            : "结束今天的练习？未完成不记本课积分。";
+          if (confirm(tip)) {
+            if (fromRecords) {
+              showView("records");
+              renderRecords();
+            } else {
+              showView("home");
+              renderHome();
+            }
           }
         });
         $("btnMute").addEventListener("click", () => {
