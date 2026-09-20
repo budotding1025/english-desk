@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Noto+Sans+SC:wght@500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./theme-duo.css?v=28" />
+  <link rel="stylesheet" href="./theme-duo.css?v=29" />
   <script src="./assets/vendor/lottie.min.js"></script>
 </head>
 <body>
@@ -572,6 +572,7 @@
       }
 
       let mascotAudio = null;
+      let praiseGate = Promise.resolve();
       function stopMascotLine() {
         if (!mascotAudio) return;
         try {
@@ -583,32 +584,55 @@
         mascotAudio = null;
       }
       function playMascotLine(clip, role, text) {
-        if (V && !V.isEnabled()) return;
-        stopMascotLine();
-        if (V) V.stop();
-        const a = new Audio("./audio/cheer/" + clip + ".mp3?v=1");
-        mascotAudio = a;
-        let fell = false;
-        const fallback = function () {
-          if (fell) return;
-          fell = true;
-          if (mascotAudio === a) mascotAudio = null;
-          if (V) V.speak(text, role);
-        };
-        a.onerror = fallback;
-        const started = a.play();
-        if (started && started.catch) started.catch(fallback);
+        return new Promise((resolve) => {
+          if (V && !V.isEnabled()) { resolve(); return; }
+          stopMascotLine();
+          if (V) V.stop();
+          const a = new Audio("./audio/cheer/" + clip + ".mp3?v=1");
+          mascotAudio = a;
+          let settled = false;
+          const finish = function () {
+            if (settled) return;
+            settled = true;
+            if (mascotAudio === a) mascotAudio = null;
+            resolve();
+          };
+          const fallback = function () {
+            if (settled) return;
+            if (V) {
+              const p = V.speak(text, role);
+              if (p && p.then) p.then(finish).catch(finish);
+              else setTimeout(finish, 900);
+            } else finish();
+          };
+          a.onended = finish;
+          a.onerror = fallback;
+          const started = a.play();
+          if (started && started.catch) started.catch(fallback);
+        });
       }
       function cueReward(fxName, fxSeconds, clip, role, text, voiceMs) {
         playFx(fxName, fxSeconds);
         const token = fxToken;
         state.praiseWait = 1000 + voiceMs;
-        setTimeout(function () {
-          if (token !== fxToken) return;
-          if ((clip === "streak2" || clip === "streak5") && fxAudio) fxAudio.volume = 0.18;
-          if (state.view !== "lesson") return;
-          playMascotLine(clip, role, text);
-        }, 1000);
+        praiseGate = new Promise((resolve) => {
+          setTimeout(function () {
+            if (token !== fxToken) { resolve(); return; }
+            if ((clip === "streak2" || clip === "streak5") && fxAudio) fxAudio.volume = 0.18;
+            if (state.view !== "lesson" && state.view !== "done") { resolve(); return; }
+            playMascotLine(clip, role, text).then(resolve);
+          }, 1000);
+        });
+        return praiseGate;
+      }
+      function afterPraise(fn, gapMs) {
+        gapMs = gapMs == null ? 280 : gapMs;
+        const gate = praiseGate || Promise.resolve();
+        gate.then(() => {
+          setTimeout(() => {
+            if (typeof fn === "function") fn();
+          }, gapMs);
+        });
       }
       function onCorrectReward() {
         const gain = Progress.COIN_CORRECT;
@@ -1055,8 +1079,8 @@
       }
 
       const LOTTIE = {
-        turtle: "./assets/lottie/turtle.json?v=2",
-        bee: "./assets/lottie/bee.json?v=2",
+        turtle: "./assets/lottie/turtle.json?v=3",
+        bee: "./assets/lottie/bee.json?v=3",
       };
       const PNG = {
         turtle: "./assets/turtle.png",
@@ -1066,7 +1090,7 @@
 
       function ensurePng(el, kind) {
         if (!el) return;
-        let img = el.querySelector(".mascot-fallback, img");
+        let img = el.querySelector("img.mascot-fallback");
         if (!img) {
           img = document.createElement("img");
           img.className = "mascot-fallback";
@@ -1074,6 +1098,8 @@
           el.appendChild(img);
         }
         img.src = PNG[kind] || PNG.turtle;
+        img.width = 148;
+        img.height = 148;
         img.style.display = "";
       }
 
@@ -1082,6 +1108,7 @@
         ensurePng(el, kind);
         if (!window.lottie) return null;
         if (location.protocol === "file:") return null;
+        el.querySelectorAll(".lottie-host").forEach((n) => n.remove());
         const host = document.createElement("div");
         host.className = "lottie-host";
         host.style.cssText = "position:absolute;inset:0;opacity:0;pointer-events:none;";
@@ -1095,10 +1122,11 @@
             path: LOTTIE[kind] || LOTTIE.turtle,
           });
           anim.addEventListener("DOMLoaded", () => {
-            const fb = el.querySelector(".mascot-fallback, img.mascot-fallback");
+            const fb = el.querySelector("img.mascot-fallback");
             if (fb) fb.style.display = "none";
             host.style.opacity = "1";
             host.style.pointerEvents = "none";
+            try { anim.play(); } catch (e) {}
           });
           anim.addEventListener("data_failed", () => {
             host.remove();
@@ -1110,6 +1138,15 @@
           ensurePng(el, kind);
           return null;
         }
+      }
+
+      function playMascotAnim(kind) {
+        const anim = lottieAnims[kind];
+        if (!anim) return;
+        try {
+          if (anim.isPaused) anim.play();
+          else anim.goToAndPlay(0, true);
+        } catch (e) {}
       }
 
       function coachAvatar(kind) {
@@ -1355,14 +1392,13 @@
           extra.appendChild(peek);
           $("cardSub").textContent = "先听鼓励，再大声跟读 3 遍";
           $("cardActions").innerHTML = "";
-          const wait = scoreAnswer(ok, c);
-          state.praiseWait = 0;
-          setTimeout(() => {
+          scoreAnswer(ok, c);
+          afterPraise(() => {
             if (state.view !== "lesson" || card() !== c) return;
             startFollowRead(c, () => advance(ok, c), {
               tip: "大声跟读 3 遍",
             });
-          }, wait);
+          });
         });
         $("cardActions").appendChild(confirm);
         const hintBtn = document.createElement("button");
@@ -1431,8 +1467,7 @@
 
         function afterJudge(ok) {
           state.listenLocked = true;
-          const wait = scoreAnswer(ok, c);
-          state.praiseWait = 0;
+          scoreAnswer(ok, c);
           $("cardActions").innerHTML = "";
           if (!ok) {
             $("cardSub").textContent = "先听鼓励。再看规律，听懂。";
@@ -1449,29 +1484,31 @@
               (c.rule ? '<p class="repair-zh">' + c.rule + "</p>" : "") +
               '<p class="repair-zh">正确答案：' + (c.same ? "相同 √" : "不相同 ×") + "</p>";
             extra.appendChild(panel);
-            setTimeout(() => {
-              if (state.view !== "lesson" || card() !== c) return;
-              speakPair(1);
-            }, wait);
             const got = document.createElement("button");
             got.type = "button";
             got.className = "btn-ok";
             got.textContent = "听懂了";
+            got.disabled = true;
             got.addEventListener("click", () => {
               startFollowRead(phonicsFollowCard(c), () => advance(ok, c), {
                 tip: "大声跟读这两个词 3 遍",
               });
             });
             $("cardActions").appendChild(got);
+            afterPraise(() => {
+              if (state.view !== "lesson" || card() !== c) return;
+              speakPair(1);
+              got.disabled = false;
+            });
             return;
           }
           $("cardSub").textContent = "对了！" + (c.rule ? " " + c.rule : "");
-          setTimeout(() => {
+          afterPraise(() => {
             if (state.view !== "lesson" || card() !== c) return;
             startFollowRead(phonicsFollowCard(c), () => advance(ok, c), {
               tip: "大声跟读这两个词 3 遍",
             });
-          }, wait);
+          });
         }
 
         const row = document.createElement("div");
@@ -1534,12 +1571,12 @@
             });
             if (ok) {
               $("cardSub").textContent = "对了。 " + (c.tip || "");
-              setTimeout(() => advance(true), 700);
+              scoreAnswer(true, c);
+              afterPraise(() => advance(true, c));
               return;
             }
             const focus = listenFocus(c);
-            const wait = scoreAnswer(false, c);
-            state.praiseWait = 0;
+            scoreAnswer(false, c);
             $("cardSub").textContent = "先听鼓励。再看英文和中文，听懂。";
             const panel = document.createElement("div");
             panel.className = "listen-repair";
@@ -1587,12 +1624,14 @@
             go.type = "button";
             go.className = "btn-ok";
             go.textContent = "听懂了";
+            go.disabled = true;
             go.addEventListener("click", () => advance(false));
             $("cardActions").appendChild(go);
-            setTimeout(() => {
+            afterPraise(() => {
               if (state.view !== "lesson" || card() !== c) return;
               replayListenFocus(c, focus);
-            }, wait);
+              go.disabled = false;
+            });
           });
           box.appendChild(b);
         });
@@ -1995,12 +2034,11 @@
         if (!state.scored) scoreAnswer(ok, c);
         state.scored = false;
         state.index += 1;
-        const delay = state.praiseWait || 400;
         state.praiseWait = 0;
-        setTimeout(() => {
+        afterPraise(() => {
           if (state.index >= state.cards.length) finishLesson();
           else renderCard(true);
-        }, delay);
+        });
       }
 
       function finishLesson(reason) {
@@ -2576,7 +2614,7 @@
             if (!$("screenHome") || $("screenHome").classList.contains("hidden")) { resolve(false); return; }
             const src = homeClips[who];
             if (!src) { resolve(false); return; }
-            const a = new Audio(src + "?v=3");
+            const a = new Audio(src + "?v=4");
             homeAudio = a;
             let settled = false;
             const finish = (ok) => {
@@ -2637,11 +2675,14 @@
           turtle.classList.toggle("is-on", who === "turtle");
           bee.classList.toggle("is-on", who === "bee");
           setHomeLine(who);
+          playMascotAnim(who);
         }
         startHomeMascotLoop = function () {
           if (!turtle || !bee) return;
           cancelHomeIntro();
           stopHomeAudio();
+          if (!lottieAnims.turtle) lottieAnims.turtle = mountLottie(turtle, "turtle", true);
+          if (!lottieAnims.bee) lottieAnims.bee = mountLottie(bee, "bee", true);
           const token = ++introToken;
           showHomeMascot("turtle");
           playHomeSlogans();
@@ -2660,10 +2701,13 @@
           if (!audioPrimed && V && V.prime) {
             V.prime().then((ok) => { if (ok) audioPrimed = true; });
           }
-          if (sloganNeedGesture) playHomeSlogans();
+          if (sloganNeedGesture || (!homeSloganSaid.turtle && !homeSloganBusy)) playHomeSlogans();
         }
         document.addEventListener("pointerdown", onUserGesture, true);
         document.addEventListener("keydown", onUserGesture, true);
+        window.addEventListener("pageshow", () => {
+          if ($("screenHome") && !$("screenHome").classList.contains("hidden")) playHomeSlogans();
+        });
 
         renderHome();
         showView("home");

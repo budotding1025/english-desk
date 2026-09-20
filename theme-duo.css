@@ -1,6 +1,6 @@
 /* 翻翻英语 lesson UI
  * Fonts: Google Fonts Nunito + Noto Sans SC (free)
- * Mascots: green turtle + yellow bee (original SVGs)
+ * Mascots: Lottie turtle + bee (PNG fallback only)
  */
 :root {
   --bg: #f7f7f7;
