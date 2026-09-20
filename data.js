@@ -2343,6 +2343,106 @@ window.ENGLISH_DESK_DATA = {
       rule: "look、good 里的 oo，常读短音 /ʊ/。",
       follow: "look",
     },
+    {
+      id: "i-same",
+      needLesson: 5,
+      left: { en: "ill", mark: "i" },
+      right: { en: "pig", mark: "i" },
+      same: true,
+      sound: "/ɪ/",
+      rule: "ill、pig 里的 i，常读短音 /ɪ/。",
+      follow: "ill",
+    },
+    {
+      id: "i-diff",
+      needLesson: 5,
+      left: { en: "ill", mark: "i" },
+      right: { en: "like", mark: "i" },
+      same: false,
+      sound: "/ɪ/ ≠ /aɪ/",
+      rule: "ill 的 i 读 /ɪ/，like 的 i_e 读 /aɪ/。不一样。",
+      follow: "ill",
+    },
+    {
+      id: "or-door",
+      needLesson: 9,
+      left: { en: "door", mark: "oor" },
+      right: { en: "fork", mark: "or" },
+      same: true,
+      sound: "/ɔː/",
+      rule: "door、fork 里的 or/oor，常读 /ɔː/。",
+      follow: "door",
+    },
+    {
+      id: "a-apple",
+      needLesson: 13,
+      left: { en: "apple", mark: "a" },
+      right: { en: "happy", mark: "a" },
+      same: true,
+      sound: "/æ/",
+      rule: "apple、happy 里的 a，常读 /æ/。",
+      follow: "apple",
+    },
+    {
+      id: "u-cut",
+      needLesson: 13,
+      left: { en: "cut", mark: "u" },
+      right: { en: "but", mark: "u" },
+      same: true,
+      sound: "/ʌ/",
+      rule: "cut、but 里的 u，常读短音 /ʌ/。",
+      follow: "cut",
+    },
+    {
+      id: "ar-farm",
+      needLesson: 17,
+      left: { en: "farm", mark: "ar" },
+      right: { en: "car", mark: "ar" },
+      same: true,
+      sound: "/ɑː/",
+      rule: "farm、car 里的 ar，常读 /ɑː/。",
+      follow: "farm",
+    },
+    {
+      id: "ow-snow",
+      needLesson: 17,
+      left: { en: "snow", mark: "ow" },
+      right: { en: "go", mark: "o" },
+      same: true,
+      sound: "/əʊ/",
+      rule: "snow、go 常读长音 /əʊ/。",
+      follow: "snow",
+    },
+    {
+      id: "th-same",
+      needLesson: 4,
+      left: { en: "these", mark: "th" },
+      right: { en: "the", mark: "th" },
+      same: true,
+      sound: "/ð/",
+      rule: "these、the 开头的 th，常读浊音 /ð/。",
+      follow: "these",
+    },
+    {
+      id: "sh-share",
+      needLesson: 8,
+      left: { en: "share", mark: "sh" },
+      right: { en: "she", mark: "sh" },
+      same: true,
+      sound: "/ʃ/",
+      rule: "share、she 里的 sh，常读 /ʃ/。",
+      follow: "share",
+    },
+    {
+      id: "ch-chicken",
+      needLesson: 13,
+      left: { en: "chicken", mark: "ch" },
+      right: { en: "chopsticks", mark: "ch" },
+      same: true,
+      sound: "/tʃ/",
+      rule: "chicken、chopsticks 里的 ch，常读 /tʃ/。",
+      follow: "chicken",
+    },
   ];
 
   function phonicsUnlockLesson(store) {
@@ -2420,37 +2520,20 @@ window.ENGLISH_DESK_DATA = {
     store = store || {};
     const cards = [];
     const hardWords = (unit.words || []).filter(function (w) { return w.extend || w.priority === "high"; });
-    shuffle(hardWords.length ? hardWords : (unit.words || [])).slice(0, 6).forEach((w) => cards.push(wordCard(w, "dictation")));
+    // 先听写，再口语：题量偏短，跟读暂停计时也不至于一次太累
+    shuffle(hardWords.length ? hardWords : (unit.words || [])).slice(0, 2).forEach((w) => cards.push(wordCard(w, "dictation")));
 
-    shuffle(listenFor(unit, store, "judge", true)).slice(0, 4).forEach((j) => {
+    shuffle(listenFor(unit, store, "judge", true)).slice(0, 1).forEach((j) => {
       cards.push(listenCard(j, "judge", { hard: true }));
     });
-    shuffle(listenFor(unit, store, "reply", true)).slice(0, 2).forEach((r) => {
+    shuffle(listenFor(unit, store, "reply", true)).slice(0, 1).forEach((r) => {
       cards.push(listenCard(r, "reply", { hard: true }));
     });
 
-    // 卷 VI 分类
-    const s = sortCard(unit);
-    if (s) {
-      s.title = "词分类挑战";
-      cards.push(s);
-    }
-
-    // 造句：because + when 各一句
     const sent1 = sentenceCard(unit, 0, store);
-    const sent2 = sentenceCard(unit, 1, store);
     if (sent1) cards.push(sent1);
-    if (sent2) cards.push(sent2);
 
-    // 仿写（冠词）
-    const w = writeCard(unit);
-    if (w) {
-      w.title = "仿写挑战";
-      cards.push(w);
-    }
-
-    // 口语：完整句 + 需开口说
-    shuffle(questionsFor(unit, store, true)).slice(0, 3).forEach((q, i) => {
+    shuffle(questionsFor(unit, store, true)).slice(0, 1).forEach((q, i) => {
       cards.push(oralCard(q, i, { challenge: true }));
     });
 
