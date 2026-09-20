@@ -67,7 +67,7 @@
   function loadManifest() {
     if (manifest) return Promise.resolve(manifest);
     if (manifestPromise) return manifestPromise;
-    manifestPromise = fetch("./audio/manifest.json?v=7")
+    manifestPromise = fetch("./audio/manifest.json?v=8")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         manifest = data;
@@ -237,7 +237,7 @@
         if (!rel && roleKey === "boyChild") rel = man ? clipPath("adultMale", utterText) : null;
         if (!rel && roleKey === "girlChild") rel = man ? clipPath("adultFemale", utterText) : null;
         if (rel) {
-          return playUrl(rel + (rel.indexOf("?") >= 0 ? "&" : "?") + "v=7", rateScale).then((ok) => {
+          return playUrl(rel + (rel.indexOf("?") >= 0 ? "&" : "?") + "v=8", rateScale).then((ok) => {
             if (ok) return true;
             return speakSynth(utterText, roleKey, langHint, rateScale);
           });

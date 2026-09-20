@@ -38,6 +38,7 @@ VOICES = {
 FRAGILE = {
     "should", "friend", "polite", "together", "would", "could",
     "mouth", "these", "live", "feel", "look", "soup", "cute", "full",
+    "he", "she", "me", "bed", "cat", "good", "make", "sad", "dog",
 }
 
 PREVIEW = [
@@ -112,13 +113,23 @@ def collect_from_data_js(src: str) -> set[tuple[str, str]]:
         if re.search(r"[A-Za-z]{3,}", label) and not re.search(r"[\u4e00-\u9fff]", label):
             items.add(("adultFemale", label))
 
-    # all word.en — adult + 翻翻龟 boyChild
+    # all word.en — adult + 翻翻龟 boyChild + 翻翻蜂 girlChild
     for m in re.finditer(r'en:\s*"([^"]+)"\s*,\s*zh:', src):
         w = m.group(1).strip()
         if w:
             items.add(("adultFemale", w))
             items.add(("adultMale", w))
             items.add(("boyChild", w))
+            items.add(("girlChild", w))
+
+    # phonics pairs: en + mark（发音小站）
+    for m in re.finditer(r'en:\s*"([^"]+)"\s*,\s*mark:', src):
+        w = m.group(1).strip()
+        if w and re.fullmatch(r"[A-Za-z']+", w):
+            items.add(("adultFemale", w))
+            items.add(("adultMale", w))
+            items.add(("boyChild", w))
+            items.add(("girlChild", w))
 
     for role, text in PREVIEW + READ_FALLBACK:
         items.add((role, text))
