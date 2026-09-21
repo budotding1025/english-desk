@@ -319,7 +319,7 @@ button { cursor: pointer; border: none; background: none; }
   line-height: 1.45;
   color: #3c3c3c;
 }
-.repair-zh { font-size: 1rem; color: #5c4a32; }
+.repair-zh { font-size: 1rem; color: #5c4a32; white-space: pre-line; }
 .listen-repair mark,
 .phonics-word mark {
   background: #ffe14a;
@@ -422,6 +422,54 @@ button { cursor: pointer; border: none; background: none; }
   margin: 8px 0 0;
   font-weight: 700;
   color: var(--sky);
+}
+.follow-zh {
+  margin: 8px 0 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.45;
+  color: #5c4a32;
+}
+.gloss-list {
+  margin: 10px 0 4px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #fff8e6;
+  border: 2px solid #f0c14a;
+}
+.gloss-en {
+  margin: 8px 0 0;
+  font-weight: 800;
+  color: #3c3c3c;
+}
+.gloss-zh {
+  margin: 2px 0 8px;
+  font-weight: 700;
+  color: #5c4a32;
+}
+.lesson-focus {
+  margin: 14px 0 8px;
+  padding: 14px 14px 8px;
+  border-radius: 16px;
+  background: #fff8e6;
+  border: 2px solid #f0c14a;
+  text-align: left;
+}
+.lesson-focus h2 {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+}
+.focus-label {
+  margin: 8px 0 4px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #8a5a00;
+}
+.focus-sent, .focus-words {
+  margin: 0 0 6px;
+  font-weight: 700;
+  line-height: 1.45;
+  color: #3c3c3c;
 }
 .choices { display: grid; gap: 12px; margin: 8px 0 16px; }
 .choice {

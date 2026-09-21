@@ -1,14 +1,15 @@
 /**
- * 翻翻英语 · 四角色英语语音
- * 优先播放预生成的微软神经语音 MP3（真男声 / 真女童声 / 年轻男声男孩）
- * 仅在无现成录音时，才回退系统 TTS（且不再把同一女声提调冒充童声）
+ * 翻翻英语 · 四角色语音
+ * 英文：预生成微软神经语音（成年男/女、男孩、女孩）
+ * 中文：同一四角色对应中文神经声（老师讲解用成年女，蜂/龟短句用童声）
+ * 无现成录音时才回退系统 TTS
  */
 (function (global) {
   const ROLE_META = {
-    adultMale: { label: "Agent·男成年", neural: "Guy / Ryan" },
-    adultFemale: { label: "Agent·女成年", neural: "Jenny / Sonia" },
-    boyChild: { label: "Agent·男小孩", neural: "Andrew / Thomas（年轻男声）" },
-    girlChild: { label: "Agent·女小孩", neural: "Ana / Maisie（儿童神经声）" },
+    adultMale: { label: "成年男", neural: "Guy / Ryan · 中文 Yunxi" },
+    adultFemale: { label: "成年女·老师", neural: "Jenny / Sonia · 中文 Xiaoxiao" },
+    boyChild: { label: "小男孩·翻翻龟", neural: "Andrew / Thomas · 中文 Yunxia" },
+    girlChild: { label: "小女孩·翻翻蜂", neural: "Ana / Maisie · 中文 Xiaoyi" },
   };
 
   const ROLE_ALIASES = {
@@ -67,7 +68,7 @@
   function loadManifest() {
     if (manifest) return Promise.resolve(manifest);
     if (manifestPromise) return manifestPromise;
-    manifestPromise = fetch("./audio/manifest.json?v=8")
+    manifestPromise = fetch("./audio/manifest.json?v=9")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         manifest = data;
@@ -232,16 +233,22 @@
 
     return loadManifest().then((man) => {
       if (!opts.queue) stop();
-      if (langHint !== "zh") {
-        let rel = man ? clipPath(roleKey, utterText) : null;
-        if (!rel && roleKey === "boyChild") rel = man ? clipPath("adultMale", utterText) : null;
-        if (!rel && roleKey === "girlChild") rel = man ? clipPath("adultFemale", utterText) : null;
-        if (rel) {
-          return playUrl(rel + (rel.indexOf("?") >= 0 ? "&" : "?") + "v=8", rateScale).then((ok) => {
-            if (ok) return true;
-            return speakSynth(utterText, roleKey, langHint, rateScale);
-          });
+      if (langHint === "zh") {
+        const zhKey = "zh|" + roleKey + "|" + utterText;
+        const zhRel = man && man.clips ? (man.clips[zhKey] || man.clips["zh|adultFemale|" + utterText]) : null;
+        if (zhRel) {
+          return playUrl(zhRel + (zhRel.indexOf("?") >= 0 ? "&" : "?") + "v=9", rateScale);
         }
+        return speakSynth(utterText, roleKey, langHint, rateScale);
+      }
+      let rel = man ? clipPath(roleKey, utterText) : null;
+      if (!rel && roleKey === "boyChild") rel = man ? clipPath("adultMale", utterText) : null;
+      if (!rel && roleKey === "girlChild") rel = man ? clipPath("adultFemale", utterText) : null;
+      if (rel) {
+        return playUrl(rel + (rel.indexOf("?") >= 0 ? "&" : "?") + "v=8", rateScale).then((ok) => {
+          if (ok) return true;
+          return speakSynth(utterText, roleKey, langHint, rateScale);
+        });
       }
       return speakSynth(utterText, roleKey, langHint, rateScale);
     });

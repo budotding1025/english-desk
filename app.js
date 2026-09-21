@@ -436,7 +436,7 @@
           const fallback = function () {
             if (settled) return;
             if (V) {
-              const p = V.speak(text, role);
+              const p = V.speak(text, role, { forceAll: true });
               if (p && p.then) p.then(finish).catch(finish);
               else setTimeout(finish, 900);
             } else finish();
@@ -1088,6 +1088,8 @@
 
       function startFollowRead(c, onDone, opts) {
         opts = opts || {};
+        const times = opts.times > 0 ? opts.times : 3;
+        const zh = opts.zh || "";
         const manual = !!opts.manualDone;
         let count = 0;
         let leftFollow = false;
@@ -1099,20 +1101,26 @@
           onDone();
         }
         $("cardActions").innerHTML = "";
+        if (zh) {
+          const note = document.createElement("p");
+          note.className = "follow-zh";
+          note.textContent = "中文翻译：" + zh;
+          $("cardExtra").appendChild(note);
+        }
         const tip = document.createElement("p");
         tip.className = "follow-tip";
         tip.id = "followTip";
-        tip.textContent = opts.tip || "大声跟读 3 遍";
+        tip.textContent = opts.tip || "大声跟读 " + times + " 遍";
         $("cardExtra").appendChild(tip);
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "btn-ok";
-        btn.textContent = "跟读（0 / 3）";
+        btn.textContent = "跟读（0 / " + times + "）";
         btn.addEventListener("click", () => {
           count += 1;
-          btn.textContent = "跟读（" + count + " / 3）";
+          btn.textContent = "跟读（" + count + " / " + times + "）";
           wordSpeak(c, 1);
-          if (count < 3) return;
+          if (count < times) return;
           btn.disabled = true;
           if (manual) {
             tip.textContent = opts.doneTip || "读得很棒！点「完成」";
@@ -1158,17 +1166,31 @@
           key: key,
           answerEn: answerEn,
           zh: c.zh || "",
+          explain: c.explain || "",
           answerZh: c.answerZh || "",
         };
       }
 
       function replayListenFocus(c, focus) {
-        if (!V) return;
+        if (!V) return Promise.resolve();
         const role = c.speakRole || "girlChild";
-        const again = V.speak(focus.original, role);
-        if (again && again.then && focus.answerEn && focus.answerEn !== focus.original) {
-          again.then(() => V.speak(focus.answerEn, "girlChild"));
+        let chain = V.speak(focus.original, role) || Promise.resolve();
+        if (focus.answerEn && focus.answerEn !== focus.original) {
+          chain = chain.then(() => V.speak(focus.answerEn, "girlChild"));
         }
+        if (focus.explain) {
+          chain = chain.then(() => V.speak(focus.explain, "adultFemale", { forceAll: true }));
+        }
+        return chain;
+      }
+
+      function followJudgeOnce(c) {
+        $("cardSub").textContent = "跟读一遍，记住这句话";
+        startFollowRead(c, () => advance(!!state.results[state.results.length - 1], c), {
+          times: 1,
+          zh: c.zh || "",
+          tip: "跟读一遍，加深记忆",
+        });
       }
 
       function renderWordCard(c) {
@@ -1395,7 +1417,14 @@
             if (ok) {
               $("cardSub").textContent = "对了。 " + (c.tip || "");
               scoreAnswer(true, c);
-              afterPraise(() => advance(true, c));
+              if (c.kind === "judge") {
+                afterPraise(() => {
+                  if (state.view !== "lesson" || card() !== c) return;
+                  followJudgeOnce(c);
+                });
+              } else {
+                afterPraise(() => advance(true, c));
+              }
               return;
             }
             const focus = listenFocus(c);
@@ -1416,6 +1445,12 @@
               zh.className = "repair-zh";
               zh.textContent = "中文：" + focus.zh;
               panel.appendChild(zh);
+            }
+            if (focus.explain) {
+              const ex = document.createElement("p");
+              ex.className = "repair-zh";
+              ex.textContent = focus.explain;
+              panel.appendChild(ex);
             }
             if (focus.answerEn) {
               const ans = document.createElement("p");
@@ -1446,14 +1481,22 @@
             const go = document.createElement("button");
             go.type = "button";
             go.className = "btn-ok";
-            go.textContent = "听懂了";
+            go.textContent = c.kind === "judge" ? "跟读一遍" : "听懂了";
             go.disabled = true;
-            go.addEventListener("click", () => advance(false));
+            go.addEventListener("click", () => {
+              if (c.kind === "judge") followJudgeOnce(c);
+              else advance(false);
+            });
             $("cardActions").appendChild(go);
             afterPraise(() => {
               if (state.view !== "lesson" || card() !== c) return;
-              replayListenFocus(c, focus);
-              go.disabled = false;
+              const chain = replayListenFocus(c, focus);
+              const enable = () => {
+                if (state.view !== "lesson" || card() !== c) return;
+                go.disabled = false;
+              };
+              if (chain && chain.then) chain.then(enable);
+              else enable();
             });
           });
           box.appendChild(b);
@@ -1479,6 +1522,23 @@
         }
       }
 
+      function paintGlosses(host, glosses) {
+        if (!host || !glosses || !glosses.length) return;
+        const box = document.createElement("div");
+        box.className = "gloss-list";
+        glosses.forEach((g) => {
+          const en = document.createElement("p");
+          en.className = "gloss-en";
+          en.textContent = g.en;
+          const zh = document.createElement("p");
+          zh.className = "gloss-zh";
+          zh.textContent = "中文翻译：" + g.zh;
+          box.appendChild(en);
+          box.appendChild(zh);
+        });
+        host.appendChild(box);
+      }
+
       function renderPatternCard(c) {
         const extra = $("cardExtra");
         extra.innerHTML = "";
@@ -1487,8 +1547,10 @@
           extra.appendChild(coachBanner("bee", "大声读出来。跟 3 遍，然后自己点完成"));
           $("cardPrompt").textContent = c.speakText || c.prompt || "";
           $("cardSub").textContent = c.tip || "大声跟读 3 遍，读完自己点完成";
+          paintGlosses(extra, c.glosses);
           startFollowRead(c, () => advance(true, c), {
             manualDone: true,
+            zh: c.glosses && c.glosses.length ? "" : c.zh || "",
             tip: "大声跟读 3 遍。读完自己点「完成」。",
             doneTip: "声音真棒！点「完成」就过关。",
           });
@@ -1815,6 +1877,7 @@
             answer: c.answer,
             tip: c.tip,
             zh: c.zh || "",
+            explain: c.explain || "",
             answerZh: c.answerZh || "",
             choices: c.choices || [],
             retryWord: { en: en, zh: zh },
@@ -1903,6 +1966,56 @@
         renderDoneSummary(settle, ok, total, egg);
       }
 
+      function buildLessonFocus() {
+        const u = unit();
+        const node = Progress.nodeById(state.pathId);
+        if (!u || !node || !Lesson.lineZh) return null;
+        const n = node.lesson;
+        const review = n === (u.lessonCount || 4);
+        const patterns = (u.patterns || []).filter((p) =>
+          review ? p.lesson === n || p.extend : p.lesson === n && !p.extend
+        );
+        const words = (u.words || [])
+          .filter((w) => {
+            const hit = review ? w.lesson === n || w.extend : w.lesson === n && !w.extend;
+            return hit && w.priority === "high";
+          })
+          .slice(0, 8);
+        if (!patterns.length && !words.length) return null;
+        const box = document.createElement("section");
+        box.className = "lesson-focus";
+        const h = document.createElement("h2");
+        h.textContent = "本课重点";
+        box.appendChild(h);
+        const say = Lesson.lessonTalk ? Lesson.lessonTalk(u.id, n) : "";
+        if (patterns.length) {
+          const lab = document.createElement("p");
+          lab.className = "focus-label";
+          lab.textContent = "主要句子 / 句型";
+          box.appendChild(lab);
+          patterns.forEach((p) => {
+            (p.demos || []).forEach((d) => {
+              const zh = Lesson.lineZh(d.text) || "";
+              const line = document.createElement("p");
+              line.className = "focus-sent";
+              line.textContent = d.text + (zh ? "　" + zh : "");
+              box.appendChild(line);
+            });
+          });
+        }
+        if (words.length) {
+          const lab = document.createElement("p");
+          lab.className = "focus-label";
+          lab.textContent = "要掌握的单词";
+          box.appendChild(lab);
+          const row = document.createElement("p");
+          row.className = "focus-words";
+          row.textContent = words.map((w) => w.en + "　" + w.zh).join(" · ");
+          box.appendChild(row);
+        }
+        return { el: box, say: say };
+      }
+
       function renderDoneSummary(settle, ok, total, egg) {
         const wrap = $("doneSummary");
         const practice = $("donePracticeWrap");
@@ -1982,6 +2095,19 @@
           }
           playMascotLine(doneLine[0], doneLine[1], doneLine[2]);
         }, voiceAt);
+
+        if (state.lessonMode === "normal") {
+          const focus = buildLessonFocus();
+          if (focus) {
+            wrap.appendChild(focus.el);
+            const focusToken = praiseToken;
+            setTimeout(function () {
+              if (focusToken !== fxToken && doneFx) return;
+              if (state.view !== "done" || !focus.say || !V) return;
+              V.speak(focus.say, "adultFemale", { forceAll: true });
+            }, voiceAt + 4600);
+          }
+        }
 
         function addBtn(label, cls, fn) {
           const b = document.createElement("button");
@@ -2161,7 +2287,7 @@
             });
             box.appendChild(again);
             home.classList.remove("hidden");
-            if (V) V.speak("你真是太棒了！再接再厉！", "girlChild");
+            if (V) V.speak("你真是太棒了！再接再厉！", "girlChild", { forceAll: true });
           });
           actions.appendChild(done);
         });
