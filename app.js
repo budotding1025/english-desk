@@ -240,23 +240,31 @@
         syncRetryBadge(s);
       }
 
-      function syncRetryBadge(store) {
-        const btn = $("navRecords");
-        if (!btn) return;
-        const n = ((store || walletStore()).retryWords || []).length;
-        let badge = btn.querySelector(".nav-badge");
+      function paintRetryBadge(host, n) {
+        if (!host) return;
+        let badge = host.querySelector(".nav-badge");
         if (!n) {
           if (badge) badge.remove();
-          btn.setAttribute("aria-label", "Records");
           return;
         }
         if (!badge) {
           badge = document.createElement("span");
           badge.className = "nav-badge";
-          btn.appendChild(badge);
+          host.appendChild(badge);
         }
         badge.textContent = n > 99 ? "99+" : String(n);
-        btn.setAttribute("aria-label", "Records，" + n + " 道错题");
+      }
+
+      function syncRetryBadge(store) {
+        const n = ((store || walletStore()).retryWords || []).length;
+        const btn = $("navRecords");
+        if (btn) {
+          paintRetryBadge(btn, n);
+          btn.setAttribute("aria-label", n ? "Records，" + n + " 道错题" : "Records");
+        }
+        const retryBtn = document.querySelector("#recordsActions .rec-action-retry");
+        paintRetryBadge(retryBtn, n);
+        if (retryBtn) retryBtn.setAttribute("aria-label", n ? "错题复习，" + n + " 道" : "错题复习");
       }
 
       function huiwenDue(store) {
@@ -723,7 +731,7 @@
           $("recordsActions").innerHTML = "";
           const retryBtn = document.createElement("button");
           retryBtn.type = "button";
-          retryBtn.className = "rec-action";
+          retryBtn.className = "rec-action rec-action-retry";
           retryBtn.innerHTML =
             "<strong>错题复习</strong><span>" +
             (retries.length ? retries.length + " 道错题 · 听写强化" : "暂无错题") +
@@ -743,6 +751,7 @@
           $("recordsActions").appendChild(retryBtn);
           $("recordsActions").appendChild(phonicsBtn);
           $("recordsActions").appendChild(challengeBtn);
+          paintRetryBadge(retryBtn, retries.length);
         }
         if ($("recordsMeta")) {
           $("recordsMeta").textContent = retries.length
@@ -827,9 +836,11 @@
         const backRecords = state.returnTo === "records";
         const label = btn.querySelector(".nav-label");
         const icon = btn.querySelector(".nav-lottie");
+        const book = btn.querySelector(".lesson-records-glyph");
         if (label) label.textContent = backRecords ? "Records" : "Home";
         btn.setAttribute("aria-label", backRecords ? "返回 Records" : "Home");
         if (icon) icon.classList.toggle("hidden", backRecords);
+        if (book) book.classList.toggle("hidden", !backRecords);
       }
 
       function paintLessonHead() {
