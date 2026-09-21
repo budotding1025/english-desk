@@ -892,8 +892,8 @@
       }
 
       const LOTTIE = {
-        turtle: "./assets/lottie/turtle.json?v=3",
-        bee: "./assets/lottie/bee.json?v=3",
+        turtle: "./assets/lottie/turtle.json?v=4",
+        bee: "./assets/lottie/bee.json?v=4",
       };
       const PNG = {
         turtle: "./assets/turtle.png",
@@ -918,13 +918,13 @@
 
       function mountLottie(el, kind, loop) {
         if (!el) return null;
-        ensurePng(el, kind);
+        const fb = el.querySelector("img.mascot-fallback");
+        if (fb) fb.style.display = "none";
         if (!window.lottie) return null;
-        if (location.protocol === "file:") return null;
         el.querySelectorAll(".lottie-host").forEach((n) => n.remove());
         const host = document.createElement("div");
         host.className = "lottie-host";
-        host.style.cssText = "position:absolute;inset:0;opacity:0;pointer-events:none;";
+        host.style.cssText = "position:absolute;inset:0;opacity:1;pointer-events:none;";
         el.appendChild(host);
         try {
           const anim = window.lottie.loadAnimation({
@@ -935,20 +935,15 @@
             path: LOTTIE[kind] || LOTTIE.turtle,
           });
           anim.addEventListener("DOMLoaded", () => {
-            const fb = el.querySelector("img.mascot-fallback");
-            if (fb) fb.style.display = "none";
-            host.style.opacity = "1";
-            host.style.pointerEvents = "none";
+            if (fb) fb.remove();
             try { anim.play(); } catch (e) {}
           });
           anim.addEventListener("data_failed", () => {
             host.remove();
-            ensurePng(el, kind);
           });
           return anim;
         } catch (e) {
           host.remove();
-          ensurePng(el, kind);
           return null;
         }
       }
@@ -968,7 +963,6 @@
         const box = document.createElement("div");
         box.className = "coach-lottie";
         wrap.appendChild(box);
-        ensurePng(box, kind);
         mountLottie(box, kind, true);
         return wrap;
       }
@@ -2329,8 +2323,6 @@
 
         const turtle = document.querySelector(".mascot-turtle");
         const bee = document.querySelector(".mascot-bee");
-        ensurePng(turtle, "turtle");
-        ensurePng(bee, "bee");
         lottieAnims.turtle = mountLottie(turtle, "turtle", true);
         lottieAnims.bee = mountLottie(bee, "bee", true);
         const homeClips = {
@@ -2370,32 +2362,8 @@
         function isHomeView() {
           return $("screenHome") && !$("screenHome").classList.contains("hidden");
         }
-        showSloganTapHint = function () {
-          const stage = document.querySelector(".mascot-stage");
-          if (!stage) return;
-          let tip = $("sloganTapHint");
-          if (!tip) {
-            tip = document.createElement("button");
-            tip.type = "button";
-            tip.id = "sloganTapHint";
-            tip.className = "slogan-tap-hint";
-            tip.textContent = "点一下听翻翻说话";
-            tip.addEventListener("click", function (e) {
-              e.preventDefault();
-              e.stopPropagation();
-              unlockAudio().then(function () {
-                hideSloganTapHint();
-                playHomeSlogans(true);
-              });
-            });
-            stage.appendChild(tip);
-          }
-          tip.classList.remove("hidden");
-        };
-        hideSloganTapHint = function () {
-          const tip = $("sloganTapHint");
-          if (tip) tip.classList.add("hidden");
-        };
+        showSloganTapHint = function () {};
+        hideSloganTapHint = function () {};
         function unlockAudio() {
           return new Promise(function (resolve) {
             const tasks = [];
@@ -2503,7 +2471,6 @@
             if (!ok) {
               homeSloganBusy = false;
               sloganNeedGesture = true;
-              showSloganTapHint();
               return;
             }
             homeSloganSaid.turtle = true;
@@ -2517,7 +2484,6 @@
               homeSloganBusy = false;
               if (!ok2) {
                 sloganNeedGesture = true;
-                showSloganTapHint();
                 return;
               }
               homeSloganSaid.bee = true;
