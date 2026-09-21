@@ -7,10 +7,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Noto+Sans+SC:wght@500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./theme-duo.css?v=32" />
+  <link rel="stylesheet" href="./theme-duo.css?v=33" />
   <script src="./assets/vendor/lottie.min.js"></script>
 </head>
 <body>
+  <audio id="sloganTurtle" class="slogan-audio" src="./audio/home/turtle.mp3?v=6" preload="auto" autoplay playsinline></audio>
+  <audio id="sloganBee" class="slogan-audio" src="./audio/home/bee.mp3?v=6" preload="auto" playsinline></audio>
+  <script>
+    (function () {
+      var a = document.getElementById("sloganTurtle");
+      if (!a) return;
+      a.muted = false;
+      a.volume = 1;
+      try { window.__sloganKick = a.play(); } catch (e) {}
+    })();
+  </script>
   <div class="coin-toast hidden" id="coinToast" aria-live="polite">
     <span class="coin-toast-icon" aria-hidden="true"><img class="mark" src="./assets/icons/coin.svg" alt="" /></span>
     <span id="coinToastText">+10</span>
@@ -174,6 +185,6 @@
   <script src="./data.js?v=17"></script>
   <script src="./progress.js?v=10"></script>
   <script src="./voice.js?v=9"></script>
-  <script src="./app.js?v=5"></script>
+  <script src="./app.js?v=7"></script>
 </body>
 </html>
