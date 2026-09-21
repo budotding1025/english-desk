@@ -65,6 +65,8 @@
       let homeAudioDone = null;
       let cancelHomeIntro = function () {};
       let startHomeMascotLoop = function () {};
+      let hideSloganTapHint = function () {};
+      let showSloganTapHint = function () {};
       const homeSloganSaid = { turtle: false, bee: false };
       let homeSloganBusy = false;
       let sloganGen = 0;
@@ -105,11 +107,11 @@
             homeAudio.onended = null;
             homeAudio.onerror = null;
             homeAudio.pause();
-            homeAudio.src = "";
+            try { homeAudio.currentTime = 0; } catch (e2) {}
           } catch (e) {}
           homeAudio = null;
         }
-        if (done) done();
+        if (done) done(false);
         sloganGen += 1;
         homeSloganBusy = false;
         const host = location.hostname;
@@ -133,13 +135,18 @@
         if (name !== "home") {
           cancelHomeIntro();
           stopHomeAudio();
-        } else {
-          startHomeMascotLoop();
-          playNavHome();
+          hideSloganTapHint();
         }
         if (name !== "lesson") stopChallengeTimer();
         if (name !== "lesson" && V) V.stop();
         if (name === "lesson") playLessonHome();
+        // 回首页：等 V.stop 后再播 slogan，避免刚解锁的音频被立刻打断
+        if (name === "home") {
+          playNavHome();
+          setTimeout(function () {
+            if (state.view === "home") startHomeMascotLoop();
+          }, 30);
+        }
       }
 
       const homeAnims = {};
@@ -2308,15 +2315,14 @@
             if (V) {
               V.setEnabled(true);
               saveStore({ voiceOn: true });
-              if (V.prime) V.prime();
             }
-            homeSloganBusy = false;
-            sloganNeedGesture = true;
             homeSloganSaid.turtle = false;
             homeSloganSaid.bee = false;
             openSettings(false);
-            showView("home");
-            playHomeSlogans();
+            unlockAudio().then(function () {
+              showView("home");
+              playHomeSlogans(true);
+            });
             renderSettings();
           });
         }
@@ -2328,8 +2334,8 @@
         lottieAnims.turtle = mountLottie(turtle, "turtle", true);
         lottieAnims.bee = mountLottie(bee, "bee", true);
         const homeClips = {
-          turtle: "./audio/home/turtle.mp3",
-          bee: "./audio/home/bee.mp3",
+          turtle: "./audio/home/turtle.mp3?v=5",
+          bee: "./audio/home/bee.mp3?v=5",
         };
         const homeLines = {
           turtle: { role: "boyChild", text: "每天进步一点点，有一天比兔子跑得还远。" },
@@ -2338,6 +2344,19 @@
         let homeWho = "turtle";
         let introToken = 0;
         let homeTimer = null;
+        let audioUnlocked = false;
+        let homeAudioCtx = null;
+        const homePlayers = {};
+        Object.keys(homeClips).forEach(function (who) {
+          const a = new Audio();
+          a.preload = "auto";
+          a.playsInline = true;
+          a.setAttribute("playsinline", "");
+          a.setAttribute("webkit-playsinline", "");
+          a.src = homeClips[who];
+          try { a.load(); } catch (e) {}
+          homePlayers[who] = a;
+        });
         cancelHomeIntro = function () {
           introToken += 1;
           if (homeTimer) {
@@ -2348,59 +2367,161 @@
         function homeAlive(token) {
           return token === introToken && $("screenHome") && !$("screenHome").classList.contains("hidden");
         }
+        function isHomeView() {
+          return $("screenHome") && !$("screenHome").classList.contains("hidden");
+        }
+        showSloganTapHint = function () {
+          const stage = document.querySelector(".mascot-stage");
+          if (!stage) return;
+          let tip = $("sloganTapHint");
+          if (!tip) {
+            tip = document.createElement("button");
+            tip.type = "button";
+            tip.id = "sloganTapHint";
+            tip.className = "slogan-tap-hint";
+            tip.textContent = "点一下听翻翻说话";
+            tip.addEventListener("click", function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+              unlockAudio().then(function () {
+                hideSloganTapHint();
+                playHomeSlogans(true);
+              });
+            });
+            stage.appendChild(tip);
+          }
+          tip.classList.remove("hidden");
+        };
+        hideSloganTapHint = function () {
+          const tip = $("sloganTapHint");
+          if (tip) tip.classList.add("hidden");
+        };
+        function unlockAudio() {
+          return new Promise(function (resolve) {
+            const tasks = [];
+            if (V && V.prime) tasks.push(V.prime());
+            try {
+              const AC = window.AudioContext || window.webkitAudioContext;
+              if (AC) {
+                if (!homeAudioCtx) homeAudioCtx = new AC();
+                if (homeAudioCtx.state === "suspended") {
+                  tasks.push(
+                    homeAudioCtx.resume().then(function () { return true; }).catch(function () { return false; })
+                  );
+                } else {
+                  tasks.push(Promise.resolve(true));
+                }
+              }
+            } catch (e) {}
+            Object.keys(homePlayers).forEach(function (who) {
+              const a = homePlayers[who];
+              try {
+                a.muted = true;
+                const p = a.play();
+                if (p && p.then) {
+                  tasks.push(
+                    p.then(function () {
+                      try { a.pause(); a.currentTime = 0; } catch (e2) {}
+                      a.muted = false;
+                      return true;
+                    }).catch(function () {
+                      a.muted = false;
+                      return false;
+                    })
+                  );
+                }
+              } catch (e3) {
+                try { a.muted = false; } catch (e4) {}
+              }
+            });
+            Promise.all(tasks.length ? tasks : [Promise.resolve(false)]).then(function (results) {
+              // muted 预热成功不等于可出声；真正解锁以出声 play 为准
+              resolve(results.some(Boolean) || audioUnlocked);
+            });
+          });
+        }
+        function pauseHomePlayers() {
+          const done = homeAudioDone;
+          homeAudioDone = null;
+          Object.keys(homePlayers).forEach(function (who) {
+            const a = homePlayers[who];
+            try {
+              a.onended = null;
+              a.onerror = null;
+              a.pause();
+            } catch (e) {}
+          });
+          homeAudio = null;
+          if (done) done(false);
+        }
         function playHomeFile(who) {
-          return new Promise((resolve) => {
-            if (!$("screenHome") || $("screenHome").classList.contains("hidden")) { resolve(false); return; }
-            const src = homeClips[who];
-            if (!src) { resolve(false); return; }
-            const a = new Audio(src + "?v=4");
+          return new Promise(function (resolve) {
+            if (!isHomeView()) { resolve(false); return; }
+            const a = homePlayers[who];
+            if (!a) { resolve(false); return; }
+            pauseHomePlayers();
             homeAudio = a;
             let settled = false;
-            const finish = (ok) => {
+            const finish = function (ok) {
               if (settled) return;
               settled = true;
               if (homeAudioDone === finish) homeAudioDone = null;
+              if (homeAudio === a) homeAudio = null;
               resolve(!!ok);
             };
             homeAudioDone = finish;
-            a.onended = () => finish(true);
-            a.onerror = () => finish(false);
+            try {
+              a.muted = false;
+              a.currentTime = 0;
+            } catch (e) {}
+            a.onended = function () { finish(true); };
+            a.onerror = function () { finish(false); };
             const started = a.play();
-            if (started && started.then) started.then(() => {}).catch(() => finish(false));
+            if (started && started.then) {
+              started.then(function () {
+                audioUnlocked = true;
+                hideSloganTapHint();
+              }).catch(function () { finish(false); });
+            }
           });
         }
         let sloganNeedGesture = false;
-        function playHomeSlogans() {
-          if (homeSloganBusy) return;
+        function playHomeSlogans(force) {
+          if (homeSloganBusy && !force) return;
           if (!V || !V.isEnabled()) return;
-          if (!$("screenHome") || $("screenHome").classList.contains("hidden")) return;
+          if (!isHomeView()) return;
+          if (force) pauseHomePlayers();
           const gen = ++sloganGen;
           homeSloganBusy = true;
           sloganNeedGesture = false;
           homeSloganSaid.turtle = false;
           homeSloganSaid.bee = false;
+          hideSloganTapHint();
           showHomeMascot("turtle");
-          playHomeFile("turtle").then((ok) => {
+          playHomeFile("turtle").then(function (ok) {
             if (gen !== sloganGen) return;
             if (!ok) {
               homeSloganBusy = false;
               sloganNeedGesture = true;
+              showSloganTapHint();
               return;
             }
             homeSloganSaid.turtle = true;
-            if (!$("screenHome") || $("screenHome").classList.contains("hidden")) {
+            if (!isHomeView()) {
               homeSloganBusy = false;
               return;
             }
             showHomeMascot("bee");
-            playHomeFile("bee").then((ok2) => {
+            playHomeFile("bee").then(function (ok2) {
               if (gen !== sloganGen) return;
               homeSloganBusy = false;
               if (!ok2) {
                 sloganNeedGesture = true;
+                showSloganTapHint();
                 return;
               }
               homeSloganSaid.bee = true;
+              hideSloganTapHint();
             });
           });
         }
@@ -2419,15 +2540,28 @@
         startHomeMascotLoop = function () {
           if (!turtle || !bee) return;
           cancelHomeIntro();
-          stopHomeAudio();
           if (!lottieAnims.turtle) lottieAnims.turtle = mountLottie(turtle, "turtle", true);
           if (!lottieAnims.bee) lottieAnims.bee = mountLottie(bee, "bee", true);
           const token = ++introToken;
           showHomeMascot("turtle");
-          playHomeSlogans();
+          function tryPlay() {
+            if (!homeAlive(token)) return;
+            if (homeSloganSaid.turtle || homeSloganBusy) return;
+            playHomeSlogans(true);
+          }
+          if (audioUnlocked) {
+            playHomeSlogans(true);
+          } else {
+            unlockAudio().then(function () {
+              if (!homeAlive(token)) return;
+              playHomeSlogans(true);
+            });
+            setTimeout(tryPlay, 280);
+            setTimeout(tryPlay, 900);
+          }
           function scheduleNext() {
             if (!homeAlive(token)) return;
-            homeTimer = setTimeout(() => {
+            homeTimer = setTimeout(function () {
               if (!homeAlive(token)) return;
               if (!homeSloganBusy) showHomeMascot(homeWho === "turtle" ? "bee" : "turtle");
               scheduleNext();
@@ -2435,17 +2569,29 @@
           }
           scheduleNext();
         };
-        let audioPrimed = false;
         function onUserGesture() {
-          if (!audioPrimed && V && V.prime) {
-            V.prime().then((ok) => { if (ok) audioPrimed = true; });
-          }
-          if (sloganNeedGesture || (!homeSloganSaid.turtle && !homeSloganBusy)) playHomeSlogans();
+          unlockAudio().then(function () {
+            if (!isHomeView()) return;
+            if (sloganNeedGesture || (!homeSloganSaid.turtle && !homeSloganBusy)) {
+              playHomeSlogans(true);
+            }
+          });
         }
         document.addEventListener("pointerdown", onUserGesture, true);
+        document.addEventListener("touchstart", onUserGesture, { capture: true, passive: true });
         document.addEventListener("keydown", onUserGesture, true);
-        window.addEventListener("pageshow", () => {
-          if ($("screenHome") && !$("screenHome").classList.contains("hidden")) playHomeSlogans();
+        window.addEventListener("pageshow", function () {
+          if (isHomeView()) startHomeMascotLoop();
+        });
+        document.addEventListener("visibilitychange", function () {
+          if (!document.hidden && isHomeView() && audioUnlocked && !homeSloganSaid.turtle && !homeSloganBusy) {
+            playHomeSlogans(true);
+          }
+        });
+        document.addEventListener("WeixinJSBridgeReady", function () {
+          unlockAudio().then(function () {
+            if (isHomeView()) playHomeSlogans(true);
+          });
         });
 
         renderHome();

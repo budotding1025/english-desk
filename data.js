@@ -372,7 +372,7 @@ window.ENGLISH_DESK_DATA = {
         { en: "remember", zh: "记住", src: "课本", lesson: 2, priority: "high" },
         { en: "poem", zh: "诗", src: "课本", lesson: 2, priority: "mid" },
         { en: "hard", zh: "难的", src: "课本", lesson: 2, priority: "high" },
-        { en: "may", zh: "可以", src: "课本", lesson: 2, priority: "high" },
+        { en: "may", zh: "可能，也许", src: "课本", lesson: 2, priority: "high" },
         { en: "try", zh: "尝试", src: "课本", lesson: 2, priority: "high" },
         { en: "ill", zh: "生病的", src: "课本", lesson: 3, priority: "high" },
         { en: "call", zh: "打电话", src: "课本", lesson: 3, priority: "mid" },

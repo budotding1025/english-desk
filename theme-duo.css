@@ -67,12 +67,36 @@ button { cursor: pointer; border: none; background: none; }
   overflow: visible;
 }
 .mascot-stage {
+  position: relative;
   height: 176px;
   margin: 0 auto 6px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
   overflow: visible;
+}
+.slogan-tap-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  z-index: 5;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #fff;
+  background: #1cb0f6;
+  box-shadow: 0 3px 0 #1899d6;
+  cursor: pointer;
+  animation: sloganPulse 1.4s ease-in-out infinite;
+}
+.slogan-tap-hint.hidden { display: none; }
+@keyframes sloganPulse {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.04); }
 }
 .mascot-wrap {
   position: relative;
