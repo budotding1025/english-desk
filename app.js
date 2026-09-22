@@ -543,7 +543,8 @@
         if ($("sessionTitle")) $("sessionTitle").textContent = lessonTitle;
         if ($("sessionMeta")) {
           $("sessionMeta").textContent =
-            (bookNo ? "Lesson " + bookNo + " · " : "") + "预习约 10 分钟 · 练习约 " + sess.minutes + " 分钟";
+            (bookNo ? "Lesson " + bookNo + " · " : "") +
+            "预习 · 默写 · 练习约 " + sess.minutes + " 分钟";
         }
         if ($("unitLine")) {
           $("unitLine").textContent = unitTitle + (lessonTitle ? " · " + lessonTitle : "");
@@ -587,13 +588,15 @@
                 ? "phonics"
                 : state.lessonMode === "preview"
                   ? "preview"
-                  : state.lessonMode === "listenDrill"
-                    ? "listenDrill"
-                    : state.lessonMode === "minimal"
-                      ? "minimal"
-                      : state.lessonMode === "miniExam"
-                        ? "miniExam"
-                        : "weekdayListen";
+                  : state.lessonMode === "reviewWrite"
+                    ? "reviewWrite"
+                    : state.lessonMode === "listenDrill"
+                      ? "listenDrill"
+                      : state.lessonMode === "minimal"
+                        ? "minimal"
+                        : state.lessonMode === "miniExam"
+                          ? "miniExam"
+                          : "weekdayListen";
         const cardStore = Object.assign({}, store, {
           currentPathId: state.pathId,
           needSaySelf: needSaySelfThisWeek(),
@@ -618,6 +621,7 @@
           else if (state.lessonMode === "listenDrill") alert("本单元暂无听力长句，先去上一课吧。");
           else if (state.lessonMode === "miniExam") alert("迷你卷还在准备，先去上一课吧。");
           else if (state.lessonMode === "preview") alert("这一课的预习还在准备，先去「开始」上课吧。");
+          else if (state.lessonMode === "reviewWrite") alert("这一课的词句默写还在准备，先去「开始」上课吧。");
           else alert("本单元暂无练习内容。");
           return;
         }
@@ -799,12 +803,18 @@
           challengeBtn.className = "rec-action challenge";
           challengeBtn.innerHTML = "<strong>难度挑战</strong><span>约 8 题 · 听写 · 听力 · 口语</span>";
           challengeBtn.addEventListener("click", () => startLesson(null, { mode: "challenge" }));
+          const writeBtn = document.createElement("button");
+          writeBtn.type = "button";
+          writeBtn.className = "rec-action rec-action-soft";
+          writeBtn.innerHTML = "<strong>词句默写</strong><span>同首页「默写」· 本课词+句</span>";
+          writeBtn.addEventListener("click", () => startLesson(null, { mode: "reviewWrite" }));
           $("recordsActions").appendChild(retryBtn);
           $("recordsActions").appendChild(listenBtn);
           $("recordsActions").appendChild(phonicsBtn);
           $("recordsActions").appendChild(minimalBtn);
           $("recordsActions").appendChild(miniBtn);
           $("recordsActions").appendChild(challengeBtn);
+          $("recordsActions").appendChild(writeBtn);
           paintRetryBadge(retryBtn, retries.length);
         }
         if ($("recordsMeta")) {
@@ -909,6 +919,7 @@
           else if (state.lessonMode === "listenDrill") $("lessonUnitTitle").textContent = "听力加练";
           else if (state.lessonMode === "miniExam") $("lessonUnitTitle").textContent = "迷你卷";
           else if (state.lessonMode === "preview") $("lessonUnitTitle").textContent = "预习";
+          else if (state.lessonMode === "reviewWrite") $("lessonUnitTitle").textContent = "默写";
           else $("lessonUnitTitle").textContent = (node && node.unitTitle) || (u && u.name) || "";
         }
         if ($("lessonNameTitle")) {
@@ -922,6 +933,11 @@
             $("lessonNameTitle").textContent = node
               ? "Preview · Lesson " + (node.bookLesson || node.lesson) + " · " + node.lessonTitle
               : "Preview · 预习";
+          }
+          else if (state.lessonMode === "reviewWrite") {
+            $("lessonNameTitle").textContent = node
+              ? "Dictation · Lesson " + (node.bookLesson || node.lesson) + " · " + node.lessonTitle
+              : "Dictation · 词句默写";
           }
           else if (node) $("lessonNameTitle").textContent = "Lesson " + (node.bookLesson || node.lesson) + " · " + node.lessonTitle;
           else $("lessonNameTitle").textContent = "";
@@ -940,6 +956,8 @@
             $("lessonFocus").textContent = "听 2 长句 + 分类 + 仿写 + 画线音 · 出完给弱项建议";
           } else if (state.lessonMode === "preview") {
             $("lessonFocus").textContent = "约 10 分钟：听重点 → 课本对话跟读 3 遍 → 单词跟读 3 遍";
+          } else if (state.lessonMode === "reviewWrite") {
+            $("lessonFocus").textContent = "本课约 6 个词 + 3 句示范 · 听英语默写（不看中文）";
           } else if (node && u && node.lesson === u.lessonCount) {
             $("lessonFocus").textContent = "本单元复习 · 知识延展 · " + focus;
           } else {
@@ -1281,15 +1299,26 @@
       }
 
       function renderWordCard(c) {
-        const isDictation = c.mode === "dictation";
+        const isDictation = c.mode === "dictation" || c.mode === "listenWrite" || c.mode === "sentenceWrite";
+        const hideZh = !!c.hideZh || c.mode === "listenWrite" || c.mode === "sentenceWrite";
+        const isSentence = c.mode === "sentenceWrite";
         const extra = $("cardExtra");
         extra.innerHTML = "";
         $("cardActions").innerHTML = "";
 
         if (isDictation) {
-          $("cardPrompt").textContent = "";
-          $("cardSub").textContent = c.zh ? "中文意思：" + c.zh : "";
-          extra.appendChild(coachBanner("turtle", "听「翻翻龟」读，写出英文"));
+          $("cardPrompt").textContent = isSentence ? "听完整句，默写下来" : "";
+          $("cardSub").textContent = hideZh
+            ? (isSentence ? "不看中文 · 听英语示范句" : "不看中文 · 听英语默写单词")
+            : c.zh
+              ? "中文意思：" + c.zh
+              : "";
+          extra.appendChild(
+            coachBanner(
+              isSentence ? "bee" : "turtle",
+              isSentence ? "听「翻翻蜂」读示范句，写出英文" : "听「翻翻龟」读，写出英文"
+            )
+          );
         } else {
           $("cardPrompt").textContent = c.zh || c.prompt || "";
           $("cardSub").textContent = "看中文，在下方输入英文";
@@ -1298,16 +1327,20 @@
 
         const field = document.createElement("div");
         field.className = "dictation-box";
-        const inputEl = document.createElement("input");
+        const inputEl = document.createElement(isSentence ? "textarea" : "input");
         inputEl.id = "dictInput";
-        inputEl.className = "dict-input";
-        inputEl.type = "text";
+        inputEl.className = "dict-input" + (isSentence ? " dict-sentence" : "");
+        if (!isSentence) {
+          inputEl.type = "text";
+        } else {
+          inputEl.rows = 3;
+        }
         inputEl.value = "";
         inputEl.autocomplete = "off";
         inputEl.setAttribute("autocapitalize", "off");
         inputEl.setAttribute("autocorrect", "off");
         inputEl.spellcheck = false;
-        inputEl.placeholder = "在这里输入英文";
+        inputEl.placeholder = isSentence ? "默写完整英文句子" : "在这里输入英文";
         field.appendChild(inputEl);
         extra.appendChild(field);
 
@@ -1324,7 +1357,17 @@
             if (input) input.focus();
             return;
           }
-          const ok = typed === right;
+          let ok = typed === right;
+          if (!ok && isSentence) {
+            const aw = typed.replace(/[^a-z'\s]/g, " ").split(/\s+/).filter(Boolean);
+            const bw = right.replace(/[^a-z'\s]/g, " ").split(/\s+/).filter(Boolean);
+            if (bw.length >= 4) {
+              const setA = {};
+              aw.forEach((w) => { setA[w] = true; });
+              const hit = bw.filter((w) => setA[w]).length;
+              ok = hit / bw.length >= 0.75 && aw.length >= Math.ceil(bw.length * 0.7);
+            }
+          }
           state.revealed = true;
           confirm.disabled = true;
           if (input) input.disabled = true;
@@ -1332,6 +1375,12 @@
           peek.className = "answer-peek" + (ok ? " ok" : "");
           peek.textContent = (ok ? "对了！ " : "正确答案：") + c.en;
           extra.appendChild(peek);
+          if (c.zh) {
+            const zhNote = document.createElement("p");
+            zhNote.className = "follow-zh";
+            zhNote.textContent = "中文：" + c.zh;
+            extra.appendChild(zhNote);
+          }
           if (c.ipa) {
             const ipaBtn = document.createElement("button");
             ipaBtn.type = "button";
@@ -1343,18 +1392,19 @@
             });
             extra.appendChild(ipaBtn);
           }
-          $("cardSub").textContent = "先听鼓励，再大声跟读 3 遍";
+          $("cardSub").textContent = "先听鼓励，再大声跟读";
           $("cardActions").innerHTML = "";
           scoreAnswer(ok, c);
           afterPraise(() => {
             if (state.view !== "lesson" || card() !== c) return;
-            // 看中文写词：跟读前先读一遍正确英文（角色规则不变）
             if (!isDictation) wordSpeak(c, 1);
             const leadMs = isDictation ? 0 : 700;
             setTimeout(() => {
               if (state.view !== "lesson" || card() !== c) return;
               startFollowRead(c, () => advance(ok, c), {
-                tip: "大声跟读 3 遍",
+                tip: isSentence ? "跟读 1 遍示范句" : "大声跟读 3 遍",
+                times: isSentence ? 1 : 3,
+                zh: hideZh ? c.zh || "" : "",
               });
             }, leadMs);
           });
@@ -1363,7 +1413,8 @@
         actionSpeakPair(isDictation ? "再听一遍" : "听发音", (rate) => wordSpeak(c, rate));
 
         inputEl.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") confirm.click();
+          if (e.key === "Enter" && !isSentence) confirm.click();
+          if (e.key === "Enter" && isSentence && (e.ctrlKey || e.metaKey)) confirm.click();
         });
         setTimeout(() => {
           inputEl.value = "";
@@ -2143,7 +2194,8 @@
           state.lessonMode === "minimal" ||
           state.lessonMode === "listenDrill" ||
           state.lessonMode === "miniExam" ||
-          state.lessonMode === "preview"
+          state.lessonMode === "preview" ||
+          state.lessonMode === "reviewWrite"
             ? Progress.settlePractice(store0, lessonCoins, todayKey(), state.lessonMode, {
                 timedOut: timedOut,
                 cards: state.cards,
@@ -2272,17 +2324,21 @@
                     ? "迷你卷完成！"
                     : settle.practiceKind === "retry"
                       ? "错题复习完成！"
-                      : settle.practiceKind === "preview"
-                        ? "预习完成！"
-                        : settle.isReview
-                          ? "复习完成！"
-                          : "本课完成！";
+                  : settle.practiceKind === "preview"
+                    ? "预习完成！"
+                    : settle.practiceKind === "reviewWrite"
+                      ? "词句默写完成！"
+                      : settle.isReview
+                        ? "复习完成！"
+                        : "本课完成！";
         wrap.appendChild(title);
 
         const score = document.createElement("p");
         score.className = "meta";
         if (settle.practiceKind === "preview") {
           score.textContent = "对话和单词都跟读完了，可以点「开始」做练习";
+        } else if (settle.practiceKind === "reviewWrite") {
+          score.textContent = challengeLate ? "做对 " + ok + " 题" : "默写做对 " + ok + " / " + total;
         } else {
           score.textContent = challengeLate ? "做对 " + ok + " 题" : "做对 " + ok + " / " + total;
         }
@@ -2329,7 +2385,9 @@
             ? ["challenge", "girlChild", "没想到你居然是一个学习的天才，效率太惊人啦！"]
             : settle.practiceKind === "preview"
               ? ["lesson", "girlChild", "预习真棒！接下来可以点开始做练习啦！"]
-              : ["lesson", "boyChild", "你又前进了一步，我为你感到自豪！"];
+              : settle.practiceKind === "reviewWrite"
+                ? ["lesson", "boyChild", "你又前进了一步，我为你感到自豪！"]
+                : ["lesson", "boyChild", "你又前进了一步，我为你感到自豪！"];
         const voiceAt = challengeDone || !challengeLate ? 3100 : 400;
         if (doneFx) playFx(doneFx, 3);
         const praiseToken = fxToken;
@@ -2377,11 +2435,13 @@
                     ? "再练听力"
                     : settle.practiceKind === "miniExam"
                       ? "再测一次"
-                      : settle.practiceKind === "retry"
-                        ? "继续错题"
-                        : settle.next
-                          ? "下一课 · " + settle.next.label
-                          : "看学期路径",
+                      : settle.practiceKind === "reviewWrite"
+                        ? "再默写一次"
+                        : settle.practiceKind === "retry"
+                          ? "继续错题"
+                          : settle.next
+                            ? "下一课 · " + settle.next.label
+                            : "看学期路径",
           "btn-start",
           () => {
             if (settle.practiceKind === "preview") startLesson();
@@ -2390,6 +2450,7 @@
             else if (settle.practiceKind === "minimal") startLesson(null, { mode: "minimal" });
             else if (settle.practiceKind === "listenDrill") startLesson(null, { mode: "listenDrill" });
             else if (settle.practiceKind === "miniExam") startLesson(null, { mode: "miniExam" });
+            else if (settle.practiceKind === "reviewWrite") startLesson(null, { mode: "reviewWrite" });
             else if (settle.practiceKind === "retry") startLesson(null, { mode: "retry" });
             else if (settle.next) startLesson(settle.next.id);
             else {
@@ -2399,14 +2460,14 @@
           }
         );
         addBtn(
-          settle.practiceKind === "preview"
+          settle.practiceKind === "preview" || settle.practiceKind === "reviewWrite"
             ? "回首页"
             : settle.practiceKind
               ? "看 Records"
               : "看学期路径",
           "btn-path",
           () => {
-            if (settle.practiceKind === "preview") {
+            if (settle.practiceKind === "preview" || settle.practiceKind === "reviewWrite") {
               showView("home");
               renderHome();
             } else if (settle.practiceKind) {
@@ -2657,6 +2718,9 @@
         $("btnStart").addEventListener("click", () => startLesson());
         if ($("btnPreview")) {
           $("btnPreview").addEventListener("click", () => startLesson(null, { mode: "preview" }));
+        }
+        if ($("btnReview")) {
+          $("btnReview").addEventListener("click", () => startLesson(null, { mode: "reviewWrite" }));
         }
         if ($("btnOpenPath")) {
           $("btnOpenPath").addEventListener("click", () => {

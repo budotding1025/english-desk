@@ -217,7 +217,7 @@
         ? 40
         : kind === "miniExam"
           ? 30
-          : kind === "phonics" || kind === "minimal" || kind === "listenDrill"
+          : kind === "phonics" || kind === "minimal" || kind === "listenDrill" || kind === "reviewWrite"
             ? 20
             : kind === "preview"
               ? 15
@@ -234,9 +234,11 @@
               ? "易混音奖励"
               : kind === "listenDrill"
                 ? "听力加练奖励"
-                : kind === "preview"
-                  ? "预习奖励"
-                  : "错题复习奖励";
+                : kind === "reviewWrite"
+                  ? "词句默写奖励"
+                  : kind === "preview"
+                    ? "预习奖励"
+                    : "错题复习奖励";
     const gems = timedOut ? 0 : kind === "challenge" || kind === "miniExam" ? 1 : 0;
     const earned = (lessonCoins || 0) + bonus;
     store.coins += earned;

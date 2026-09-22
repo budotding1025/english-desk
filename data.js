@@ -1958,20 +1958,23 @@ window.ENGLISH_DESK_DATA = {
   }
 
   function wordCard(w, mode) {
-    const dictation = mode === "dictation";
+    const listenWrite = mode === "listenWrite";
+    const sentenceWrite = mode === "sentenceWrite";
+    const dictation = mode === "dictation" || listenWrite || sentenceWrite;
     const ipa = wordIpa(w.en);
     return {
       type: "word",
-      mode: dictation ? "dictation" : "zh2en",
-      title: dictation ? "听写" : "看中文写词",
-      prompt: dictation ? "听「翻翻龟」读，写出英文" : w.zh,
+      mode: mode || "zh2en",
+      title: sentenceWrite ? "默写句子" : listenWrite ? "默写单词" : dictation ? "听写" : "看中文写词",
+      prompt: sentenceWrite || listenWrite ? "听英语，写出英文" : dictation ? "听「翻翻龟」读，写出英文" : w.zh,
       answer: w.en,
       zh: w.zh,
       en: w.en,
-      ipa: ipa,
+      ipa: sentenceWrite ? "" : ipa,
+      hideZh: !!(listenWrite || sentenceWrite),
       speakText: w.en,
-      speakRole: dictation ? "boyChild" : "adultMale",
-      coach: dictation ? "turtle" : null,
+      speakRole: sentenceWrite ? "girlChild" : dictation ? "boyChild" : "adultMale",
+      coach: sentenceWrite ? "bee" : dictation ? "turtle" : null,
       autoPlay: dictation,
       retryWord: { en: w.en, zh: w.zh },
     };
@@ -2148,6 +2151,91 @@ window.ENGLISH_DESK_DATA = {
   var PREVIEW_OPEN =
     "我们先用大约十分钟预习。先听老师讲这一课要掌握什么，再听课本对话，每一句跟读三遍，最后单词也读三遍。预习好了，上课回答问题会更有信心。";
 
+  var REVIEW_WRITE_OPEN =
+    "我们来做本课词句默写。先听英语，默写几个重点单词；再听两三句课本示范句，默写下来。不看中文。";
+
+  function lessonModelSentences(unit, store) {
+    store = store || {};
+    const n = lessonNo(unit, store);
+    const out = [];
+    const seen = {};
+    function push(en, zh, role) {
+      const text = String(en || "").trim();
+      if (!text || seen[text]) return;
+      seen[text] = true;
+      out.push({
+        en: text,
+        zh: zh || lineZh(text) || "",
+        role: role || "girlChild",
+      });
+    }
+    const lesson = previewLesson(unit, store);
+    ((lesson && lesson.keySentences) || []).forEach(function (s) {
+      push(s.en, s.zh, "girlChild");
+    });
+    if (out.length < 4) {
+      ((lesson && lesson.lines) || []).forEach(function (l) {
+        if (out.length >= 6) return;
+        const t = String(l.text || "");
+        if (t.length > 72) return;
+        push(t, l.zh, l.role || "girlChild");
+      });
+    }
+    if (out.length < 3) {
+      patternsFor(unit, store, false).forEach(function (p) {
+        if (p.lesson && p.lesson !== n && !p.extend) return;
+        (p.demos || []).forEach(function (d) {
+          if (out.length >= 6) return;
+          push(d.text, "", d.role || "girlChild");
+        });
+      });
+    }
+    return out;
+  }
+
+  function lessonBookWords(unit, store) {
+    store = store || {};
+    const n = lessonNo(unit, store);
+    const review = isReviewLesson(unit, n);
+    const words = (unit.words || []).filter(function (w) {
+      if (w.extend) return false;
+      if (review) return w.lesson === n || !w.lesson;
+      return w.lesson === n;
+    });
+    const high = words.filter(function (w) { return w.priority === "high"; });
+    const rest = words.filter(function (w) { return w.priority !== "high"; });
+    return high.concat(rest);
+  }
+
+  function buildReviewWriteCards(unit, store) {
+    store = store || {};
+    const n = lessonNo(unit, store);
+    const cards = [];
+    cards.push({
+      type: "talk",
+      title: "默写·开场",
+      prompt: "词句默写 · Lesson " + n,
+      speakText: REVIEW_WRITE_OPEN,
+      speakRole: "adultFemale",
+      forceZh: true,
+      tip: "听老师说怎么默写",
+      coach: "turtle",
+      autoPlay: true,
+    });
+    const bookWords = lessonBookWords(unit, store);
+    const highOnly = bookWords.filter(function (w) { return w.priority === "high"; });
+    (highOnly.length ? highOnly : bookWords).slice(0, 6).forEach(function (w) {
+      cards.push(wordCard(w, "listenWrite"));
+    });
+    lessonModelSentences(unit, store).slice(0, 3).forEach(function (s) {
+      const card = wordCard({ en: s.en, zh: s.zh, src: "课本", priority: "high" }, "sentenceWrite");
+      card.speakRole = s.role || "girlChild";
+      card.coach = "bee";
+      cards.push(card);
+    });
+    return cards;
+  }
+
   var JUDGE_TALK = {
     "Dad, I'm a little worried. Am I late?": "你再听一遍。他说我有点担心，还问我是不是迟到了。他就是在担心迟到。这句该选对。",
     "I can't find my dog Danny. He is brown with a black nose.": "他找不到狗 Danny，还说它是棕色的，鼻子是黑的。判断说的就是这件事。这句该选对。",
@@ -2258,7 +2346,7 @@ window.ENGLISH_DESK_DATA = {
   }
 
   function commentaryLines() {
-    const lines = [PREVIEW_OPEN];
+    const lines = [PREVIEW_OPEN, REVIEW_WRITE_OPEN];
     Object.keys(JUDGE_TALK).forEach(function (key) { lines.push(JUDGE_TALK[key]); });
     Object.keys(LESSON_TALK).forEach(function (id) {
       Object.keys(LESSON_TALK[id]).forEach(function (n) { lines.push(LESSON_TALK[id][n]); });
@@ -2602,6 +2690,8 @@ window.ENGLISH_DESK_DATA = {
       return buildMiniExamCards(unit, store);
     } else if (sessionId === "preview") {
       return buildPreviewCards(unit, store);
+    } else if (sessionId === "reviewWrite") {
+      return buildReviewWriteCards(unit, store);
     } else {
       const s = sortCard(unit);
       if (s) cards.push(s);
@@ -3143,6 +3233,7 @@ window.ENGLISH_DESK_DATA = {
     buildListenDrillCards,
     buildMiniExamCards,
     buildPreviewCards,
+    buildReviewWriteCards,
     eggLine,
     lineZh,
     lessonTalk,

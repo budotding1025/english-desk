@@ -1856,6 +1856,8 @@
     "en-GB|girlChild|word": "audio/en-GB/girlChild/1f170c65935963e6cc2a.mp3",
     "en-GB|girlChild|fill": "audio/en-GB/girlChild/00983a57e310a48ea372.mp3",
     "en-GB|girlChild|I'm worried because I'm late.": "audio/en-GB/girlChild/fd1fccb41460cb131492.mp3",
-    "en-GB|girlChild|I'm happy because I can play.": "audio/en-GB/girlChild/464637b5a0ae278b7196.mp3"
+    "en-GB|girlChild|I'm happy because I can play.": "audio/en-GB/girlChild/464637b5a0ae278b7196.mp3",
+    "zh|adultFemale|我们来做本课词句默写。先听英语，默写单词；再听课本示范句，默写句子。不看中文，和课本对齐。": "audio/zh/adultFemale/c8ea4a98f5d023af0389.mp3",
+    "zh|adultFemale|我们来做本课词句默写。先听英语，默写几个重点单词；再听两三句课本示范句，默写下来。不看中文。": "audio/zh/adultFemale/743ecb467dc11dd4adc7.mp3"
   }
 }
