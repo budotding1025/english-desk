@@ -215,20 +215,33 @@
       ? 0
       : kind === "challenge"
         ? 40
-        : kind === "phonics"
-          ? 20
-          : 20;
+        : kind === "miniExam"
+          ? 30
+          : kind === "phonics" || kind === "minimal" || kind === "listenDrill"
+            ? 20
+            : kind === "preview"
+              ? 15
+              : 20;
     const bonusLabel = timedOut
       ? ""
       : kind === "challenge"
         ? "限时挑战奖励"
-        : kind === "phonics"
-          ? "发音小站奖励"
-          : "错题复习奖励";
-    const gems = timedOut ? 0 : kind === "challenge" ? 1 : 0;
+        : kind === "miniExam"
+          ? "迷你卷奖励"
+          : kind === "phonics"
+            ? "发音小站奖励"
+            : kind === "minimal"
+              ? "易混音奖励"
+              : kind === "listenDrill"
+                ? "听力加练奖励"
+                : kind === "preview"
+                  ? "预习奖励"
+                  : "错题复习奖励";
+    const gems = timedOut ? 0 : kind === "challenge" || kind === "miniExam" ? 1 : 0;
     const earned = (lessonCoins || 0) + bonus;
     store.coins += earned;
     store.gems += gems;
+    const weakTips = kind === "miniExam" ? buildWeakTips(opts.cards || [], opts.results || []) : [];
     return {
       store: store,
       lessonCoins: lessonCoins || 0,
@@ -243,7 +256,59 @@
       pathId: store.currentPathId,
       practiceKind: kind,
       timedOut: timedOut,
+      weakTips: weakTips,
     };
+  }
+
+  function buildWeakTips(cards, results) {
+    let listenFail = 0;
+    let phonFail = 0;
+    let sentFail = 0;
+    let wordFail = 0;
+    (cards || []).forEach((c, i) => {
+      if (results[i]) return;
+      if (c.type === "listen") listenFail += 1;
+      else if (c.type === "phonics") phonFail += 1;
+      else if (c.type === "pattern" || c.makeSentence || c.saySelf) sentFail += 1;
+      else wordFail += 1;
+    });
+    const tips = [];
+    if (listenFail) {
+      tips.push({
+        title: "听力",
+        text: "长句后半句易漏 → 去「听力加练」",
+        mode: "listenDrill",
+      });
+    }
+    if (phonFail) {
+      tips.push({
+        title: "发音",
+        text: "画线音 / 易混对比 → 去「发音小站」或「易混音」",
+        mode: "minimal",
+      });
+    }
+    if (sentFail) {
+      tips.push({
+        title: "造句",
+        text: "I'm … because / when … → 上课多「说自己」",
+        mode: "retry",
+      });
+    }
+    if (wordFail) {
+      tips.push({
+        title: "词汇",
+        text: "认词还不够稳 → 去「预习」听三遍",
+        mode: "preview",
+      });
+    }
+    if (!tips.length) {
+      tips.push({
+        title: "真棒",
+        text: "这套迷你卷过关了，可以去挑战或预习下一课",
+        mode: "",
+      });
+    }
+    return tips;
   }
 
   function settleLesson(store, pathId, lessonCoins, todayKey) {

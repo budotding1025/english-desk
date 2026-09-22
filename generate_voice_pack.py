@@ -39,6 +39,7 @@ FRAGILE = {
     "should", "friend", "polite", "together", "would", "could",
     "mouth", "these", "live", "feel", "look", "soup", "cute", "full",
     "he", "she", "me", "bed", "cat", "good", "make", "sad", "dog",
+    "ship", "sheep", "fill", "let", "word", "worried",
 }
 
 PREVIEW = [

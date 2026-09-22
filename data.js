@@ -1959,6 +1959,7 @@ window.ENGLISH_DESK_DATA = {
 
   function wordCard(w, mode) {
     const dictation = mode === "dictation";
+    const ipa = wordIpa(w.en);
     return {
       type: "word",
       mode: dictation ? "dictation" : "zh2en",
@@ -1967,12 +1968,44 @@ window.ENGLISH_DESK_DATA = {
       answer: w.en,
       zh: w.zh,
       en: w.en,
+      ipa: ipa,
       speakText: w.en,
       speakRole: dictation ? "boyChild" : "adultMale",
       coach: dictation ? "turtle" : null,
       autoPlay: dictation,
       retryWord: { en: w.en, zh: w.zh },
     };
+  }
+
+  const WORD_IPA = {
+    worried: "/ˈwʌrid/",
+    happy: "/ˈhæpi/",
+    excited: "/ɪkˈsaɪtɪd/",
+    sad: "/sæd/",
+    angry: "/ˈæŋɡri/",
+    tired: "/ˈtaɪəd/",
+    late: "/leɪt/",
+    let: "/let/",
+    ship: "/ʃɪp/",
+    sheep: "/ʃiːp/",
+    because: "/bɪˈkɒz/",
+    feel: "/fiːl/",
+    friend: "/frend/",
+    park: "/pɑːk/",
+    school: "/skuːl/",
+    cake: "/keɪk/",
+    plane: "/pleɪn/",
+    ill: "/ɪl/",
+    share: "/ʃeə/",
+    better: "/ˈbetə/",
+  };
+
+  function wordIpa(en) {
+    const key = String(en || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z']/g, "");
+    return WORD_IPA[key] || "";
   }
 
   function lineZh(text) {
@@ -2112,6 +2145,9 @@ window.ENGLISH_DESK_DATA = {
     return map[text] || "";
   }
 
+  var PREVIEW_OPEN =
+    "我们先用大约十分钟预习。先听老师讲这一课要掌握什么，再听课本对话，每一句跟读三遍，最后单词也读三遍。预习好了，上课回答问题会更有信心。";
+
   var JUDGE_TALK = {
     "Dad, I'm a little worried. Am I late?": "你再听一遍。他说我有点担心，还问我是不是迟到了。他就是在担心迟到。这句该选对。",
     "I can't find my dog Danny. He is brown with a black nose.": "他找不到狗 Danny，还说它是棕色的，鼻子是黑的。判断说的就是这件事。这句该选对。",
@@ -2222,12 +2258,131 @@ window.ENGLISH_DESK_DATA = {
   }
 
   function commentaryLines() {
-    const lines = [];
+    const lines = [PREVIEW_OPEN];
     Object.keys(JUDGE_TALK).forEach(function (key) { lines.push(JUDGE_TALK[key]); });
     Object.keys(LESSON_TALK).forEach(function (id) {
       Object.keys(LESSON_TALK[id]).forEach(function (n) { lines.push(LESSON_TALK[id][n]); });
     });
+    const preview = (typeof window !== "undefined" && window.ENGLISH_DESK_PREVIEW) || {};
+    Object.keys(preview).forEach(function (uid) {
+      Object.keys(preview[uid] || {}).forEach(function (n) {
+        const lesson = preview[uid][n];
+        if (lesson && lesson.focusTalk) lines.push(lesson.focusTalk);
+      });
+    });
     return lines;
+  }
+
+  function previewLesson(unit, store) {
+    const n = lessonNo(unit, store);
+    const book = (typeof window !== "undefined" && window.ENGLISH_DESK_PREVIEW) || {};
+    const unitBook = book[unit.id] || {};
+    return unitBook[n] || unitBook[String(n)] || null;
+  }
+
+  function buildPreviewCards(unit, store) {
+    store = store || {};
+    const cards = [];
+    const n = lessonNo(unit, store);
+    const review = isReviewLesson(unit, n);
+    const lesson = previewLesson(unit, store);
+    const focusLine = ((unit.focus || [])[n - 1]) || (lesson && lesson.title) || "本课重点";
+    const talk =
+      (lesson && lesson.focusTalk) ||
+      lessonTalk(unit.id, n) ||
+      focusLine;
+
+    cards.push({
+      type: "talk",
+      title: "预习·开场",
+      prompt: "预习约 10 分钟 · Lesson " + n,
+      speakText: PREVIEW_OPEN,
+      speakRole: "adultFemale",
+      forceZh: true,
+      tip: "听老师说怎么预习",
+      coach: "bee",
+      autoPlay: true,
+    });
+
+    cards.push({
+      type: "talk",
+      title: "预习·重点",
+      prompt: focusLine,
+      speakText: talk,
+      speakRole: "adultFemale",
+      forceZh: true,
+      tip: "听老师讲清这一课要掌握什么",
+      frame: "",
+      glosses: ((lesson && lesson.keySentences) || []).map(function (s) {
+        return { en: s.en, zh: s.zh };
+      }),
+      coach: "bee",
+      autoPlay: true,
+    });
+
+    const lines = (lesson && lesson.lines) || [];
+    if (lines.length) {
+      const demos = lines.map(function (l) {
+        return { role: l.role || "girlChild", text: l.text, name: l.name || "" };
+      });
+      cards.push({
+        type: "pattern",
+        title: "预习·听对话",
+        prompt: (lesson && lesson.title) || "听课本对话",
+        demos: demos,
+        speakText: demos.map(function (d) { return d.text; }).join(" "),
+        speakRole: (demos[0] && demos[0].role) || "girlChild",
+        glosses: lines
+          .map(function (l) { return { en: (l.name ? l.name + "： " : "") + l.text, zh: l.zh || lineZh(l.text) }; })
+          .filter(function (g) { return g.zh; }),
+        tip: "先完整听一遍课本对话，看中文意思",
+        coach: "bee",
+        autoPlay: true,
+        previewListen: true,
+      });
+      lines.forEach(function (l) {
+        const zh = l.zh || lineZh(l.text);
+        cards.push({
+          type: "pattern",
+          title: "预习·跟读对话",
+          prompt: (l.name ? l.name + "： " : "") + l.text,
+          demos: [{ role: l.role || "girlChild", text: l.text }],
+          speakText: l.text,
+          speakRole: l.role || "girlChild",
+          zh: zh,
+          glosses: zh ? [{ en: l.text, zh: zh }] : [],
+          tip: "跟读课本原句 3 遍",
+          coach: "bee",
+          autoPlay: true,
+          followRead: true,
+        });
+      });
+    }
+
+    const words = (unit.words || []).filter(function (w) {
+      const hit = review ? w.lesson === n || w.extend : w.lesson === n && !w.extend;
+      return hit && !w.extend;
+    });
+    const high = words.filter(function (w) { return w.priority === "high"; });
+    const rest = words.filter(function (w) { return w.priority !== "high"; });
+    high.concat(rest).slice(0, 8).forEach(function (w) {
+      cards.push({
+        type: "pattern",
+        title: "预习·跟读单词",
+        prompt: w.en,
+        demos: [{ role: "girlChild", text: w.en }],
+        speakText: w.en,
+        speakRole: "girlChild",
+        zh: w.zh,
+        glosses: [{ en: w.en, zh: w.zh }],
+        tip: "跟读课本单词 3 遍",
+        coach: "bee",
+        autoPlay: true,
+        followRead: true,
+      });
+    });
+
+    return cards;
   }
 
   function listenCard(item, kind, opts) {
@@ -2240,10 +2395,19 @@ window.ENGLISH_DESK_DATA = {
     } else {
       prompt = item.show || item.prompt || "听完再选";
     }
+    const hearTimes =
+      typeof opts.hearTimes === "number"
+        ? opts.hearTimes
+        : isJudge
+          ? hard
+            ? 1
+            : 2
+          : 0;
     return {
       type: "listen",
       kind: kind,
       hard: hard,
+      hearTimes: hearTimes,
       title: hard ? (isJudge ? "听力挑战·判断" : "听力挑战·应答") : isJudge ? "听力判断" : "听力对话",
       prompt: prompt,
       speakText: item.speak,
@@ -2251,7 +2415,7 @@ window.ENGLISH_DESK_DATA = {
       coach: isJudge ? "bee" : null,
       autoPlay: true,
       answer: item.answer,
-      tip: (item.tip || "") + (hard ? " · 先听再选" : ""),
+      tip: (item.tip || "") + (hard ? " · 先听再选" : hearTimes >= 2 ? " · 听两遍再选" : ""),
       zh: item.zh || lineZh(item.speak) || (isJudge ? "" : String(item.show || "").replace(/^判断[:：]\s*/, "")),
       explain: judgeExplain(item),
       answerZh: item.answerZh || lineZh(((item.choices || []).filter((ch) => String(ch.id) === String(item.answer))[0] || {}).text || ""),
@@ -2293,15 +2457,18 @@ window.ENGLISH_DESK_DATA = {
     };
   }
 
-  function sentenceCard(unit, index, store) {
+  function sentenceCard(unit, index, store, opts) {
+    opts = opts || {};
     const list = patternsFor(unit, store || {}, true);
     const p = list[typeof index === "number" ? index : 0] || list[0];
     if (!p) return null;
     const demo = (p.demos && p.demos[0] && p.demos[0].text) || "I'm happy because I can play.";
     return {
       type: "pattern",
-      title: "造句挑战",
-      prompt: "用句型自己造一句（不要照抄示范）\n" + (p.frame || p.label),
+      title: opts.saySelf ? "说自己" : "造句挑战",
+      prompt: opts.saySelf
+        ? "I'm ____ because / when ____.\n必须说自己的事（不要照抄示范）"
+        : "用句型自己造一句（不要照抄示范）\n" + (p.frame || p.label),
       demos: [{ role: "girlChild", text: demo }],
       speakText: demo,
       speakRole: "girlChild",
@@ -2310,6 +2477,8 @@ window.ENGLISH_DESK_DATA = {
       autoPlay: true,
       frame: p.frame || "",
       makeSentence: true,
+      saySelf: !!opts.saySelf,
+      requireWord: opts.requireWord || "",
     };
   }
 
@@ -2415,12 +2584,24 @@ window.ENGLISH_DESK_DATA = {
       if (reply) cards.push(listenCard(reply, "reply"));
       const pat = patternCard(unit, 0, store, review);
       if (pat) cards.push(pat);
+      if (store.needSaySelf) {
+        const say = sentenceCard(unit, 0, store, { saySelf: true });
+        if (say) cards.push(say);
+      }
     } else if (sessionId === "retry") {
       return buildRetryCards(unit, store);
     } else if (sessionId === "challenge") {
       return buildChallengeCards(unit, store);
     } else if (sessionId === "phonics") {
       return buildPhonicsCards(store);
+    } else if (sessionId === "minimal") {
+      return buildMinimalCards(store);
+    } else if (sessionId === "listenDrill") {
+      return buildListenDrillCards(unit, store);
+    } else if (sessionId === "miniExam") {
+      return buildMiniExamCards(unit, store);
+    } else if (sessionId === "preview") {
+      return buildPreviewCards(unit, store);
     } else {
       const s = sortCard(unit);
       if (s) cards.push(s);
@@ -2441,12 +2622,25 @@ window.ENGLISH_DESK_DATA = {
     const allRetry = store.retryWords || [];
     const pool = (retry.length ? retry : allRetry).slice(-8);
     const cards = [];
+    let fillN = 0;
     pool.forEach((r, i) => {
       if (r.type === "listen" && r.card) {
         cards.push(r.card);
         return;
       }
       cards.push(wordCard({ en: r.en, zh: r.zh, src: "错词", priority: "high" }, i % 2 === 0 ? "dictation" : "zh2en"));
+      if (fillN < 3 && r.en && !/^(a|an|the|to|is|am|are)$/i.test(r.en)) {
+        const fill = sentenceCard(unit, 0, store, { requireWord: r.en });
+        if (fill) {
+          fillN += 1;
+          fill.title = "进一句";
+          fill.prompt = "用「" + r.en + "」补全：I'm ____ because ____.";
+          fill.tip = "句子里必须有：" + r.en + "；还要有 because / when";
+          fill.requireWord = r.en;
+          fill.makeSentence = true;
+          cards.push(fill);
+        }
+      }
     });
     return cards;
   }
@@ -2746,6 +2940,170 @@ window.ENGLISH_DESK_DATA = {
     }));
   }
 
+  /** 易混音小站：一对一最小对比（比音标表更贴卷） */
+  const MINIMAL_PAIRS = [
+    {
+      id: "late-let",
+      needLesson: 1,
+      left: { en: "late", mark: "a" },
+      right: { en: "let", mark: "e" },
+      same: false,
+      sound: "/eɪ/ ≠ /e/",
+      rule: "late 的 a 读 /eɪ/，let 的 e 读 /e/。不一样。",
+      follow: "late",
+    },
+    {
+      id: "ship-sheep",
+      needLesson: 1,
+      left: { en: "ship", mark: "i" },
+      right: { en: "sheep", mark: "ee" },
+      same: false,
+      sound: "/ɪ/ ≠ /iː/",
+      rule: "ship 短音 /ɪ/，sheep 长音 /iː/。不一样。",
+      follow: "ship",
+    },
+    {
+      id: "worried-word",
+      needLesson: 1,
+      left: { en: "worried", mark: "o" },
+      right: { en: "word", mark: "o" },
+      same: false,
+      sound: "/ʌ/ ≠ /ɜː/",
+      rule: "worried 里的 o 常读 /ʌ/，word 的 or 读 /ɜː/。不一样。",
+      follow: "worried",
+    },
+    {
+      id: "happy-sad-a",
+      needLesson: 1,
+      left: { en: "happy", mark: "a" },
+      right: { en: "sad", mark: "a" },
+      same: true,
+      sound: "/æ/",
+      rule: "happy、sad 里的 a，都读 /æ/。相同。",
+      follow: "happy",
+    },
+    {
+      id: "feel-fill",
+      needLesson: 1,
+      left: { en: "feel", mark: "ee" },
+      right: { en: "fill", mark: "i" },
+      same: false,
+      sound: "/iː/ ≠ /ɪ/",
+      rule: "feel 长音 /iː/，fill 短音 /ɪ/。不一样。",
+      follow: "feel",
+    },
+    {
+      id: "cake-cat",
+      needLesson: 2,
+      left: { en: "cake", mark: "a" },
+      right: { en: "cat", mark: "a" },
+      same: false,
+      sound: "/eɪ/ ≠ /æ/",
+      rule: "cake 的 a_e 读 /eɪ/，cat 的 a 读 /æ/。不一样。",
+      follow: "cake",
+    },
+    {
+      id: "he-bed",
+      needLesson: 1,
+      left: { en: "he", mark: "e" },
+      right: { en: "bed", mark: "e" },
+      same: false,
+      sound: "/iː/ ≠ /e/",
+      rule: "he 的 e 读 /iː/，bed 的 e 读 /e/。不一样。",
+      follow: "he",
+    },
+    {
+      id: "look-good",
+      needLesson: 2,
+      left: { en: "look", mark: "oo" },
+      right: { en: "good", mark: "oo" },
+      same: true,
+      sound: "/ʊ/",
+      rule: "look、good 里的 oo，都读短音 /ʊ/。相同。",
+      follow: "look",
+    },
+  ];
+
+  function buildMinimalCards(store) {
+    store = store || {};
+    const unlock = phonicsUnlockLesson(store);
+    const pool = MINIMAL_PAIRS.filter((p) => (p.needLesson || 1) <= unlock);
+    const picked = shuffle(pool.length ? pool : MINIMAL_PAIRS).slice(0, 6);
+    return picked.map((p) => ({
+      type: "phonics",
+      title: "易混对比",
+      prompt: "听一听，这两个词画线部分发音相同吗？",
+      tip: "一对一对比：相同 √ / 不同 ×，再跟读",
+      left: p.left,
+      right: p.right,
+      leftHtml: markWordHtml(p.left.en, p.left.mark),
+      rightHtml: markWordHtml(p.right.en, p.right.mark),
+      same: !!p.same,
+      answer: !!p.same,
+      sound: p.sound || "",
+      rule: p.rule || "",
+      speakText: p.left.en + ". " + p.right.en,
+      speakRole: "girlChild",
+      coach: "bee",
+      autoPlay: true,
+      en: p.left.en + " · " + p.right.en,
+      followRead: true,
+      followWords: [p.left.en, p.right.en],
+      speakFollow: p.left.en + " " + p.right.en,
+    }));
+  }
+
+  function buildListenDrillCards(unit, store) {
+    store = store || {};
+    const cards = [];
+    const judges = listenFor(unit, store, "judge", true);
+    const becauseFirst = judges.filter((j) => /because|when/i.test(j.speak || ""));
+    const pool = becauseFirst.length ? becauseFirst.concat(judges) : judges;
+    const seen = {};
+    shuffle(pool).forEach((j) => {
+      if (cards.length >= 5) return;
+      const key = j.speak || j.id || "";
+      if (seen[key]) return;
+      seen[key] = true;
+      const c = listenCard(j, "judge", { hearTimes: 2 });
+      c.title = "听力加练";
+      c.tip = (j.tip || "") + " · 听两遍，盯后半句";
+      cards.push(c);
+    });
+    return cards;
+  }
+
+  function buildMiniExamCards(unit, store) {
+    store = store || {};
+    const cards = [];
+    shuffle(listenFor(unit, store, "judge")).slice(0, 2).forEach((j) => {
+      const c = listenCard(j, "judge", { hearTimes: 2 });
+      c.title = "迷你卷·听力";
+      cards.push(c);
+    });
+    const s = sortCard(unit);
+    if (s) {
+      s.title = "迷你卷·词分类";
+      s.bank = (s.bank || []).slice(0, 4);
+      s.prompt = "把 4 个词点进正确类别";
+      cards.push(s);
+    } else {
+      pickWords(unit, store, 4, 1).forEach((w) => cards.push(wordCard(w, "dictation")));
+    }
+    const sent = sentenceCard(unit, 0, store, { saySelf: true });
+    if (sent) {
+      sent.title = "迷你卷·仿写";
+      cards.push(sent);
+    }
+    buildMinimalCards(store)
+      .slice(0, 2)
+      .forEach((c) => {
+        c.title = "迷你卷·画线音";
+        cards.push(c);
+      });
+    return cards;
+  }
+
   function buildChallengeCards(unit, store) {
     store = store || {};
     const cards = [];
@@ -2781,11 +3139,16 @@ window.ENGLISH_DESK_DATA = {
     buildRetryCards,
     buildChallengeCards,
     buildPhonicsCards,
+    buildMinimalCards,
+    buildListenDrillCards,
+    buildMiniExamCards,
+    buildPreviewCards,
     eggLine,
     lineZh,
     lessonTalk,
     judgeTalk,
     commentaryLines,
     shuffle,
+    wordIpa,
   };
 })(window);
