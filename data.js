@@ -2417,39 +2417,19 @@ window.ENGLISH_DESK_DATA = {
     const lines = (lesson && lesson.lines) || [];
     if (lines.length) {
       const demos = lines.map(function (l) {
-        return { role: l.role || "girlChild", text: l.text, name: l.name || "" };
+        return { role: l.role || "girlChild", text: l.text, name: l.name || "", zh: l.zh || lineZh(l.text) || "" };
       });
       cards.push({
         type: "pattern",
-        title: "预习·听对话",
-        prompt: (lesson && lesson.title) || "听课本对话",
+        title: "预习·读课文",
+        prompt: (lesson && lesson.title) || "读课本对话",
         demos: demos,
-        speakText: demos.map(function (d) { return d.text; }).join(" "),
+        speakText: demos[0] ? demos[0].text : "",
         speakRole: (demos[0] && demos[0].role) || "girlChild",
-        glosses: lines
-          .map(function (l) { return { en: (l.name ? l.name + "： " : "") + l.text, zh: l.zh || lineZh(l.text) }; })
-          .filter(function (g) { return g.zh; }),
-        tip: "先完整听一遍课本对话，看中文意思",
+        tip: "一句一句听、跟读。读到的句子会变绿，方便背诵。",
         coach: "bee",
-        autoPlay: true,
-        previewListen: true,
-      });
-      lines.forEach(function (l) {
-        const zh = l.zh || lineZh(l.text);
-        cards.push({
-          type: "pattern",
-          title: "预习·跟读对话",
-          prompt: (l.name ? l.name + "： " : "") + l.text,
-          demos: [{ role: l.role || "girlChild", text: l.text }],
-          speakText: l.text,
-          speakRole: l.role || "girlChild",
-          zh: zh,
-          glosses: zh ? [{ en: l.text, zh: zh }] : [],
-          tip: "跟读课本原句 3 遍",
-          coach: "bee",
-          autoPlay: true,
-          followRead: true,
-        });
+        autoPlay: false,
+        previewScript: true,
       });
     }
 

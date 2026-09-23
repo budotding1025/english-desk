@@ -473,6 +473,61 @@ button { cursor: pointer; border: none; background: none; }
   line-height: 1.45;
   color: #5c4a32;
 }
+.script-lines {
+  margin: 10px 0 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: min(52vh, 420px);
+  overflow: auto;
+  padding: 4px 2px;
+}
+.script-line {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  background: rgba(255, 255, 255, 0.55);
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.script-line .script-name {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+.script-line .script-en {
+  display: block;
+  font-size: 1.12rem;
+  font-weight: 800;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.script-line .script-zh {
+  margin: 4px 0 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #6b5a45;
+}
+.script-line.is-active {
+  background: #e6f7ea;
+  border-color: #0a7a32;
+  box-shadow: 0 0 0 2px rgba(10, 122, 50, 0.18);
+}
+.script-line.is-active .script-en {
+  color: #065f28;
+  font-size: 1.22rem;
+  font-weight: 900;
+}
+.script-line.is-active .script-name {
+  color: #0a7a32;
+}
+.script-line.is-done {
+  opacity: 0.72;
+}
+.script-line.is-done .script-en {
+  color: #2f6b45;
+}
 .gloss-list {
   margin: 10px 0 4px;
   padding: 10px 12px;

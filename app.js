@@ -958,7 +958,7 @@
           } else if (state.lessonMode === "miniExam") {
             $("lessonFocus").textContent = "听 2 长句 + 分类 + 仿写 + 画线音 · 出完给弱项建议";
           } else if (state.lessonMode === "preview") {
-            $("lessonFocus").textContent = "约 10 分钟：听重点 → 课本对话跟读 3 遍 → 单词跟读 3 遍";
+            $("lessonFocus").textContent = "约 10 分钟：听重点 → 课文一句一句跟读（绿字）→ 单词跟读";
           } else if (state.lessonMode === "reviewWrite") {
             $("lessonFocus").textContent = "本课约 6 个词 + 3 句示范 · 听英语默写（不看中文）";
           } else if (node && u && node.lesson === u.lessonCount) {
@@ -1756,10 +1756,183 @@
         $("cardActions").appendChild(go);
       }
 
+      function renderPreviewScriptCard(c) {
+        const extra = $("cardExtra");
+        const lines = (c.demos || []).map((d) => ({
+          role: d.role || "girlChild",
+          text: d.text,
+          name: d.name || "",
+          zh: d.zh || (Lesson.lineZh ? Lesson.lineZh(d.text) : "") || "",
+        }));
+        if (!lines.length) {
+          advance(true, c);
+          return;
+        }
+
+        extra.appendChild(coachBanner("bee", "一句一句读课文。绿字是正在读的句子"));
+        $("cardPrompt").textContent = c.prompt || "读课本对话";
+        $("cardSub").textContent = c.tip || "听完跟读，绿句方便背诵";
+
+        const list = document.createElement("div");
+        list.className = "script-lines";
+        const rowEls = [];
+        lines.forEach((line) => {
+          const row = document.createElement("div");
+          row.className = "script-line";
+          const name = document.createElement("span");
+          name.className = "script-name";
+          name.textContent = line.name ? line.name + "：" : "";
+          const en = document.createElement("span");
+          en.className = "script-en";
+          en.textContent = line.text;
+          row.appendChild(name);
+          row.appendChild(en);
+          if (line.zh) {
+            const zh = document.createElement("p");
+            zh.className = "script-zh";
+            zh.textContent = line.zh;
+            row.appendChild(zh);
+          }
+          list.appendChild(row);
+          rowEls.push(row);
+        });
+        extra.appendChild(list);
+
+        const status = document.createElement("p");
+        status.className = "follow-tip";
+        status.textContent = "先整课听一遍（一句一句）";
+        extra.appendChild(status);
+
+        let playGen = 0;
+        let phase = "listen"; // listen | follow
+        let followIndex = 0;
+        let followCount = 0;
+        const FOLLOW_TIMES = 3;
+
+        function setActive(i) {
+          rowEls.forEach((el, j) => {
+            el.classList.toggle("is-active", j === i);
+            el.classList.toggle("is-done", phase === "follow" ? j < followIndex : false);
+          });
+          if (i >= 0 && rowEls[i]) {
+            try {
+              rowEls[i].scrollIntoView({ block: "nearest", behavior: "smooth" });
+            } catch (e) {}
+          }
+        }
+
+        function speakLine(line, rate) {
+          if (!V || !line) return Promise.resolve();
+          const opts = rate && rate !== 1 ? { rate: rate } : undefined;
+          return V.speak(line.text, line.role || "girlChild", opts);
+        }
+
+        function playAll(rate) {
+          const gen = ++playGen;
+          phase = "listen";
+          followCount = 0;
+          status.textContent = "正在一句一句读课文…";
+          let chain = Promise.resolve();
+          lines.forEach((line, i) => {
+            chain = chain.then(() => {
+              if (gen !== playGen || state.view !== "lesson" || card() !== c) return;
+              setActive(i);
+              return speakLine(line, rate);
+            }).then(() => {
+              if (gen !== playGen) return;
+              return new Promise((r) => setTimeout(r, 280));
+            });
+          });
+          return chain.then(() => {
+            if (gen !== playGen || state.view !== "lesson" || card() !== c) return;
+            setActive(-1);
+            status.className = "follow-tip ok";
+            status.textContent = "听完了。可以再听，或开始跟读背诵。";
+            paintActions();
+          });
+        }
+
+        function playCurrent(rate) {
+          const line = lines[followIndex];
+          if (!line) return;
+          playGen += 1;
+          setActive(followIndex);
+          speakLine(line, rate);
+        }
+
+        function paintActions() {
+          $("cardActions").innerHTML = "";
+          if (phase === "listen") {
+            actionSpeakPair("再听课文", (rate) => playAll(rate));
+            const go = document.createElement("button");
+            go.type = "button";
+            go.className = "btn-ok";
+            go.textContent = "开始跟读背诵";
+            go.addEventListener("click", () => {
+              phase = "follow";
+              followIndex = 0;
+              followCount = 0;
+              status.className = "follow-tip";
+              status.textContent = "跟读第 1 / " + lines.length + " 句（绿字）。跟读 " + FOLLOW_TIMES + " 遍。";
+              setActive(0);
+              paintActions();
+              setTimeout(() => playCurrent(1), 200);
+            });
+            $("cardActions").appendChild(go);
+            return;
+          }
+
+          actionSpeakPair("再听这句", (rate) => playCurrent(rate));
+          const followBtn = document.createElement("button");
+          followBtn.type = "button";
+          followBtn.className = "btn-ok";
+          followBtn.textContent = "跟读（" + followCount + " / " + FOLLOW_TIMES + "）";
+          followBtn.addEventListener("click", () => {
+            followCount += 1;
+            playCurrent(1);
+            if (followCount < FOLLOW_TIMES) {
+              followBtn.textContent = "跟读（" + followCount + " / " + FOLLOW_TIMES + "）";
+              status.textContent =
+                "跟读第 " + (followIndex + 1) + " / " + lines.length + " 句 · 已跟 " + followCount + " / " + FOLLOW_TIMES;
+              return;
+            }
+            if (followIndex >= lines.length - 1) {
+              status.className = "follow-tip ok";
+              status.textContent = "课文跟读完成！可以背了。";
+              setActive(-1);
+              $("cardActions").innerHTML = "";
+              const done = document.createElement("button");
+              done.type = "button";
+              done.className = "btn-ok";
+              done.textContent = "完成";
+              done.addEventListener("click", () => advance(true, c));
+              $("cardActions").appendChild(done);
+              return;
+            }
+            followIndex += 1;
+            followCount = 0;
+            status.className = "follow-tip";
+            status.textContent =
+              "跟读第 " + (followIndex + 1) + " / " + lines.length + " 句（绿字）。跟读 " + FOLLOW_TIMES + " 遍。";
+            setActive(followIndex);
+            paintActions();
+            setTimeout(() => playCurrent(1), 250);
+          });
+          $("cardActions").appendChild(followBtn);
+        }
+
+        paintActions();
+        setTimeout(() => playAll(1), 350);
+      }
+
       function renderPatternCard(c) {
         const extra = $("cardExtra");
         extra.innerHTML = "";
         $("cardActions").innerHTML = "";
+        if (c.previewScript) {
+          renderPreviewScriptCard(c);
+          return;
+        }
         if (c.previewListen) {
           extra.appendChild(coachBanner("bee", "先完整听一遍对话"));
           $("cardPrompt").textContent = c.prompt || "听对话";
