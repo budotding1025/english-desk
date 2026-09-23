@@ -228,7 +228,8 @@ button { cursor: pointer; border: none; background: none; }
 }
 .home-cta-row .btn-start,
 .home-cta-row .btn-preview,
-.home-cta-row .btn-review {
+.home-cta-row .btn-review,
+.home-cta-row .btn-dictation {
   width: 100%;
   margin: 0;
 }
@@ -246,7 +247,8 @@ button { cursor: pointer; border: none; background: none; }
   border-bottom-width: 2px;
   transform: translateY(2px);
 }
-.btn-review {
+.btn-review,
+.btn-dictation {
   padding: 14px 10px 16px;
   background: #fff8e8;
   color: #8a5a00;
@@ -256,7 +258,8 @@ button { cursor: pointer; border: none; background: none; }
   border: 2px solid #ffc800;
   border-bottom-width: 4px;
 }
-.btn-review:active {
+.btn-review:active,
+.btn-dictation:active {
   border-bottom-width: 2px;
   transform: translateY(2px);
 }

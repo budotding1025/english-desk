@@ -544,7 +544,7 @@
         if ($("sessionMeta")) {
           $("sessionMeta").textContent =
             (bookNo ? "Lesson " + bookNo + " · " : "") +
-            "预习 · 默写 · 练习约 " + sess.minutes + " 分钟";
+            "预习 · 默写 · 复习约 " + sess.minutes + " 分钟";
         }
         if ($("unitLine")) {
           $("unitLine").textContent = unitTitle + (lessonTitle ? " · " + lessonTitle : "");
@@ -620,8 +620,8 @@
           else if (state.lessonMode === "minimal") alert("易混音小站还在准备，先去上一课吧。");
           else if (state.lessonMode === "listenDrill") alert("本单元暂无听力长句，先去上一课吧。");
           else if (state.lessonMode === "miniExam") alert("迷你卷还在准备，先去上一课吧。");
-          else if (state.lessonMode === "preview") alert("这一课的预习还在准备，先去「开始」上课吧。");
-          else if (state.lessonMode === "reviewWrite") alert("这一课的词句默写还在准备，先去「开始」上课吧。");
+          else if (state.lessonMode === "preview") alert("这一课的预习还在准备，先去「复习」上课吧。");
+          else if (state.lessonMode === "reviewWrite") alert("这一课的词句默写还在准备，先去「复习」上课吧。");
           else alert("本单元暂无练习内容。");
           return;
         }
@@ -2340,7 +2340,7 @@
         const score = document.createElement("p");
         score.className = "meta";
         if (settle.practiceKind === "preview") {
-          score.textContent = "对话和单词都跟读完了，可以点「开始」做练习";
+          score.textContent = "对话和单词都跟读完了，可以点「复习」做练习";
         } else if (settle.practiceKind === "reviewWrite") {
           score.textContent = challengeLate ? "做对 " + ok + " 题" : "默写做对 " + ok + " / " + total;
         } else {
@@ -2388,7 +2388,7 @@
           : challengeDone
             ? ["challenge", "girlChild", "没想到你居然是一个学习的天才，效率太惊人啦！"]
             : settle.practiceKind === "preview"
-              ? ["lesson", "girlChild", "预习真棒！接下来可以点开始做练习啦！"]
+              ? ["lesson", "girlChild", "预习真棒！接下来可以点复习做练习啦！"]
               : settle.practiceKind === "reviewWrite"
                 ? ["lesson", "boyChild", "你又前进了一步，我为你感到自豪！"]
                 : ["lesson", "boyChild", "你又前进了一步，我为你感到自豪！"];
@@ -2428,7 +2428,7 @@
         }
         addBtn(
           settle.practiceKind === "preview"
-            ? "去开始练习"
+            ? "去复习练习"
             : settle.practiceKind === "challenge"
               ? "再挑战一次"
               : settle.practiceKind === "phonics"
