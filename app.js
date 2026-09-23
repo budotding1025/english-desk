@@ -893,7 +893,10 @@
           const listenManaged =
             c.type === "listen" && (c.hearTimes > 0 || (c.kind === "judge" && !c.hard) || c.hard);
           if (c.autoPlay && !listenManaged) speakCard(c);
-          else if (c.type === "word" && c.zh) V.speak(c.zh, "girlChild");
+          else if (c.type === "word" && c.mode === "zh2en" && c.zh) V.speak(c.zh, "girlChild", { forceAll: true });
+          else if (c.type === "word" && (c.mode === "dictation" || c.mode === "listenWrite" || c.mode === "sentenceWrite")) {
+            setTimeout(() => wordSpeak(c, 1), 280);
+          }
         }
       }
 
@@ -1146,17 +1149,17 @@
 
       function wordSpeak(c, rate) {
         if (V && V.prime) V.prime();
-        if (!V || !c) return;
-        const role = c.speakRole || (c.mode === "dictation" ? "boyChild" : "adultMale");
-        const opts = rate && rate !== 1 ? { rate: rate } : undefined;
+        if (!V || !c) return Promise.resolve();
+        const text = String(c.en || c.speakText || "").trim();
         const words = (c.followWords || []).map((w) => String(w || "").trim()).filter(Boolean);
+        let role = c.speakRole || (c.mode === "dictation" || c.mode === "listenWrite" ? "boyChild" : "adultMale");
+        if (text && text.split(/\s+/).length >= 3 && role === "adultMale") role = "boyChild";
+        const opts = rate && rate !== 1 ? { rate: rate } : undefined;
         if (words.length >= 2) {
-          V.speakSequence(words.map((text) => ({ role: role, text: text, rate: opts && opts.rate })));
-          return;
+          return V.speakSequence(words.map((w) => ({ role: role, text: w, rate: opts && opts.rate })));
         }
-        const text = String(c.en || c.speakText || words[0] || "").trim();
-        if (!text || text === "null" || text === "undefined") return;
-        V.speak(text, role, opts);
+        if (!text || text === "null" || text === "undefined") return Promise.resolve();
+        return V.speak(text, role, opts);
       }
       function actionOkBad(onOk, onBad) {
         const row = document.createElement("div");
@@ -1217,6 +1220,7 @@
         tip.id = "followTip";
         tip.textContent = opts.tip || "大声跟读 " + times + " 遍";
         $("cardExtra").appendChild(tip);
+        actionSpeakPair("再听一遍", (rate) => wordSpeak(c, rate));
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "btn-ok";

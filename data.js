@@ -1961,22 +1961,28 @@ window.ENGLISH_DESK_DATA = {
     const listenWrite = mode === "listenWrite";
     const sentenceWrite = mode === "sentenceWrite";
     const dictation = mode === "dictation" || listenWrite || sentenceWrite;
-    const ipa = wordIpa(w.en);
+    const en = String(w.en || "").trim();
+    const wordCount = en.split(/\s+/).filter(Boolean).length;
+    const isSentenceLike = wordCount >= 3;
+    const ipa = wordIpa(en);
+    let speakRole = "adultMale";
+    if (sentenceWrite) speakRole = "girlChild";
+    else if (dictation || isSentenceLike) speakRole = "boyChild";
     return {
       type: "word",
       mode: mode || "zh2en",
       title: sentenceWrite ? "默写句子" : listenWrite ? "默写单词" : dictation ? "听写" : "看中文写词",
       prompt: sentenceWrite || listenWrite ? "听英语，写出英文" : dictation ? "听「翻翻龟」读，写出英文" : w.zh,
-      answer: w.en,
+      answer: en,
       zh: w.zh,
-      en: w.en,
-      ipa: sentenceWrite ? "" : ipa,
+      en: en,
+      ipa: sentenceWrite || isSentenceLike ? "" : ipa,
       hideZh: !!(listenWrite || sentenceWrite),
-      speakText: w.en,
-      speakRole: sentenceWrite ? "girlChild" : dictation ? "boyChild" : "adultMale",
+      speakText: en,
+      speakRole: speakRole,
       coach: sentenceWrite ? "bee" : dictation ? "turtle" : null,
       autoPlay: dictation,
-      retryWord: { en: w.en, zh: w.zh },
+      retryWord: { en: en, zh: w.zh },
     };
   }
 

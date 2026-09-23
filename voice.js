@@ -68,7 +68,7 @@
   function loadManifest() {
     if (manifest) return Promise.resolve(manifest);
     if (manifestPromise) return manifestPromise;
-    manifestPromise = fetch("./audio/manifest.json?v=11")
+    manifestPromise = fetch("./audio/manifest.json?v=12")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         manifest = data;
@@ -244,6 +244,15 @@
       let rel = man ? clipPath(roleKey, utterText) : null;
       if (!rel && roleKey === "boyChild") rel = man ? clipPath("adultMale", utterText) : null;
       if (!rel && roleKey === "girlChild") rel = man ? clipPath("adultFemale", utterText) : null;
+      // 课本句常只录了童声：写词/跟读用 adult 时要能落到已有 clips
+      if (!rel) {
+        const order = ["boyChild", "girlChild", "adultMale", "adultFemale"];
+        for (let i = 0; i < order.length; i++) {
+          if (order[i] === roleKey) continue;
+          rel = man ? clipPath(order[i], utterText) : null;
+          if (rel) break;
+        }
+      }
       if (rel) {
         return playUrl(rel + (rel.indexOf("?") >= 0 ? "&" : "?") + "v=8", rateScale).then((ok) => {
           if (ok) return true;
