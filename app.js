@@ -546,6 +546,9 @@
             (bookNo ? "Lesson " + bookNo + " · " : "") +
             "预习 · 默写 · 复习约 " + sess.minutes + " 分钟";
         }
+        if ($("btnPreview")) $("btnPreview").textContent = "预习";
+        if ($("btnReview")) $("btnReview").textContent = "默写";
+        if ($("btnStart")) $("btnStart").textContent = "复习";
         if ($("unitLine")) {
           $("unitLine").textContent = unitTitle + (lessonTitle ? " · " + lessonTitle : "");
         }
@@ -1769,9 +1772,9 @@
           return;
         }
 
-        extra.appendChild(coachBanner("bee", "一句一句读课文。绿字是正在读的句子"));
+        extra.appendChild(coachBanner("bee", "一句一句读。跟不上就点「暂停」，自己节奏点「继续」"));
         $("cardPrompt").textContent = c.prompt || "读课本对话";
-        $("cardSub").textContent = c.tip || "听完跟读，绿句方便背诵";
+        $("cardSub").textContent = c.tip || "听完跟读，绿句方便背诵；可随时暂停";
 
         const list = document.createElement("div");
         list.className = "script-lines";
@@ -1800,14 +1803,22 @@
 
         const status = document.createElement("p");
         status.className = "follow-tip";
-        status.textContent = "先整课听一遍（一句一句）";
+        status.textContent = "先整课听一遍（一句一句）。跟不上就暂停。";
         extra.appendChild(status);
 
         let playGen = 0;
         let phase = "listen"; // listen | follow
         let followIndex = 0;
         let followCount = 0;
+        let listenIndex = 0;
+        let listenRate = 1;
+        let isPlaying = false;
+        let paused = false;
         const FOLLOW_TIMES = 3;
+
+        function stillHere(gen) {
+          return gen === playGen && state.view === "lesson" && card() === c;
+        }
 
         function setActive(i) {
           rowEls.forEach((el, j) => {
@@ -1822,29 +1833,89 @@
         }
 
         function speakLine(line, rate) {
-          if (!V || !line) return Promise.resolve();
+          if (!V || !line) return Promise.resolve(false);
           const opts = rate && rate !== 1 ? { rate: rate } : undefined;
           return V.speak(line.text, line.role || "girlChild", opts);
         }
 
-        function playAll(rate) {
+        /** stop() 可能让 Audio Promise 挂起，用世代号竞态，便于暂停立刻生效 */
+        function speakLineCancellable(line, rate, gen) {
+          return new Promise((resolve) => {
+            let done = false;
+            const finish = (v) => {
+              if (done) return;
+              done = true;
+              clearInterval(iv);
+              resolve(v);
+            };
+            const iv = setInterval(() => {
+              if (playGen !== gen) finish(false);
+            }, 80);
+            speakLine(line, rate).then(
+              (ok) => finish(playGen === gen ? ok : false),
+              () => finish(false)
+            );
+          });
+        }
+
+        function pauseListen() {
+          if (!isPlaying || paused) return;
+          paused = true;
+          isPlaying = false;
+          playGen += 1;
+          if (V && V.stop) V.stop();
+          status.className = "follow-tip";
+          status.textContent =
+            "已暂停 · 第 " +
+            (listenIndex + 1) +
+            " / " +
+            lines.length +
+            " 句（绿字还在）。想好了点「继续」";
+          setActive(listenIndex);
+          paintActions();
+        }
+
+        function resumeListen() {
+          if (!paused && isPlaying) return;
+          paused = false;
+          playAll(listenRate, listenIndex);
+        }
+
+        function playAll(rate, fromIndex) {
+          const startAt = typeof fromIndex === "number" ? fromIndex : 0;
           const gen = ++playGen;
           phase = "listen";
           followCount = 0;
-          status.textContent = "正在一句一句读课文…";
+          paused = false;
+          isPlaying = true;
+          listenRate = rate && rate > 0 ? rate : 1;
+          listenIndex = Math.max(0, Math.min(startAt, lines.length - 1));
+          status.className = "follow-tip";
+          status.textContent = "正在读课文…跟不上就点「暂停」";
+          paintActions();
+
           let chain = Promise.resolve();
-          lines.forEach((line, i) => {
-            chain = chain.then(() => {
-              if (gen !== playGen || state.view !== "lesson" || card() !== c) return;
-              setActive(i);
-              return speakLine(line, rate);
-            }).then(() => {
-              if (gen !== playGen) return;
-              return new Promise((r) => setTimeout(r, 280));
-            });
-          });
+          for (let i = listenIndex; i < lines.length; i++) {
+            const idx = i;
+            chain = chain
+              .then(() => {
+                if (!stillHere(gen)) return;
+                listenIndex = idx;
+                setActive(idx);
+                status.className = "follow-tip";
+                status.textContent =
+                  "第 " + (idx + 1) + " / " + lines.length + " 句（绿字）。跟不上就暂停";
+                return speakLineCancellable(lines[idx], listenRate, gen);
+              })
+              .then(() => {
+                if (!stillHere(gen)) return;
+                return new Promise((r) => setTimeout(r, 320));
+              });
+          }
           return chain.then(() => {
-            if (gen !== playGen || state.view !== "lesson" || card() !== c) return;
+            if (!stillHere(gen)) return;
+            isPlaying = false;
+            paused = false;
             setActive(-1);
             status.className = "follow-tip ok";
             status.textContent = "听完了。可以再听，或开始跟读背诵。";
@@ -1856,6 +1927,8 @@
           const line = lines[followIndex];
           if (!line) return;
           playGen += 1;
+          isPlaying = false;
+          paused = false;
           setActive(followIndex);
           speakLine(line, rate);
         }
@@ -1863,22 +1936,49 @@
         function paintActions() {
           $("cardActions").innerHTML = "";
           if (phase === "listen") {
-            actionSpeakPair("再听课文", (rate) => playAll(rate));
-            const go = document.createElement("button");
-            go.type = "button";
-            go.className = "btn-ok";
-            go.textContent = "开始跟读背诵";
-            go.addEventListener("click", () => {
-              phase = "follow";
-              followIndex = 0;
-              followCount = 0;
-              status.className = "follow-tip";
-              status.textContent = "跟读第 1 / " + lines.length + " 句（绿字）。跟读 " + FOLLOW_TIMES + " 遍。";
-              setActive(0);
-              paintActions();
-              setTimeout(() => playCurrent(1), 200);
-            });
-            $("cardActions").appendChild(go);
+            if (isPlaying || paused) {
+              const pc = document.createElement("button");
+              pc.type = "button";
+              pc.className = paused ? "btn-ok" : "btn-speak";
+              pc.textContent = paused ? "继续" : "暂停";
+              pc.addEventListener("click", () => {
+                if (paused) resumeListen();
+                else pauseListen();
+              });
+              $("cardActions").appendChild(pc);
+            }
+            if (!isPlaying) {
+              actionSpeakPair(paused ? "从头再听" : "再听课文", (rate) => {
+                paused = false;
+                playAll(rate, 0);
+              });
+              const go = document.createElement("button");
+              go.type = "button";
+              go.className = "btn-ok";
+              go.textContent = "开始跟读背诵";
+              go.addEventListener("click", () => {
+                playGen += 1;
+                if (V && V.stop) V.stop();
+                isPlaying = false;
+                paused = false;
+                phase = "follow";
+                followIndex = 0;
+                followCount = 0;
+                status.className = "follow-tip";
+                status.textContent =
+                  "跟读第 1 / " + lines.length + " 句（绿字）。跟读 " + FOLLOW_TIMES + " 遍。";
+                setActive(0);
+                paintActions();
+                setTimeout(() => playCurrent(1), 200);
+              });
+              $("cardActions").appendChild(go);
+            } else {
+              const tip = document.createElement("p");
+              tip.className = "follow-tip";
+              tip.style.margin = "4px 0 0";
+              tip.textContent = "听的时候可随时暂停，按自己的节奏学";
+              $("cardActions").appendChild(tip);
+            }
             return;
           }
 
@@ -1922,7 +2022,7 @@
         }
 
         paintActions();
-        setTimeout(() => playAll(1), 350);
+        setTimeout(() => playAll(1, 0), 350);
       }
 
       function renderPatternCard(c) {
