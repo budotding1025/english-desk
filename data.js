@@ -2150,8 +2150,68 @@ window.ENGLISH_DESK_DATA = {
       "I'd like some soup. We can't live without water. I wish you a happy New Year.": "我想要一些汤。没有水我们无法生活。祝你新年快乐。",
       "First we make fruit salad, then we go to the farm, and I wish we stay together because family means more than gifts.": "我们先做水果沙拉，然后去农场，我希望我们待在一起，因为家人比礼物更重要。",
       "We can't live without nature, so last I wish every family a green Spring Festival, not just loud fireworks.": "我们不能离开大自然生活，所以最后我祝每个家庭一个绿色的春节，而不只是更响的烟花。",
+      "Not so good.": "不太好。",
+      "I have a bad cold.": "我得了重感冒。",
+      "I can't go to school tomorrow.": "明天不能去上学。",
+      "Don't worry.": "别担心。",
+      "You should have a good rest and drink some warm water now.": "你现在应该好好休息，喝点温水。",
+      "Hello, Aunt.": "你好，阿姨。",
+      "This is Guoguo.": "我是果果。",
+      "May I speak to Lingling?": "我可以和玲玲讲话吗？",
+      "Sorry, Guoguo.": "对不起，果果。",
+      "Lingling is sleeping.": "玲玲在睡觉。",
+      "She is ill today.": "她今天生病了。",
+      "I'm sorry to hear that.": "听到这个我很难过。",
+      "May I call her later?": "我可以稍后再打给她吗？",
+      "Yes.": "可以。",
+      "That's fine.": "没问题。",
+      "How are you feeling, Lingling?": "你感觉怎么样，玲玲？",
+      "Thank you, Guoguo.": "谢谢你，果果。",
+      "Not so good. I have a bad cold. I can't go to school tomorrow.": "不太好。我得了重感冒。明天不能去上学。",
     };
     return map[text] || "";
+  }
+
+  function splitEnSentences(text) {
+    const raw = String(text || "").trim();
+    if (!raw) return [];
+    const parts = [];
+    let buf = "";
+    for (let i = 0; i < raw.length; i++) {
+      const ch = raw[i];
+      buf += ch;
+      if (ch === "." || ch === "!" || ch === "?") {
+        const next = raw[i + 1];
+        if (next == null || /\s|"|'|”|’/.test(next)) {
+          const s = buf.trim();
+          if (s) parts.push(s);
+          buf = "";
+          while (i + 1 < raw.length && /\s/.test(raw[i + 1])) i++;
+        }
+      }
+    }
+    if (buf.trim()) parts.push(buf.trim());
+    return parts.length ? parts : [raw];
+  }
+
+  function splitZhSentences(text) {
+    const raw = String(text || "").trim();
+    if (!raw) return [];
+    const parts = raw.split(/([。！？])/);
+    const out = [];
+    let buf = "";
+    for (let i = 0; i < parts.length; i++) {
+      const p = parts[i];
+      if (!p) continue;
+      buf += p;
+      if (/[。！？]/.test(p)) {
+        const s = buf.trim();
+        if (s) out.push(s);
+        buf = "";
+      }
+    }
+    if (buf.trim()) out.push(buf.trim());
+    return out.length ? out : [raw];
   }
 
   var PREVIEW_OPEN =
@@ -2167,12 +2227,17 @@ window.ENGLISH_DESK_DATA = {
     const seen = {};
     function push(en, zh, role) {
       const text = String(en || "").trim();
-      if (!text || seen[text]) return;
-      seen[text] = true;
-      out.push({
-        en: text,
-        zh: zh || lineZh(text) || "",
-        role: role || "girlChild",
+      if (!text) return;
+      const bits = splitEnSentences(text);
+      bits.forEach(function (one) {
+        if (!one || seen[one]) return;
+        if (one.length > 72) return;
+        seen[one] = true;
+        out.push({
+          en: one,
+          zh: zh || lineZh(one) || "",
+          role: role || "girlChild",
+        });
       });
     }
     const lesson = previewLesson(unit, store);
@@ -2182,9 +2247,7 @@ window.ENGLISH_DESK_DATA = {
     if (out.length < 4) {
       ((lesson && lesson.lines) || []).forEach(function (l) {
         if (out.length >= 6) return;
-        const t = String(l.text || "");
-        if (t.length > 72) return;
-        push(t, l.zh, l.role || "girlChild");
+        push(l.text, l.zh, l.role || "girlChild");
       });
     }
     if (out.length < 3) {
@@ -2416,8 +2479,18 @@ window.ENGLISH_DESK_DATA = {
 
     const lines = (lesson && lesson.lines) || [];
     if (lines.length) {
-      const demos = lines.map(function (l) {
-        return { role: l.role || "girlChild", text: l.text, name: l.name || "", zh: l.zh || lineZh(l.text) || "" };
+      const demos = [];
+      lines.forEach(function (l) {
+        const enParts = splitEnSentences(l.text);
+        const zhParts = splitZhSentences(l.zh || lineZh(l.text) || "");
+        enParts.forEach(function (text, i) {
+          demos.push({
+            role: l.role || "girlChild",
+            text: text,
+            name: l.name || "",
+            zh: zhParts[i] || (enParts.length === 1 ? zhParts[0] || "" : "") || "",
+          });
+        });
       });
       cards.push({
         type: "pattern",

@@ -635,6 +635,32 @@
         renderCard(true);
       }
 
+      function closePathLessonPicker() {
+        const ov = $("pathLessonOverlay");
+        if (!ov) return;
+        ov.classList.add("hidden");
+        ov.setAttribute("aria-hidden", "true");
+      }
+
+      function openPathLessonPicker(node) {
+        if (!node) return;
+        state.pathPickId = node.id;
+        saveStore({ unitId: node.unitId, currentPathId: node.id });
+        const ov = $("pathLessonOverlay");
+        if (!ov) {
+          startLesson(node.id);
+          return;
+        }
+        const bookNo = node.bookLesson || node.lesson;
+        if ($("pathLessonTitle")) $("pathLessonTitle").textContent = node.lessonTitle || "这一课";
+        if ($("pathLessonMeta")) {
+          $("pathLessonMeta").textContent =
+            (node.unitTitle || "") + (bookNo ? " · Lesson " + bookNo : "") + " · 和首页一样选一种练法";
+        }
+        ov.classList.remove("hidden");
+        ov.setAttribute("aria-hidden", "false");
+      }
+
       function renderPath() {
         const store = walletStore();
         const path = Progress.semesterPath();
@@ -664,10 +690,10 @@
             '<span class="path-dot">' + (done ? "✓" : bookNo) + "</span>" +
             '<span class="path-copy"><strong>' + node.lessonTitle + "</strong>" +
             "<small>" + (node.unitTitle || "") + "</small>" +
-            "<small>" + (done ? "已学 · 复习 +" + 25 + " 币" : current ? "Lesson " + bookNo + " · 下一课 · 首通 +" + 50 + " 币" : "Lesson " + bookNo) +
+            "<small>" + (done ? "已学 · 点开可选预习/默写/复习" : current ? "Lesson " + bookNo + " · 下一课 · 点开选练法" : "Lesson " + bookNo + " · 点开选练法") +
             "</small></span>";
           btn.addEventListener("click", () => {
-            startLesson(node.id);
+            openPathLessonPicker(node);
           });
           list.appendChild(btn);
         });
@@ -3109,8 +3135,34 @@
         if ($("btnPathStart")) {
           $("btnPathStart").addEventListener("click", () => {
             const s = walletStore();
-            startLesson(s.currentPathId);
+            const node = Progress.nodeById(s.currentPathId) || Progress.semesterPath()[0];
+            if (node) openPathLessonPicker(node);
           });
+        }
+        if ($("pathLessonClose")) {
+          $("pathLessonClose").addEventListener("click", () => closePathLessonPicker());
+        }
+        if ($("pathLessonOverlay")) {
+          $("pathLessonOverlay").addEventListener("click", (e) => {
+            if (e.target === $("pathLessonOverlay")) closePathLessonPicker();
+          });
+        }
+        function startFromPath(mode) {
+          const id = state.pathPickId || walletStore().currentPathId;
+          closePathLessonPicker();
+          if (!id) return;
+          if (mode === "preview") startLesson(id, { mode: "preview" });
+          else if (mode === "reviewWrite") startLesson(id, { mode: "reviewWrite" });
+          else startLesson(id);
+        }
+        if ($("pathBtnPreview")) {
+          $("pathBtnPreview").addEventListener("click", () => startFromPath("preview"));
+        }
+        if ($("pathBtnWrite")) {
+          $("pathBtnWrite").addEventListener("click", () => startFromPath("reviewWrite"));
+        }
+        if ($("pathBtnReview")) {
+          $("pathBtnReview").addEventListener("click", () => startFromPath("normal"));
         }
         if ($("navHome")) {
           $("navHome").addEventListener("click", () => {

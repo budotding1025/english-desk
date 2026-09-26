@@ -76,7 +76,23 @@
     <p class="path-meta" id="pathMeta">本学期共 0 课 · 已学 0 课</p>
     <div class="path-scroll" id="pathList"></div>
     <div class="path-footer">
-      <button type="button" class="btn-start" id="btnPathStart">开始下一课</button>
+      <button type="button" class="btn-start" id="btnPathStart">选下一课练法</button>
+    </div>
+  </div>
+
+  <!-- PATH LESSON PICKER -->
+  <div class="overlay hidden" id="pathLessonOverlay" aria-hidden="true">
+    <div class="sheet" role="dialog" aria-labelledby="pathLessonTitle">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2 id="pathLessonTitle">这一课</h2>
+        <button type="button" class="icon-btn" id="pathLessonClose" aria-label="关闭">×</button>
+      </div>
+      <p class="meta" id="pathLessonMeta" style="margin:0 0 16px;color:var(--muted);font-weight:700"></p>
+      <div class="home-cta-row">
+        <button type="button" class="btn-preview" id="pathBtnPreview">预习</button>
+        <button type="button" class="btn-dictation" id="pathBtnWrite">默写</button>
+        <button type="button" class="btn-start" id="pathBtnReview">复习</button>
+      </div>
     </div>
   </div>
 
@@ -187,10 +203,10 @@
     </button>
   </nav>
 
-  <script src="./preview-book.js?v=1"></script>
-  <script src="./data.js?v=26"></script>
+  <script src="./preview-book.js?v=2"></script>
+  <script src="./data.js?v=27"></script>
   <script src="./progress.js?v=13"></script>
-  <script src="./voice.js?v=14"></script>
-  <script src="./app.js?v=22"></script>
+  <script src="./voice.js?v=15"></script>
+  <script src="./app.js?v=23"></script>
 </body>
 </html>

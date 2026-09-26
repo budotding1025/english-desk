@@ -41,6 +41,7 @@
   let currentAudio = null;
   let synthCache = {};
   let playGen = 0;
+  let playResolve = null;
 
   function normRole(role) {
     if (!role) return "adultFemale";
@@ -98,6 +99,13 @@
       currentAudio = null;
     }
     if (window.speechSynthesis) window.speechSynthesis.cancel();
+    if (playResolve) {
+      const r = playResolve;
+      playResolve = null;
+      try {
+        r(false);
+      } catch (e) {}
+    }
   }
 
   function stop() {
@@ -109,6 +117,7 @@
     return new Promise((resolve) => {
       try {
         haltPlayback();
+        playResolve = resolve;
         const a = new Audio(url);
         a.playbackRate = rate && rate > 0 ? rate : 1;
         a.preservesPitch = true;
@@ -117,15 +126,23 @@
         currentAudio = a;
         a.onended = () => {
           if (currentAudio === a) currentAudio = null;
+          if (playResolve === resolve) playResolve = null;
           resolve(true);
         };
         a.onerror = () => {
           if (currentAudio === a) currentAudio = null;
+          if (playResolve === resolve) playResolve = null;
           resolve(false);
         };
         const p = a.play();
-        if (p && p.catch) p.catch(() => resolve(false));
+        if (p && p.catch) {
+          p.catch(() => {
+            if (playResolve === resolve) playResolve = null;
+            resolve(false);
+          });
+        }
       } catch (e) {
+        if (playResolve === resolve) playResolve = null;
         resolve(false);
       }
     });
@@ -207,19 +224,68 @@
     const voice = pickSynth(langHint === "zh" ? roleKey : mapped, langHint);
     return new Promise((resolve) => {
       try {
+        // 排队连读时也先停掉上一句，避免两句叠在一起
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(text);
         u.lang = (voice && voice.lang) || (langHint === "zh" ? "zh-CN" : accent);
         if (voice) u.voice = voice;
         u.rate = rate;
         u.pitch = pitch;
         u.volume = 1;
-        u.onend = () => resolve(true);
-        u.onerror = () => resolve(false);
+        playResolve = resolve;
+        u.onend = () => {
+          if (playResolve === resolve) playResolve = null;
+          resolve(true);
+        };
+        u.onerror = () => {
+          if (playResolve === resolve) playResolve = null;
+          resolve(false);
+        };
         window.speechSynthesis.speak(u);
       } catch (e) {
         resolve(false);
       }
     });
+  }
+
+  /** 把一段话拆成一句一句，避免多句挤在同一条语音里 */
+  function splitUtterances(text) {
+    const raw = String(text || "").trim();
+    if (!raw) return [];
+    if (/[\u4e00-\u9fff]/.test(raw)) {
+      const chunks = raw.split(/([。！？!?])/);
+      const parts = [];
+      let buf = "";
+      for (let i = 0; i < chunks.length; i++) {
+        const p = chunks[i];
+        if (!p) continue;
+        buf += p;
+        if (/[。！？!?]/.test(p)) {
+          const s = buf.trim();
+          if (s) parts.push(s);
+          buf = "";
+        }
+      }
+      if (buf.trim()) parts.push(buf.trim());
+      return parts.length ? parts : [raw];
+    }
+    const parts = [];
+    let buf = "";
+    for (let i = 0; i < raw.length; i++) {
+      const ch = raw[i];
+      buf += ch;
+      if (ch === "." || ch === "!" || ch === "?") {
+        const next = raw[i + 1];
+        if (next == null || /\s|"|'|”|’/.test(next)) {
+          const s = buf.trim();
+          if (s) parts.push(s);
+          buf = "";
+          while (i + 1 < raw.length && /\s/.test(raw[i + 1])) i++;
+        }
+      }
+    }
+    if (buf.trim()) parts.push(buf.trim());
+    return parts.length ? parts : [raw];
   }
 
   function speak(text, role, opts) {
@@ -231,8 +297,20 @@
     const langHint = opts.lang || (/[\u4e00-\u9fff]/.test(utterText) ? "zh" : "en");
     const rateScale = opts.rate && opts.rate > 0 ? opts.rate : 1;
 
+    // 英文多句：拆开顺序读，避免叠音；中文讲解 forceAll 保持整段
+    if (!opts.forceAll && !opts.keepJoined && langHint === "en") {
+      const bits = splitUtterances(utterText);
+      if (bits.length > 1) {
+        return speakSequence(
+          bits.map((t) => ({ text: t, role: roleKey, rate: rateScale })),
+          opts.gapMs != null ? opts.gapMs : 420
+        );
+      }
+    }
+
     return loadManifest().then((man) => {
       if (!opts.queue) stop();
+      else haltPlayback();
       if (langHint === "zh") {
         const zhKey = "zh|" + roleKey + "|" + utterText;
         const zhRel = man && man.clips ? (man.clips[zhKey] || man.clips["zh|adultFemale|" + utterText]) : null;
@@ -244,7 +322,6 @@
       let rel = man ? clipPath(roleKey, utterText) : null;
       if (!rel && roleKey === "boyChild") rel = man ? clipPath("adultMale", utterText) : null;
       if (!rel && roleKey === "girlChild") rel = man ? clipPath("adultFemale", utterText) : null;
-      // 课本句常只录了童声：写词/跟读用 adult 时要能落到已有 clips
       if (!rel) {
         const order = ["boyChild", "girlChild", "adultMale", "adultFemale"];
         for (let i = 0; i < order.length; i++) {
@@ -264,16 +341,30 @@
   }
 
   function speakSequence(lines, gapMs) {
-    gapMs = gapMs == null ? 380 : gapMs;
+    gapMs = gapMs == null ? 420 : gapMs;
     stop();
     const gen = playGen;
     let chain = Promise.resolve();
-    (lines || []).forEach((line, i) => {
+    const flat = [];
+    (lines || []).forEach((line) => {
+      if (!line) return;
+      const bits = splitUtterances(line.text);
+      (bits.length ? bits : [line.text]).forEach((text) => {
+        flat.push({
+          role: line.role,
+          text: text,
+          forceAll: line.forceAll,
+          rate: line.rate,
+        });
+      });
+    });
+    flat.forEach((line, i) => {
       chain = chain
         .then(() => {
           if (gen !== playGen) return false;
           return speak(line.text, line.role, {
             queue: true,
+            keepJoined: true,
             forceAll: line.forceAll,
             rate: line.rate,
           });
@@ -281,7 +372,7 @@
         .then(() => {
           if (gen !== playGen) return;
           return new Promise((r) => {
-            if (i < lines.length - 1) setTimeout(r, gapMs);
+            if (i < flat.length - 1) setTimeout(r, gapMs);
             else r();
           });
         });
