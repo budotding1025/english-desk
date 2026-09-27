@@ -819,6 +819,11 @@ button { cursor: pointer; border: none; background: none; }
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+.overlay.is-center {
+  align-items: center;
 }
 .sheet {
   width: 100%;
@@ -829,6 +834,12 @@ button { cursor: pointer; border: none; background: none; }
   max-height: 85vh;
   overflow: auto;
   box-shadow: 0 -8px 32px rgba(0,0,0,0.12);
+}
+.overlay.is-center .sheet {
+  border-radius: 20px;
+  box-shadow: 0 12px 36px rgba(0,0,0,0.16);
+  margin: 0;
+  max-height: min(85vh, calc(100vh - 32px));
 }
 .sheet h2 { font-weight: 800; margin: 0 0 14px; font-size: 1.25rem; }
 .sheet label {
