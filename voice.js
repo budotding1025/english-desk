@@ -241,7 +241,15 @@
           if (playResolve === resolve) playResolve = null;
           resolve(false);
         };
-        window.speechSynthesis.speak(u);
+        // cancel 后立刻 speak，部分浏览器会吞掉；稍等再播
+        setTimeout(() => {
+          try {
+            window.speechSynthesis.speak(u);
+          } catch (e2) {
+            if (playResolve === resolve) playResolve = null;
+            resolve(false);
+          }
+        }, 40);
       } catch (e) {
         resolve(false);
       }
@@ -276,7 +284,8 @@
       buf += ch;
       if (ch === "." || ch === "!" || ch === "?") {
         const next = raw[i + 1];
-        if (next == null || /\s|"|'|”|’/.test(next)) {
+        // 只在句末空白处切开，避免 "Excuse me." 引号内被截断
+        if (next == null || /\s/.test(next)) {
           const s = buf.trim();
           if (s) parts.push(s);
           buf = "";

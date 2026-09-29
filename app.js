@@ -1829,7 +1829,7 @@
 
         const status = document.createElement("p");
         status.className = "follow-tip";
-        status.textContent = "一句一停听课文。听完点「继续」再下一句。";
+        status.textContent = "先点「开始听」读第 1 句（手机要先点一下才有声音）";
         extra.appendChild(status);
 
         let playGen = 0;
@@ -1842,6 +1842,7 @@
         let paused = false;
         let waitingNext = false; // 一句一停：等孩子点继续
         let stepMode = true; // true=一句一停；false=连读
+        let started = false; // 需用户点一下才播，避免手机静音拦截
         const FOLLOW_TIMES = 3;
 
         function stillHere(gen) {
@@ -1951,9 +1952,16 @@
             "第 " + (listenIndex + 1) + " / " + lines.length + " 句（绿字）。听完点「继续」";
           paintActions();
 
-          return speakLineCancellable(lines[listenIndex], listenRate, gen).then(() => {
+          return speakLineCancellable(lines[listenIndex], listenRate, gen).then((ok) => {
             if (!stillHere(gen)) return;
             isPlaying = false;
+            if (!ok) {
+              status.className = "follow-tip";
+              status.textContent =
+                "第 " + (listenIndex + 1) + " 句没有声音。请点「再听这句」，或关掉静音后再试";
+              paintActions();
+              return;
+            }
             if (listenIndex >= lines.length - 1) {
               markListenDone();
               return;
@@ -2045,9 +2053,13 @@
               pc.type = "button";
               pc.className = "btn-ok";
               pc.textContent = waitingNext ? "继续 · 下一句" : "继续";
-              pc.addEventListener("click", () => resumeListen({ nextLine: waitingNext }));
+              pc.addEventListener("click", () => {
+                if (V && V.prime) V.prime();
+                resumeListen({ nextLine: waitingNext });
+              });
               $("cardActions").appendChild(pc);
               actionSpeakPair("再听这句", (rate) => {
+                if (V && V.prime) V.prime();
                 stepMode = true;
                 playStep(rate, listenIndex);
               });
@@ -2057,6 +2069,7 @@
                 cont.className = "btn-speak secondary";
                 cont.textContent = "改连读整课";
                 cont.addEventListener("click", () => {
+                  if (V && V.prime) V.prime();
                   stepMode = false;
                   playContinuous(listenRate || 1, listenIndex);
                 });
@@ -2065,7 +2078,34 @@
               return;
             }
 
+            if (!started) {
+              const start = document.createElement("button");
+              start.type = "button";
+              start.className = "btn-ok";
+              start.textContent = "开始听 · 第 1 句";
+              start.addEventListener("click", () => {
+                if (V && V.prime) V.prime();
+                started = true;
+                stepMode = true;
+                playStep(1, 0);
+              });
+              $("cardActions").appendChild(start);
+              const slowStart = document.createElement("button");
+              slowStart.type = "button";
+              slowStart.className = "btn-speak secondary";
+              slowStart.textContent = "慢速 0.5× 开始";
+              slowStart.addEventListener("click", () => {
+                if (V && V.prime) V.prime();
+                started = true;
+                stepMode = true;
+                playStep(0.5, 0);
+              });
+              $("cardActions").appendChild(slowStart);
+              return;
+            }
+
             actionSpeakPair("从头一句一停", (rate) => {
+              if (V && V.prime) V.prime();
               stepMode = true;
               playStep(rate, 0);
             });
@@ -2074,6 +2114,7 @@
             cont.className = "btn-speak secondary";
             cont.textContent = "连读整课";
             cont.addEventListener("click", () => {
+              if (V && V.prime) V.prime();
               stepMode = false;
               playContinuous(listenRate || 1, 0);
             });
@@ -2143,7 +2184,6 @@
         }
 
         paintActions();
-        setTimeout(() => playStep(1, 0), 350);
       }
 
       function renderPatternCard(c) {

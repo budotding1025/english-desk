@@ -2182,7 +2182,7 @@ window.ENGLISH_DESK_DATA = {
       buf += ch;
       if (ch === "." || ch === "!" || ch === "?") {
         const next = raw[i + 1];
-        if (next == null || /\s|"|'|”|’/.test(next)) {
+        if (next == null || /\s/.test(next)) {
           const s = buf.trim();
           if (s) parts.push(s);
           buf = "";
