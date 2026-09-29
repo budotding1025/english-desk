@@ -69,7 +69,7 @@
   function loadManifest() {
     if (manifest) return Promise.resolve(manifest);
     if (manifestPromise) return manifestPromise;
-    manifestPromise = fetch("./audio/manifest.json?v=12")
+    manifestPromise = fetch("./audio/manifest.json?v=13")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         manifest = data;
