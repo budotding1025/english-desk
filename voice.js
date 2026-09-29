@@ -161,27 +161,40 @@
         playResolve = resolve;
         const a = ensurePlayEl();
         currentAudio = a;
+        const targetRate = rate && rate > 0 ? Number(rate) : 1;
         a.onended = null;
         a.onerror = null;
-        a.playbackRate = rate && rate > 0 ? rate : 1;
-        a.preservesPitch = true;
-        try { a.mozPreservesPitch = true; } catch (e) {}
-        try { a.webkitPreservesPitch = true; } catch (e) {}
+        a.onloadedmetadata = null;
+        a.onplaying = null;
         a.volume = 1;
         a.muted = false;
         const src = absUrl(url);
+        const applyRate = () => {
+          try {
+            a.defaultPlaybackRate = targetRate;
+            a.playbackRate = targetRate;
+            a.preservesPitch = true;
+            try { a.mozPreservesPitch = true; } catch (e1) {}
+            try { a.webkitPreservesPitch = true; } catch (e2) {}
+          } catch (e) {}
+        };
         const onDone = (ok) => {
           if (playResolve !== resolve) return;
           playResolve = null;
+          a.onloadedmetadata = null;
+          a.onplaying = null;
           if (currentAudio === a) currentAudio = null;
           resolve(!!ok);
         };
         a.onended = () => onDone(true);
         a.onerror = () => onDone(false);
+        a.onloadedmetadata = applyRate;
+        a.onplaying = applyRate;
         const startPlay = () => {
+          applyRate();
           const p = a.play();
-          if (p && p.catch) {
-            p.catch(() => onDone(false));
+          if (p && p.then) {
+            p.then(() => applyRate()).catch(() => onDone(false));
           }
         };
         if (a.src === src && a.readyState >= 2) {
@@ -191,6 +204,8 @@
         }
         a.src = src;
         a.load();
+        // load() 会把 playbackRate 重置为 1，必须在 load 之后、播放时再设
+        applyRate();
         startPlay();
       } catch (e) {
         if (playResolve === resolve) playResolve = null;
@@ -270,12 +285,14 @@
       rate = 1.0;
     }
     if (rateScale && rateScale > 0) rate = rate * rateScale;
+    // 系统 TTS 对过慢不敏感，夹在可辨认区间
+    if (rate < 0.55) rate = 0.55;
+    if (rate > 1.4) rate = 1.4;
 
     const mapped = roleKey === "boyChild" ? "adultMale" : roleKey === "girlChild" ? "adultFemale" : roleKey;
     const voice = pickSynth(langHint === "zh" ? roleKey : mapped, langHint);
     return new Promise((resolve) => {
       try {
-        // 排队连读时也先停掉上一句，避免两句叠在一起
         if (window.speechSynthesis) window.speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(text);
         u.lang = (voice && voice.lang) || (langHint === "zh" ? "zh-CN" : accent);
