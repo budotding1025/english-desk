@@ -1798,16 +1798,19 @@
           return;
         }
 
-        extra.appendChild(coachBanner("bee", "默认一句一停：听完点「继续」再下一句，按自己节奏学"));
+        extra.appendChild(coachBanner("bee", "可点任意一句开始听；默认一句一停，按自己节奏学"));
         $("cardPrompt").textContent = c.prompt || "读课本对话";
-        $("cardSub").textContent = c.tip || "绿字是当前句；也可改连读，随时暂停";
+        $("cardSub").textContent = c.tip || "点绿字那句可重听；点别的句子就从那里开始";
 
         const list = document.createElement("div");
         list.className = "script-lines";
         const rowEls = [];
-        lines.forEach((line) => {
+        lines.forEach((line, idx) => {
           const row = document.createElement("div");
           row.className = "script-line";
+          row.setAttribute("role", "button");
+          row.tabIndex = 0;
+          row.title = "从这句开始听";
           const name = document.createElement("span");
           name.className = "script-name";
           name.textContent = line.name ? line.name + "：" : "";
@@ -1829,7 +1832,7 @@
 
         const status = document.createElement("p");
         status.className = "follow-tip";
-        status.textContent = "先点「开始听」读第 1 句（手机要先点一下才有声音）";
+        status.textContent = "点「开始听」，或直接点某一句从那里听";
         extra.appendChild(status);
 
         let playGen = 0;
@@ -2029,6 +2032,53 @@
           setActive(followIndex);
           speakLine(line, rate);
         }
+
+        function unlockVoice() {
+          if (V) {
+            V.setEnabled(true);
+            saveStore({ voiceOn: true });
+            if ($("btnMute")) $("btnMute").textContent = "♪";
+          }
+        }
+
+        /** 点击某一句：从这句开始听 / 跟读 */
+        function jumpToLine(i, rate) {
+          if (i < 0 || i >= lines.length) return;
+          unlockVoice();
+          const r = rate && rate > 0 ? rate : listenRate || 1;
+          const go = () => {
+            started = true;
+            paused = false;
+            waitingNext = false;
+            isPlaying = false;
+            if (phase === "follow") {
+              followIndex = i;
+              followCount = 0;
+              status.className = "follow-tip";
+              status.textContent =
+                "跟读第 " + (i + 1) + " / " + lines.length + " 句（绿字）。跟读 " + FOLLOW_TIMES + " 遍。";
+              setActive(i);
+              paintActions();
+              playCurrent(r);
+              return;
+            }
+            phase = "listen";
+            stepMode = true;
+            playStep(r, i);
+          };
+          if (V && V.prime) V.prime().then(go).catch(go);
+          else go();
+        }
+
+        rowEls.forEach((row, idx) => {
+          row.addEventListener("click", () => jumpToLine(idx));
+          row.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              jumpToLine(idx);
+            }
+          });
+        });
 
         function paintActions() {
           $("cardActions").innerHTML = "";
