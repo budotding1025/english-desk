@@ -39,9 +39,11 @@
   let manifest = null;
   let manifestPromise = null;
   let currentAudio = null;
+  let playEl = null; // 复用同一 Audio，保留手机点击解锁
   let synthCache = {};
   let playGen = 0;
   let playResolve = null;
+  let unlocked = false;
 
   function normRole(role) {
     if (!role) return "adultFemale";
@@ -69,7 +71,7 @@
   function loadManifest() {
     if (manifest) return Promise.resolve(manifest);
     if (manifestPromise) return manifestPromise;
-    manifestPromise = fetch("./audio/manifest.json?v=13")
+    manifestPromise = fetch("./audio/manifest.json?v=14")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         manifest = data;
@@ -82,10 +84,41 @@
     return manifestPromise;
   }
 
+  function ensurePlayEl() {
+    if (!playEl) {
+      playEl = new Audio();
+      playEl.preload = "auto";
+      playEl.setAttribute("playsinline", "true");
+      playEl.setAttribute("webkit-playsinline", "true");
+    }
+    return playEl;
+  }
+
   function clipPath(role, text) {
     if (!manifest || !manifest.clips) return null;
-    const key = accent + "|" + role + "|" + text;
-    return manifest.clips[key] || null;
+    const clips = manifest.clips;
+    const t = String(text || "").trim();
+    if (!t) return null;
+    const roles = [role, "girlChild", "boyChild", "adultFemale", "adultMale"];
+    const seen = {};
+    for (let i = 0; i < roles.length; i++) {
+      const r = roles[i];
+      if (!r || seen[r]) continue;
+      seen[r] = true;
+      const exact = clips[accent + "|" + r + "|" + t];
+      if (exact) return exact;
+    }
+    // 大小写不敏感兜底
+    const needle = (accent + "|" + t).toLowerCase();
+    const keys = Object.keys(clips);
+    for (let i = 0; i < keys.length; i++) {
+      const k = keys[i];
+      if (!k.startsWith(accent + "|")) continue;
+      const parts = k.split("|");
+      if (parts.length < 3) continue;
+      if (parts.slice(2).join("|").toLowerCase() === t.toLowerCase()) return clips[k];
+    }
+    return null;
   }
 
   function haltPlayback() {
@@ -94,7 +127,7 @@
         currentAudio.onended = null;
         currentAudio.onerror = null;
         currentAudio.pause();
-        currentAudio.src = "";
+        // 不要清空 src，保留解锁状态；仅停播
       } catch (e) {}
       currentAudio = null;
     }
@@ -113,34 +146,52 @@
     haltPlayback();
   }
 
+  function absUrl(rel) {
+    try {
+      return new URL(rel, window.location.href).href;
+    } catch (e) {
+      return rel;
+    }
+  }
+
   function playUrl(url, rate) {
     return new Promise((resolve) => {
       try {
         haltPlayback();
         playResolve = resolve;
-        const a = new Audio(url);
+        const a = ensurePlayEl();
+        currentAudio = a;
+        a.onended = null;
+        a.onerror = null;
         a.playbackRate = rate && rate > 0 ? rate : 1;
         a.preservesPitch = true;
         try { a.mozPreservesPitch = true; } catch (e) {}
         try { a.webkitPreservesPitch = true; } catch (e) {}
-        currentAudio = a;
-        a.onended = () => {
+        a.volume = 1;
+        a.muted = false;
+        const src = absUrl(url);
+        const onDone = (ok) => {
+          if (playResolve !== resolve) return;
+          playResolve = null;
           if (currentAudio === a) currentAudio = null;
-          if (playResolve === resolve) playResolve = null;
-          resolve(true);
+          resolve(!!ok);
         };
-        a.onerror = () => {
-          if (currentAudio === a) currentAudio = null;
-          if (playResolve === resolve) playResolve = null;
-          resolve(false);
+        a.onended = () => onDone(true);
+        a.onerror = () => onDone(false);
+        const startPlay = () => {
+          const p = a.play();
+          if (p && p.catch) {
+            p.catch(() => onDone(false));
+          }
         };
-        const p = a.play();
-        if (p && p.catch) {
-          p.catch(() => {
-            if (playResolve === resolve) playResolve = null;
-            resolve(false);
-          });
+        if (a.src === src && a.readyState >= 2) {
+          try { a.currentTime = 0; } catch (e) {}
+          startPlay();
+          return;
         }
+        a.src = src;
+        a.load();
+        startPlay();
       } catch (e) {
         if (playResolve === resolve) playResolve = null;
         resolve(false);
@@ -406,22 +457,37 @@
     stop();
   }
 
-  let primer = null;
   function prime() {
     return new Promise((resolve) => {
       try {
-        if (!primer) {
-          primer = new Audio("./audio/fx/sparkle.wav");
-          primer.preload = "auto";
-          primer.volume = 0.001;
+        const a = ensurePlayEl();
+        a.muted = false;
+        a.volume = 0.05;
+        a.onended = null;
+        a.onerror = null;
+        // 用静音几乎听不见的短音解锁；没有 fx 时用空 data uri 仍可解锁部分浏览器
+        const unlockSrc = absUrl("./audio/fx/sparkle.wav");
+        const finish = (ok) => {
+          unlocked = !!ok;
+          try {
+            a.pause();
+            a.currentTime = 0;
+            a.volume = 1;
+          } catch (e) {}
+          resolve(!!ok);
+        };
+        a.onended = () => finish(true);
+        a.onerror = () => finish(false);
+        a.src = unlockSrc;
+        const p = a.play();
+        if (p && p.then) {
+          p.then(() => {
+            // 立刻停掉解锁音，保留已授权状态
+            setTimeout(() => finish(true), 30);
+          }).catch(() => finish(false));
+        } else {
+          finish(true);
         }
-        const started = primer.play();
-        if (started && started.then) {
-          started.then(() => {
-            try { primer.pause(); primer.currentTime = 0; } catch (e) {}
-            resolve(true);
-          }).catch(() => resolve(false));
-        } else resolve(true);
       } catch (e) {
         resolve(false);
       }

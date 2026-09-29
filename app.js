@@ -2054,14 +2054,28 @@
               pc.className = "btn-ok";
               pc.textContent = waitingNext ? "继续 · 下一句" : "继续";
               pc.addEventListener("click", () => {
-                if (V && V.prime) V.prime();
-                resumeListen({ nextLine: waitingNext });
+                if (V) {
+                  V.setEnabled(true);
+                  saveStore({ voiceOn: true });
+                  if ($("btnMute")) $("btnMute").textContent = "♪";
+                }
+                const go = () => resumeListen({ nextLine: waitingNext });
+                if (V && V.prime) V.prime().then(go).catch(go);
+                else go();
               });
               $("cardActions").appendChild(pc);
               actionSpeakPair("再听这句", (rate) => {
-                if (V && V.prime) V.prime();
-                stepMode = true;
-                playStep(rate, listenIndex);
+                if (V) {
+                  V.setEnabled(true);
+                  saveStore({ voiceOn: true });
+                  if ($("btnMute")) $("btnMute").textContent = "♪";
+                }
+                const go = () => {
+                  stepMode = true;
+                  playStep(rate, listenIndex);
+                };
+                if (V && V.prime) V.prime().then(go).catch(go);
+                else go();
               });
               if (paused) {
                 const cont = document.createElement("button");
@@ -2084,10 +2098,18 @@
               start.className = "btn-ok";
               start.textContent = "开始听 · 第 1 句";
               start.addEventListener("click", () => {
-                if (V && V.prime) V.prime();
-                started = true;
-                stepMode = true;
-                playStep(1, 0);
+                if (V) {
+                  V.setEnabled(true);
+                  saveStore({ voiceOn: true });
+                  if ($("btnMute")) $("btnMute").textContent = "♪";
+                }
+                const go = () => {
+                  started = true;
+                  stepMode = true;
+                  playStep(1, 0);
+                };
+                if (V && V.prime) V.prime().then(go).catch(go);
+                else go();
               });
               $("cardActions").appendChild(start);
               const slowStart = document.createElement("button");
@@ -2095,28 +2117,52 @@
               slowStart.className = "btn-speak secondary";
               slowStart.textContent = "慢速 0.5× 开始";
               slowStart.addEventListener("click", () => {
-                if (V && V.prime) V.prime();
-                started = true;
-                stepMode = true;
-                playStep(0.5, 0);
+                if (V) {
+                  V.setEnabled(true);
+                  saveStore({ voiceOn: true });
+                  if ($("btnMute")) $("btnMute").textContent = "♪";
+                }
+                const go = () => {
+                  started = true;
+                  stepMode = true;
+                  playStep(0.5, 0);
+                };
+                if (V && V.prime) V.prime().then(go).catch(go);
+                else go();
               });
               $("cardActions").appendChild(slowStart);
               return;
             }
 
             actionSpeakPair("从头一句一停", (rate) => {
-              if (V && V.prime) V.prime();
-              stepMode = true;
-              playStep(rate, 0);
+              if (V) {
+                V.setEnabled(true);
+                saveStore({ voiceOn: true });
+                if ($("btnMute")) $("btnMute").textContent = "♪";
+              }
+              const go = () => {
+                stepMode = true;
+                playStep(rate, 0);
+              };
+              if (V && V.prime) V.prime().then(go).catch(go);
+              else go();
             });
             const cont = document.createElement("button");
             cont.type = "button";
             cont.className = "btn-speak secondary";
             cont.textContent = "连读整课";
             cont.addEventListener("click", () => {
-              if (V && V.prime) V.prime();
-              stepMode = false;
-              playContinuous(listenRate || 1, 0);
+              if (V) {
+                V.setEnabled(true);
+                saveStore({ voiceOn: true });
+                if ($("btnMute")) $("btnMute").textContent = "♪";
+              }
+              const go = () => {
+                stepMode = false;
+                playContinuous(listenRate || 1, 0);
+              };
+              if (V && V.prime) V.prime().then(go).catch(go);
+              else go();
             });
             $("cardActions").appendChild(cont);
 
