@@ -94,31 +94,70 @@
     return playEl;
   }
 
+  function exactClip(role, text) {
+    if (!manifest || !manifest.clips) return null;
+    return manifest.clips[accent + "|" + role + "|" + text] || null;
+  }
+
   function clipPath(role, text) {
     if (!manifest || !manifest.clips) return null;
-    const clips = manifest.clips;
     const t = String(text || "").trim();
     if (!t) return null;
-    const roles = [role, "girlChild", "boyChild", "adultFemale", "adultMale"];
+    // 孩子角色优先童声/女声，避免突然跳出成人男声
+    let roles;
+    if (role === "boyChild" || role === "girlChild") {
+      roles = ["girlChild", "boyChild", "adultFemale", "adultMale"];
+    } else if (role === "adultMale") {
+      roles = ["adultMale", "boyChild", "adultFemale", "girlChild"];
+    } else {
+      roles = ["adultFemale", "girlChild", "adultMale", "boyChild"];
+    }
     const seen = {};
     for (let i = 0; i < roles.length; i++) {
       const r = roles[i];
       if (!r || seen[r]) continue;
       seen[r] = true;
-      const exact = clips[accent + "|" + r + "|" + t];
+      const exact = exactClip(r, t);
       if (exact) return exact;
     }
-    // 大小写不敏感兜底
-    const needle = (accent + "|" + t).toLowerCase();
-    const keys = Object.keys(clips);
-    for (let i = 0; i < keys.length; i++) {
-      const k = keys[i];
-      if (!k.startsWith(accent + "|")) continue;
-      const parts = k.split("|");
-      if (parts.length < 3) continue;
-      if (parts.slice(2).join("|").toLowerCase() === t.toLowerCase()) return clips[k];
+    // 大小写不敏感兜底（仍避开成人男优先）
+    const prefer = roles;
+    const keys = Object.keys(manifest.clips);
+    for (let p = 0; p < prefer.length; p++) {
+      const r = prefer[p];
+      for (let i = 0; i < keys.length; i++) {
+        const k = keys[i];
+        if (!k.startsWith(accent + "|" + r + "|")) continue;
+        const body = k.slice((accent + "|" + r + "|").length);
+        if (body.toLowerCase() === t.toLowerCase()) return manifest.clips[k];
+      }
     }
     return null;
+  }
+
+  function clipCandidates(roleKey, text) {
+    const t = String(text || "").trim();
+    if (!t || !manifest || !manifest.clips) return [];
+    const order =
+      roleKey === "boyChild" || roleKey === "girlChild"
+        ? ["girlChild", "boyChild", "adultFemale", "adultMale"]
+        : roleKey === "adultMale"
+          ? ["adultMale", "boyChild", "adultFemale", "girlChild"]
+          : ["adultFemale", "girlChild", "adultMale", "boyChild"];
+    const out = [];
+    const seen = {};
+    order.forEach((r) => {
+      const rel = exactClip(r, t);
+      if (rel && !seen[rel]) {
+        seen[rel] = true;
+        out.push(rel);
+      }
+    });
+    if (!out.length) {
+      const fallback = clipPath(roleKey, t);
+      if (fallback) out.push(fallback);
+    }
+    return out;
   }
 
   function haltPlayback() {
@@ -289,8 +328,13 @@
     if (rate < 0.55) rate = 0.55;
     if (rate > 1.4) rate = 1.4;
 
-    const mapped = roleKey === "boyChild" ? "adultMale" : roleKey === "girlChild" ? "adultFemale" : roleKey;
-    const voice = pickSynth(langHint === "zh" ? roleKey : mapped, langHint);
+    const mapped =
+      roleKey === "boyChild"
+        ? "girlChild" // 回退系统音时也不用成人男声，避免突然变声
+        : roleKey === "girlChild"
+          ? "girlChild"
+          : roleKey;
+    const voice = pickSynth(langHint === "zh" ? (roleKey === "boyChild" ? "boyChild" : roleKey) : mapped, langHint);
     return new Promise((resolve) => {
       try {
         if (window.speechSynthesis) window.speechSynthesis.cancel();
@@ -396,23 +440,19 @@
         }
         return speakSynth(utterText, roleKey, langHint, rateScale);
       }
-      let rel = man ? clipPath(roleKey, utterText) : null;
-      if (!rel && roleKey === "boyChild") rel = man ? clipPath("adultMale", utterText) : null;
-      if (!rel && roleKey === "girlChild") rel = man ? clipPath("adultFemale", utterText) : null;
-      if (!rel) {
-        const order = ["boyChild", "girlChild", "adultMale", "adultFemale"];
-        for (let i = 0; i < order.length; i++) {
-          if (order[i] === roleKey) continue;
-          rel = man ? clipPath(order[i], utterText) : null;
-          if (rel) break;
-        }
-      }
-      if (rel) {
-        return playUrl(rel + (rel.indexOf("?") >= 0 ? "&" : "?") + "v=8", rateScale).then((ok) => {
-          if (ok) return true;
+      const candidates = clipCandidates(roleKey, utterText);
+      const tryNext = (i) => {
+        if (i >= candidates.length) {
+          // 孩子句尽量不用系统男声；仍失败再 synth
           return speakSynth(utterText, roleKey, langHint, rateScale);
+        }
+        const rel = candidates[i];
+        return playUrl(rel + (rel.indexOf("?") >= 0 ? "&" : "?") + "v=10", rateScale).then((ok) => {
+          if (ok) return true;
+          return tryNext(i + 1);
         });
-      }
+      };
+      if (candidates.length) return tryNext(0);
       return speakSynth(utterText, roleKey, langHint, rateScale);
     });
   }
