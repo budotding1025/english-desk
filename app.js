@@ -825,7 +825,7 @@
           const miniBtn = document.createElement("button");
           miniBtn.type = "button";
           miniBtn.className = "rec-action challenge";
-          miniBtn.innerHTML = "<strong>迷你卷</strong><span>约 8–10 分钟 · 听+分类+仿写+音</span>";
+          miniBtn.innerHTML = "<strong>迷你卷</strong><span>对齐 U1/U2 试卷 · 听答语·判断·画线音·分类·问答·阅读·仿写</span>";
           miniBtn.addEventListener("click", () => startLesson(null, { mode: "miniExam" }));
           const challengeBtn = document.createElement("button");
           challengeBtn.type = "button";
@@ -985,7 +985,8 @@
           } else if (state.lessonMode === "listenDrill") {
             $("lessonFocus").textContent = "同一长句听两遍再判，盯后半句 because / when";
           } else if (state.lessonMode === "miniExam") {
-            $("lessonFocus").textContent = "听 2 长句 + 分类 + 仿写 + 画线音 · 出完给弱项建议";
+            $("lessonFocus").textContent =
+              "对齐校内卷：听选答语 · 听判断 · 画线音 · 词分类 · 问句答语 · 看图/对话 · 阅读 · 仿写";
           } else if (state.lessonMode === "preview") {
             $("lessonFocus").textContent = "约 10 分钟：听重点 → 课文一句一句跟读（绿字）→ 单词跟读";
           } else if (state.lessonMode === "reviewWrite") {

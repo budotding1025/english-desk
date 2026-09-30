@@ -350,6 +350,147 @@ window.ENGLISH_DESK_DATA = {
           extend: true
         },
       ],
+      // 对齐校内 U1 试卷：六·同类词 / 五·画线音 / 八·问句答语 / 十·阅读
+      wordSort: {
+        bank: ["worried", "sad", "angry", "sunny", "cloudy", "rainy", "fix", "look", "find"],
+        groups: [
+          { id: "feel", label: "心情 (happy…)", answers: ["worried", "sad", "angry"] },
+          { id: "act", label: "动作 (worry…)", answers: ["fix", "look", "find"] },
+          { id: "weather", label: "天气 (windy…)", answers: ["sunny", "cloudy", "rainy"] },
+        ],
+      },
+      paperExam: {
+        phonics: [
+          { left: { en: "cake", mark: "a" }, right: { en: "make", mark: "a" }, same: true, sound: "/eɪ/", rule: "cake / make 的 a_e 都读 /eɪ/。相同。", follow: "cake" },
+          { left: { en: "cat", mark: "a" }, right: { en: "angry", mark: "a" }, same: true, sound: "/æ/", rule: "cat / angry 的 a 都读 /æ/。相同。", follow: "cat" },
+          { left: { en: "he", mark: "e" }, right: { en: "she", mark: "e" }, same: true, sound: "/iː/", rule: "he / she 的 e 都读 /iː/。相同。", follow: "he" },
+          { left: { en: "bed", mark: "e" }, right: { en: "me", mark: "e" }, same: false, sound: "/e/ ≠ /iː/", rule: "bed 的 e 读 /e/，me 的 e 读 /iː/。不一样。", follow: "bed" },
+        ],
+        qa: [
+          {
+            ask: "What's the matter with Maomao?",
+            choices: [
+              { id: "a", text: "I'm happy." },
+              { id: "b", text: "He can't find his dog." },
+              { id: "c", text: "I'm better, Mum." },
+            ],
+            answer: "b",
+            tip: "卷·问句选答语",
+          },
+          {
+            ask: "How do you feel on the first school day?",
+            choices: [
+              { id: "a", text: "I'm happy." },
+              { id: "b", text: "He is brown with a black nose." },
+              { id: "c", text: "Because Kevin broke his new model plane." },
+            ],
+            answer: "a",
+            tip: "卷·问句选答语",
+          },
+          {
+            ask: "Why is Mike angry?",
+            choices: [
+              { id: "a", text: "I'm better, Mum." },
+              { id: "b", text: "Because Kevin broke his new model plane." },
+              { id: "c", text: "He can't find his dog." },
+            ],
+            answer: "b",
+            tip: "卷·问句选答语",
+          },
+          {
+            ask: "How do you feel now?",
+            choices: [
+              { id: "a", text: "I'm better, Mum." },
+              { id: "b", text: "He is brown with a black nose." },
+              { id: "c", text: "I'm happy." },
+            ],
+            answer: "a",
+            tip: "卷·问句选答语",
+          },
+        ],
+        dialogue: [
+          {
+            ask: "Hi, John. You look sad. What's next?",
+            prompt: "补全对话：You look sad. ______",
+            choices: [
+              { id: "a", text: "Thank you so much." },
+              { id: "b", text: "What's the matter?" },
+              { id: "c", text: "Look, it's just under your cap." },
+            ],
+            answer: "b",
+            tip: "卷·补全对话",
+          },
+          {
+            ask: "I can't find my watch. My father will…",
+            prompt: "补全对话：找不到表，爸爸会怎样？",
+            choices: [
+              { id: "a", text: "He will be angry." },
+              { id: "b", text: "What does it look like?" },
+              { id: "c", text: "Thank you so much." },
+            ],
+            answer: "a",
+            tip: "卷·补全对话",
+          },
+        ],
+        reading: {
+          title: "I'm Happy",
+          passage:
+            "I'm happy when the sun is shining. I can go outside and play with my friends. We can ride our bikes, fly kites, or play catch. I'm happy when I'm with my family. I feel safe and loved. I'm happy when I read a good book. It's like having an adventure in my mind. I'm happy when I help others and see a smile on his face.",
+          items: [
+            {
+              ask: "When am I happy?",
+              choices: [
+                { id: "a", text: "When it is raining." },
+                { id: "b", text: "When the sun is shining." },
+                { id: "c", text: "When it is snowing." },
+              ],
+              answer: "b",
+            },
+            {
+              ask: "How do I feel when I am with my family?",
+              choices: [
+                { id: "a", text: "Safe and loved." },
+                { id: "b", text: "Angry." },
+                { id: "c", text: "Sad." },
+              ],
+              answer: "a",
+            },
+            {
+              ask: "Why do I feel happy when helping others?",
+              choices: [
+                { id: "a", text: "Because I can get money." },
+                { id: "b", text: "Because I can get new toys." },
+                { id: "c", text: "Because I can see a smile on the friend's face." },
+              ],
+              answer: "c",
+            },
+          ],
+        },
+        pictureMatch: [
+          {
+            ask: "Kids at the amusement park gate.",
+            prompt: "看图选句：孩子们在游乐园门口",
+            choices: [
+              { id: "a", text: "My aunt is angry, because the cat broke the vase." },
+              { id: "b", text: "The kids are excited, because they are going to the amusement park." },
+              { id: "c", text: "Peter is happy, because he plays basketball with his friends." },
+            ],
+            answer: "b",
+            tip: "卷·看图选句",
+          },
+          {
+            ask: "A boy is crying. He lost his red scarf.",
+            prompt: "看图选句：男孩哭了，找不到红围巾",
+            choices: [
+              { id: "a", text: "The boy is sad. He can't find his red scarf." },
+              { id: "b", text: "My mum is worried, because my grandma is ill." },
+              { id: "c", text: "Peter is happy, because he plays basketball with his friends." },
+            ],
+            answer: "a",
+            tip: "卷·看图选句",
+          },
+        ],
+      },
     },
     {
       id: "u2",
@@ -591,6 +732,173 @@ window.ENGLISH_DESK_DATA = {
           extend: true
         },
       ],
+      // 对齐校内 U2 试卷：六·异类词 / 五·画线音 / 八·问句答语 / 十·阅读
+      wordSort: {
+        bank: ["remember", "help", "try", "sleeping", "reading", "telling", "story", "book", "gift", "call", "hear", "speak"],
+        groups: [
+          { id: "verb", label: "动词 (help…)", answers: ["remember", "help", "try", "call", "hear", "speak"] },
+          { id: "ing", label: "-ing (reading…)", answers: ["sleeping", "reading", "telling"] },
+          { id: "noun", label: "名词 (book…)", answers: ["story", "book", "gift"] },
+        ],
+      },
+      paperExam: {
+        phonics: [
+          { left: { en: "no", mark: "o" }, right: { en: "not", mark: "o" }, same: false, sound: "/əʊ/ ≠ /ɒ/", rule: "no 的 o 读 /əʊ/，not 的 o 读 /ɒ/。不一样。", follow: "no" },
+          { left: { en: "five", mark: "i" }, right: { en: "mice", mark: "i" }, same: true, sound: "/aɪ/", rule: "five / mice 的 i_e 都读 /aɪ/。相同。", follow: "five" },
+          { left: { en: "set", mark: "e" }, right: { en: "sit", mark: "i" }, same: false, sound: "/e/ ≠ /ɪ/", rule: "set 的 e 读 /e/，sit 的 i 读 /ɪ/。不一样。", follow: "set" },
+          { left: { en: "go", mark: "o" }, right: { en: "ago", mark: "o" }, same: true, sound: "/əʊ/", rule: "go / ago 的 o 都读 /əʊ/。相同。", follow: "go" },
+        ],
+        qa: [
+          {
+            ask: "What's the matter, Alice?",
+            choices: [
+              { id: "a", text: "He is reading a science book." },
+              { id: "b", text: "I can't remember the poem." },
+              { id: "c", text: "Thank you so much." },
+            ],
+            answer: "b",
+            tip: "卷·问句选答语",
+          },
+          {
+            ask: "May I speak to Lucy?",
+            choices: [
+              { id: "a", text: "Sorry, she is sleeping." },
+              { id: "b", text: "I often play football with him." },
+              { id: "c", text: "Not so good." },
+            ],
+            answer: "a",
+            tip: "卷·问句选答语",
+          },
+          {
+            ask: "How are you feeling?",
+            choices: [
+              { id: "a", text: "Not so good." },
+              { id: "b", text: "He is reading a science book." },
+              { id: "c", text: "Thank you so much." },
+            ],
+            answer: "a",
+            tip: "卷·问句选答语",
+          },
+          {
+            ask: "You should have a good rest.",
+            choices: [
+              { id: "a", text: "I often play football with him." },
+              { id: "b", text: "Thank you so much." },
+              { id: "c", text: "Sorry, she is sleeping." },
+            ],
+            answer: "b",
+            tip: "卷·问句选答语",
+          },
+        ],
+        dialogue: [
+          {
+            ask: "Hello, Auntie. This is Emma. May I…",
+            prompt: "补全对话：打电话找 Sophia",
+            choices: [
+              { id: "a", text: "May I speak to Sophia?" },
+              { id: "b", text: "I'll tell her." },
+              { id: "c", text: "We can read books together." },
+            ],
+            answer: "a",
+            tip: "卷·补全对话",
+          },
+          {
+            ask: "She is not home. Can you…",
+            prompt: "补全对话：请她回电",
+            choices: [
+              { id: "a", text: "I have some new story books." },
+              { id: "b", text: "Can you ask her to call me back?" },
+              { id: "c", text: "We can read books together." },
+            ],
+            answer: "b",
+            tip: "卷·补全对话",
+          },
+        ],
+        oddOne: [
+          {
+            ask: "Which word is different?",
+            prompt: "选出不同类：remember / help / hard / try",
+            choices: [
+              { id: "a", text: "remember" },
+              { id: "b", text: "help" },
+              { id: "c", text: "hard" },
+              { id: "d", text: "try" },
+            ],
+            answer: "c",
+            tip: "卷·异类词（hard 是形容词）",
+          },
+          {
+            ask: "Which word is different?",
+            prompt: "选出不同类：sleeping / reading / telling / sing",
+            choices: [
+              { id: "a", text: "sleeping" },
+              { id: "b", text: "reading" },
+              { id: "c", text: "telling" },
+              { id: "d", text: "sing" },
+            ],
+            answer: "d",
+            tip: "卷·异类词（sing 不是 -ing）",
+          },
+        ],
+        reading: {
+          title: "Friends Help Each Other",
+          passage:
+            "I am Lucy. I have a great friend named Lily. Last Monday, we had a big maths test. I lost my ruler. Lily gave me her spare ruler. Lily is not good at drawing. I love drawing, so I often help her. I show her how to draw. Our friendship is getting stronger.",
+          items: [
+            {
+              ask: "What is the name of the writer's friend?",
+              choices: [
+                { id: "a", text: "Lucy." },
+                { id: "b", text: "Lily." },
+                { id: "c", text: "Lisa." },
+              ],
+              answer: "b",
+            },
+            {
+              ask: "What happened before the maths test?",
+              choices: [
+                { id: "a", text: "She lost the textbook." },
+                { id: "b", text: "She lost the ruler." },
+                { id: "c", text: "She lost the pencil." },
+              ],
+              answer: "b",
+            },
+            {
+              ask: "How did the writer help Lily?",
+              choices: [
+                { id: "a", text: "She taught her maths." },
+                { id: "b", text: "She taught her reading." },
+                { id: "c", text: "She taught her how to draw." },
+              ],
+              answer: "c",
+            },
+          ],
+        },
+        pictureMatch: [
+          {
+            ask: "A child is sleeping in bed. He is ill.",
+            prompt: "看图选句：孩子生病躺在床上",
+            choices: [
+              { id: "a", text: "The book is about airplane." },
+              { id: "b", text: "Bill is sleeping. He is ill." },
+              { id: "c", text: "You can drink some warm water." },
+            ],
+            answer: "b",
+            tip: "卷·看图选句",
+          },
+          {
+            ask: "A mug of warm water.",
+            prompt: "看图选句：一杯热水",
+            choices: [
+              { id: "a", text: "You can drink some warm water." },
+              { id: "b", text: "Kevin has a bad cold." },
+              { id: "c", text: "You can draw a picture for a poem." },
+            ],
+            answer: "a",
+            tip: "卷·看图选句",
+          },
+        ],
+      },
     },
     {
       id: "u3",
@@ -3222,34 +3530,130 @@ window.ENGLISH_DESK_DATA = {
     return cards;
   }
 
+  /** 试卷式选择题（听问句 / 读题干后选） */
+  function paperChoiceCard(item, title) {
+    const c = listenCard(
+      {
+        speak: item.ask,
+        role: item.role || "adultFemale",
+        choices: item.choices,
+        answer: item.answer,
+        tip: item.tip || "",
+        show: item.prompt || item.ask,
+      },
+      "reply",
+      { hearTimes: 0 }
+    );
+    c.title = title || "迷你卷·选择";
+    c.prompt = item.prompt || item.ask;
+    c.autoPlay = true;
+    return c;
+  }
+
+  function paperPhonicsCards(unit) {
+    const list = (unit.paperExam && unit.paperExam.phonics) || [];
+    return list.map((p) => ({
+      type: "phonics",
+      title: "迷你卷·画线音",
+      prompt: "听一听，这两个词画线部分发音相同吗？",
+      tip: "与校内卷「五」同型：相同 √ / 不同 ×",
+      left: p.left,
+      right: p.right,
+      leftHtml: markWordHtml(p.left.en, p.left.mark),
+      rightHtml: markWordHtml(p.right.en, p.right.mark),
+      same: !!p.same,
+      sound: p.sound || "",
+      rule: p.rule || "",
+      follow: p.follow || p.left.en,
+      speakRole: "girlChild",
+      autoPlay: true,
+    }));
+  }
+
+  function paperReadingCards(unit) {
+    const R = unit.paperExam && unit.paperExam.reading;
+    if (!R || !(R.items || []).length) return [];
+    return (R.items || []).map((item, i) => {
+      const c = paperChoiceCard(
+        {
+          ask: item.ask,
+          prompt: (R.title ? "【" + R.title + "】\n" : "") + (i === 0 && R.passage ? R.passage + "\n\n" : "") + item.ask,
+          choices: item.choices,
+          answer: item.answer,
+          tip: "卷·阅读选择",
+        },
+        "迷你卷·阅读"
+      );
+      return c;
+    });
+  }
+
+  /**
+   * 迷你卷题型对齐校内 U1/U2 试卷：
+   * 听选答语 → 听判断 → 画线音 → 词分类/异类 → 问句答语 → 看图选句 → 补全对话 → 阅读 → 仿写
+   */
   function buildMiniExamCards(unit, store) {
     store = store || {};
     const cards = [];
-    shuffle(listenFor(unit, store, "judge")).slice(0, 2).forEach((j) => {
-      const c = listenCard(j, "judge", { hearTimes: 2 });
-      c.title = "迷你卷·听力";
+    const paper = unit.paperExam || {};
+
+    shuffle(listenFor(unit, store, "reply")).slice(0, 2).forEach((r) => {
+      const c = listenCard(r, "reply", { hearTimes: 0 });
+      c.title = "迷你卷·听选答语";
       cards.push(c);
     });
-    const s = sortCard(unit);
-    if (s) {
-      s.title = "迷你卷·词分类";
-      s.bank = (s.bank || []).slice(0, 4);
-      s.prompt = "把 4 个词点进正确类别";
-      cards.push(s);
-    } else {
-      pickWords(unit, store, 4, 1).forEach((w) => cards.push(wordCard(w, "dictation")));
-    }
-    const sent = sentenceCard(unit, 0, store, { saySelf: true });
-    if (sent) {
-      sent.title = "迷你卷·仿写";
-      cards.push(sent);
-    }
-    buildMinimalCards(store)
+
+    shuffle(listenFor(unit, store, "judge")).slice(0, 2).forEach((j) => {
+      const c = listenCard(j, "judge", { hearTimes: 2 });
+      c.title = "迷你卷·听短文判断";
+      cards.push(c);
+    });
+
+    const phonics = paperPhonicsCards(unit);
+    shuffle(phonics.length ? phonics : buildMinimalCards(store))
       .slice(0, 2)
       .forEach((c) => {
         c.title = "迷你卷·画线音";
         cards.push(c);
       });
+
+    const s = sortCard(unit);
+    if (s) {
+      s.title = "迷你卷·词分类";
+      s.bank = (s.bank || []).slice(0, 6);
+      s.prompt = "把词点进正确类别（对齐试卷「同类词」）";
+      cards.push(s);
+    }
+    shuffle(paper.oddOne || [])
+      .slice(0, 1)
+      .forEach((item) => cards.push(paperChoiceCard(item, "迷你卷·异类词")));
+
+    shuffle(paper.qa || [])
+      .slice(0, 2)
+      .forEach((item) => cards.push(paperChoiceCard(item, "迷你卷·问句答语")));
+
+    shuffle(paper.pictureMatch || [])
+      .slice(0, 1)
+      .forEach((item) => cards.push(paperChoiceCard(item, "迷你卷·看图选句")));
+
+    shuffle(paper.dialogue || [])
+      .slice(0, 1)
+      .forEach((item) => cards.push(paperChoiceCard(item, "迷你卷·补全对话")));
+
+    paperReadingCards(unit)
+      .slice(0, 2)
+      .forEach((c) => cards.push(c));
+
+    const sent = sentenceCard(unit, 0, store, { saySelf: true });
+    if (sent) {
+      sent.title = "迷你卷·仿写";
+      sent.prompt =
+        unit.id === "u2"
+          ? "仿写：写两句介绍自己的朋友（可参考 I'm happy when… / Lily is my good friend.）"
+          : "仿写：I'm ______ when / because ______.（说自己的事）";
+      cards.push(sent);
+    }
+
     return cards;
   }
 

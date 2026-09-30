@@ -272,34 +272,35 @@
       if (c.type === "listen") listenFail += 1;
       else if (c.type === "phonics") phonFail += 1;
       else if (c.type === "pattern" || c.makeSentence || c.saySelf) sentFail += 1;
+      else if (c.type === "sort") wordFail += 1;
       else wordFail += 1;
     });
     const tips = [];
     if (listenFail) {
       tips.push({
         title: "听力",
-        text: "长句后半句易漏 → 去「听力加练」",
+        text: "听选答语 / 听判断易错 → 去「听力加练」",
         mode: "listenDrill",
       });
     }
     if (phonFail) {
       tips.push({
         title: "发音",
-        text: "画线音 / 易混对比 → 去「发音小站」或「易混音」",
+        text: "画线音（同校内卷「五」）→ 去「发音小站」或「易混音」",
         mode: "minimal",
       });
     }
     if (sentFail) {
       tips.push({
-        title: "造句",
-        text: "I'm … because / when … → 上课多「说自己」",
+        title: "仿写",
+        text: "I'm … when / because … → 上课多「说自己」",
         mode: "retry",
       });
     }
     if (wordFail) {
       tips.push({
-        title: "词汇",
-        text: "认词还不够稳 → 去「预习」听三遍",
+        title: "词汇分类",
+        text: "同类词 / 异类词（同校内卷「六」）→ 去「预习」再过词",
         mode: "preview",
       });
     }
