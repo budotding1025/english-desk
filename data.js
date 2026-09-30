@@ -3754,10 +3754,209 @@ window.ENGLISH_DESK_DATA = {
     });
   }
 
-  /** 从教材问句/句型改编成「听问句选答语」（卷·三 / 八 同型） */
+  /** 无 wordSort 时按教材课次自动归类（同试卷「同类词」） */
+  function bookWordSort(unit) {
+    if (unit.wordSort) return unit.wordSort;
+    const words = (unit.words || []).filter(function (w) {
+      return w && w.en && !w.extend;
+    });
+    if (words.length < 4) return null;
+    const byLesson = {};
+    words.forEach(function (w) {
+      const L = w.lesson || 1;
+      if (!byLesson[L]) byLesson[L] = [];
+      if (byLesson[L].indexOf(w.en) < 0) byLesson[L].push(w.en);
+    });
+    const lessons = Object.keys(byLesson)
+      .map(Number)
+      .sort(function (a, b) {
+        return a - b;
+      });
+    let groups;
+    if (lessons.length >= 2) {
+      groups = lessons.slice(0, 3).map(function (L) {
+        return { id: "L" + L, label: "第" + L + "课", answers: byLesson[L] };
+      });
+    } else {
+      const high = words.filter(function (w) {
+        return w.priority === "high";
+      });
+      const rest = words.filter(function (w) {
+        return w.priority !== "high";
+      });
+      groups = [
+        { id: "high", label: "重点词", answers: high.map(function (w) { return w.en; }) },
+        { id: "other", label: "其它词", answers: rest.map(function (w) { return w.en; }) },
+      ].filter(function (g) {
+        return g.answers.length;
+      });
+    }
+    if (groups.length < 2) return null;
+    return {
+      bank: shuffle(words.map(function (w) { return w.en; })).slice(0, 9),
+      groups: groups,
+    };
+  }
+
+  function bookAdaptedOddOne(unit) {
+    const words = (unit.words || []).filter(function (w) {
+      return w && w.en && !w.extend;
+    });
+    if (words.length < 4) return [];
+    const byLesson = {};
+    words.forEach(function (w) {
+      const L = w.lesson || 1;
+      if (!byLesson[L]) byLesson[L] = [];
+      byLesson[L].push(w);
+    });
+    const lessons = Object.keys(byLesson).map(Number);
+    let same;
+    let odd;
+    if (lessons.length >= 2) {
+      const mainL = lessons.sort(function (a, b) {
+        return byLesson[b].length - byLesson[a].length;
+      })[0];
+      const otherL = lessons.filter(function (L) {
+        return L !== mainL;
+      })[0];
+      same = shuffle(byLesson[mainL].slice()).slice(0, 3);
+      odd = shuffle(byLesson[otherL].slice())[0];
+    } else {
+      const high = words.filter(function (w) {
+        return w.priority === "high";
+      });
+      const other = words.filter(function (w) {
+        return w.priority !== "high";
+      });
+      if (high.length >= 3 && other.length >= 1) {
+        same = shuffle(high.slice()).slice(0, 3);
+        odd = shuffle(other.slice())[0];
+      } else {
+        const short = words.filter(function (w) {
+          return String(w.en).indexOf(" ") < 0;
+        });
+        const long = words.filter(function (w) {
+          return String(w.en).indexOf(" ") >= 0;
+        });
+        if (short.length >= 3 && long.length >= 1) {
+          same = shuffle(short.slice()).slice(0, 3);
+          odd = shuffle(long.slice())[0];
+        }
+      }
+    }
+    if (!same || same.length < 3 || !odd) return [];
+    const pool = shuffle(same.concat([odd]));
+    const choices = pool.map(function (w, i) {
+      return { id: String.fromCharCode(97 + i), text: w.en };
+    });
+    const ans = (choices.filter(function (c) {
+      return c.text === odd.en;
+    })[0] || choices[0]).id;
+    return [
+      {
+        ask: "Which word is different?",
+        prompt: "选出不同类的一项（教材词）",
+        choices: choices,
+        answer: ans,
+        tip: "教材异类词改编 · 同试卷「六」",
+      },
+    ];
+  }
+
+  function bookAdaptedDialogue(unit) {
+    const pats = (unit.patterns || []).filter(function (p) {
+      return p && !p.extend && p.demos && p.demos.length >= 2;
+    });
+    if (!pats.length) return [];
+    return shuffle(pats)
+      .slice(0, 2)
+      .map(function (p) {
+        const a = p.demos[0].text;
+        const b = p.demos[1].text;
+        const other = shuffle(
+          (unit.patterns || [])
+            .filter(function (x) {
+              return x !== p && x.demos && x.demos[1];
+            })
+            .map(function (x) {
+              return x.demos[1].text;
+            })
+            .concat(["Happy New Year!", "I'd like some soup."])
+        ).slice(0, 2);
+        const choices = shuffle([
+          { id: "a", text: b },
+          { id: "b", text: other[0] },
+          { id: "c", text: other[1] || "Open the door, please." },
+        ]);
+        const ans = (choices.filter(function (c) {
+          return c.text === b;
+        })[0] || choices[0]).id;
+        return {
+          ask: a,
+          prompt: "补全对话（教材句型）：A: " + a + "  B: ______",
+          choices: choices,
+          answer: ans,
+          tip: "教材对话改编 · 同试卷「补全对话」",
+          role: (p.demos[0] && p.demos[0].role) || "adultFemale",
+        };
+      });
+  }
+
+  function bookListenMeaningItems(unit) {
+    const lines = [];
+    ((unit.listen && unit.listen.pictureSentences) || []).forEach(function (t) {
+      lines.push(t);
+    });
+    ((unit.listen && unit.listen.judge) || []).forEach(function (j) {
+      if (j && j.speak && !j.extend) lines.push(j.speak);
+    });
+    (unit.patterns || []).forEach(function (p) {
+      if (p.extend) return;
+      (p.demos || []).forEach(function (d) {
+        if (d && d.text) lines.push(d.text);
+      });
+    });
+    const uniq = [];
+    lines.forEach(function (t) {
+      if (t && uniq.indexOf(t) < 0) uniq.push(t);
+    });
+    if (uniq.length < 2) return [];
+    const line = shuffle(uniq.slice())[0];
+    const decoys = shuffle(
+      uniq
+        .filter(function (x) {
+          return x !== line;
+        })
+        .concat(["I am cooking dinner.", "She is watching TV."])
+    ).slice(0, 2);
+    const choices = shuffle([
+      { id: "a", text: line },
+      { id: "b", text: decoys[0] },
+      { id: "c", text: decoys[1] || "I am cooking dinner." },
+    ]);
+    const ans = (choices.filter(function (c) {
+      return c.text === line;
+    })[0] || choices[0]).id;
+    return [
+      {
+        ask: line,
+        prompt: "听句子，选择听到的句子（教材选图题改编）",
+        choices: choices,
+        answer: ans,
+        tip: "教材听句选意 · 同试卷「听选图」",
+        role: "girlChild",
+      },
+    ];
+  }
+
+  /** 全单元教材问句改编成听选答语（同试卷三/八） */
   function bookAdaptedReplyItems(unit, store) {
-    const qs = questionsFor(unit, store) || [];
-    const samples = qs.map((q) => (q.sample && q.sample.text) || "").filter(Boolean);
+    const qs = (unit.questions || []).filter(function (q) {
+      return q && q.ask && q.sample && q.sample.text;
+    });
+    const samples = qs.map(function (q) {
+      return q.sample.text;
+    });
     const decoys = [
       "I'd like some chicken.",
       "Open the door, please.",
@@ -3765,41 +3964,51 @@ window.ENGLISH_DESK_DATA = {
       "It is small and thin.",
       "I don't like it.",
       "Fifty.",
+      "We can read it together.",
+      "You should have a good rest.",
     ];
-    return qs
-      .filter((q) => q.ask && q.sample && q.sample.text)
-      .map((q) => {
-        const right = q.sample.text;
-        const wrongPool = samples
-          .concat(decoys)
-          .filter((t) => t && t !== right);
-        const wrong = shuffle(wrongPool).slice(0, 2);
-        const choices = shuffle([
-          { id: "a", text: right },
-          { id: "b", text: wrong[0] || decoys[0] },
-          { id: "c", text: wrong[1] || decoys[1] },
-        ]);
-        const ans = (choices.filter((c) => c.text === right)[0] || choices[0]).id;
-        return {
-          speak: q.ask,
-          role: q.asker || "adultFemale",
-          choices: choices,
-          answer: ans,
-          tip: "教材问句改编 · 同试卷「听选答语」",
-          book: true,
-        };
+    return qs.map(function (q) {
+      const right = q.sample.text;
+      const wrongPool = samples.concat(decoys).filter(function (t) {
+        return t && t !== right;
       });
+      const wrong = shuffle(wrongPool).slice(0, 2);
+      const choices = shuffle([
+        { id: "a", text: right },
+        { id: "b", text: wrong[0] || decoys[0] },
+        { id: "c", text: wrong[1] || decoys[1] },
+      ]);
+      const ans = (choices.filter(function (c) {
+        return c.text === right;
+      })[0] || choices[0]).id;
+      return {
+        speak: q.ask,
+        role: q.asker || "adultFemale",
+        choices: choices,
+        answer: ans,
+        tip: "教材问句改编 · 同试卷「听选答语」",
+        book: true,
+      };
+    });
   }
 
-  /** 教材听力句改编判断（无官方 paper 时补齐卷·四 同型） */
+  /** 全单元教材听力判断（同试卷四） */
   function bookAdaptedJudgeItems(unit, store) {
-    const list = listenFor(unit, store, "judge") || [];
-    return list.map((j) => Object.assign({}, j, { book: !j.paper, tip: (j.tip || "") + (j.paper ? "" : " · 教材听力改编") }));
+    const list = ((unit.listen && unit.listen.judge) || []).filter(function (j) {
+      return j && j.speak;
+    });
+    return list.map(function (j) {
+      return Object.assign({}, j, {
+        book: !j.paper,
+        tip: (j.tip || "") + (j.paper ? "" : " · 教材听力改编"),
+      });
+    });
   }
 
   /**
-   * Records「教材·试卷练」：按校内卷题型组卷，优先官方听力/试卷库，缺则用教材句型改编同类题。
-   * 题型：听选答语 → 听判断 → 画线音 → 词分类/异类 → 问句答语 → 看图选句 → 补全对话 → 阅读 → 仿写
+   * Records「教材·试卷练」：
+   * - 以教材为主；U1/U2 有校内卷/听力材料时用完整版
+   * - U3–U8 同题型，内容从课本词句/听力/问句改编（后续有试卷可再升级）
    */
   function buildMiniExamCards(unit, store) {
     store = store || {};
@@ -3808,24 +4017,23 @@ window.ENGLISH_DESK_DATA = {
     const hasPaper = !!(paper.qa || paper.phonics || paper.reading || paper.dialogue || paper.pictureMatch);
 
     let replies = listenPaperBank(unit, "reply");
-    if (replies.length < 2) {
-      replies = replies.concat(bookAdaptedReplyItems(unit, store));
-    }
-    shuffle(replies)
-      .slice(0, 3)
-      .forEach((r) => {
-        const c = listenCard(r, "reply", { hearTimes: 0 });
-        c.title = r.paper ? "试卷练·听选答语" : r.book ? "教材练·听选答语" : "试卷练·听选答语";
-        cards.push(c);
-      });
+    if (replies.length < 3) replies = replies.concat(bookAdaptedReplyItems(unit, store));
+    const seenR = {};
+    shuffle(replies).forEach(function (r) {
+      if (cards.filter(function (c) { return c.kind === "reply"; }).length >= 3) return;
+      const key = r.speak || "";
+      if (seenR[key]) return;
+      seenR[key] = true;
+      const c = listenCard(r, "reply", { hearTimes: 0 });
+      c.title = r.paper ? "试卷练·听选答语" : "教材练·听选答语";
+      cards.push(c);
+    });
 
     let judges = listenPaperBank(unit, "judge");
-    if (judges.length < 2) {
-      judges = judges.concat(bookAdaptedJudgeItems(unit, store));
-    }
+    if (judges.length < 3) judges = judges.concat(bookAdaptedJudgeItems(unit, store));
     const seenJ = {};
-    shuffle(judges).forEach((j) => {
-      if (cards.filter((c) => c.kind === "judge").length >= 3) return;
+    shuffle(judges).forEach(function (j) {
+      if (cards.filter(function (c) { return c.kind === "judge"; }).length >= 3) return;
       const key = (j.speak || "") + "|" + (j.show || "");
       if (seenJ[key]) return;
       seenJ[key] = true;
@@ -3837,80 +4045,77 @@ window.ENGLISH_DESK_DATA = {
     const phonics = paperPhonicsCards(unit);
     shuffle(phonics.length ? phonics : buildMinimalCards(store))
       .slice(0, 2)
-      .forEach((c) => {
+      .forEach(function (c) {
         c.title = phonics.length ? "试卷练·画线音" : "教材练·画线音";
         cards.push(c);
       });
 
-    const s = sortCard(unit);
-    if (s) {
-      s.title = "试卷练·词分类";
-      s.bank = (s.bank || []).slice(0, 6);
-      s.prompt = hasPaper
-        ? "把词点进正确类别（同校内卷「同类词」）"
-        : "把词点进正确类别（教材词汇归类）";
-      cards.push(s);
+    const sortSrc = unit.wordSort || bookWordSort(unit);
+    if (sortSrc) {
+      cards.push({
+        type: "sort",
+        title: hasPaper && unit.wordSort ? "试卷练·词分类" : "教材练·词分类",
+        prompt:
+          hasPaper && unit.wordSort
+            ? "把词点进正确类别（同校内卷「同类词」）"
+            : "把词点进正确类别（按教材课次/重点）",
+        bank: shuffle((sortSrc.bank || []).slice()).slice(0, 6),
+        groups: sortSrc.groups || [],
+      });
     }
-    shuffle(paper.oddOne || [])
+
+    let odd = paper.oddOne || [];
+    if (!odd.length) odd = bookAdaptedOddOne(unit);
+    shuffle(odd)
       .slice(0, 1)
-      .forEach((item) => cards.push(paperChoiceCard(item, "试卷练·异类词")));
+      .forEach(function (item) {
+        cards.push(paperChoiceCard(item, paper.oddOne ? "试卷练·异类词" : "教材练·异类词"));
+      });
 
     let qa = paper.qa || [];
     if (!qa.length) {
-      qa = bookAdaptedReplyItems(unit, store).map((r) => ({
-        ask: r.speak,
-        role: r.role,
-        prompt: r.speak,
-        choices: r.choices,
-        answer: r.answer,
-        tip: "教材问句改编 · 同试卷「问句选答语」",
-      }));
+      qa = bookAdaptedReplyItems(unit, store).map(function (r) {
+        return {
+          ask: r.speak,
+          role: r.role,
+          prompt: r.speak,
+          choices: r.choices,
+          answer: r.answer,
+          tip: "教材问句改编 · 同试卷「问句选答语」",
+        };
+      });
     }
     shuffle(qa)
       .slice(0, 2)
-      .forEach((item) => cards.push(paperChoiceCard(item, item.tip && item.tip.indexOf("教材") >= 0 ? "教材练·问句答语" : "试卷练·问句答语")));
+      .forEach(function (item) {
+        cards.push(paperChoiceCard(item, paper.qa ? "试卷练·问句答语" : "教材练·问句答语"));
+      });
 
-    shuffle(paper.pictureMatch || [])
-      .slice(0, 1)
-      .forEach((item) => cards.push(paperChoiceCard(item, "试卷练·看图选句")));
-
-    // 无插图时：用听力材料选图句改编成「听句选意思」
-    if (!(paper.pictureMatch || []).length && unit.listen && unit.listen.pictureSentences) {
-      const line = shuffle((unit.listen.pictureSentences || []).slice())[0];
-      if (line) {
-        const decoys = shuffle(
-          (unit.listen.pictureSentences || [])
-            .filter((x) => x !== line)
-            .concat(["I am late for school.", "She is eating lunch."])
-        ).slice(0, 2);
-        const choices = shuffle([
-          { id: "a", text: line },
-          { id: "b", text: decoys[0] || "I am late for school." },
-          { id: "c", text: decoys[1] || "She is eating lunch." },
-        ]);
-        const ans = (choices.filter((c) => c.text === line)[0] || choices[0]).id;
-        cards.push(
-          paperChoiceCard(
-            {
-              ask: line,
-              prompt: "听句子，选择意思最接近的一项（教材选图题改编）",
-              choices: choices,
-              answer: ans,
-              tip: "教材选图题改编",
-            },
-            "教材练·听句选意"
-          )
-        );
-      }
+    if ((paper.pictureMatch || []).length) {
+      shuffle(paper.pictureMatch)
+        .slice(0, 1)
+        .forEach(function (item) {
+          cards.push(paperChoiceCard(item, "试卷练·看图选句"));
+        });
+    } else {
+      bookListenMeaningItems(unit)
+        .slice(0, 1)
+        .forEach(function (item) {
+          cards.push(paperChoiceCard(item, "教材练·听句选意"));
+        });
     }
 
-    shuffle(paper.dialogue || [])
+    let dialogues = paper.dialogue || [];
+    if (!dialogues.length) dialogues = bookAdaptedDialogue(unit);
+    shuffle(dialogues)
       .slice(0, 1)
-      .forEach((item) => cards.push(paperChoiceCard(item, "试卷练·补全对话")));
+      .forEach(function (item) {
+        cards.push(paperChoiceCard(item, paper.dialogue ? "试卷练·补全对话" : "教材练·补全对话"));
+      });
 
     const readingCards = paperReadingCards(unit);
     if (readingCards.length) {
-      readingCards.slice(0, 2).forEach((c) => {
+      readingCards.slice(0, 2).forEach(function (c) {
         c.title = "试卷练·阅读";
         cards.push(c);
       });
@@ -3923,8 +4128,8 @@ window.ENGLISH_DESK_DATA = {
               ask: "What is the passage mainly about?",
               prompt: "【教材短文】\n" + String(w.passage).slice(0, 280) + "\n\nWhat is the passage mainly about?",
               choices: [
-                { id: "a", text: "Feelings / friends / school life." },
-                { id: "b", text: "How to cook dinner." },
+                { id: "a", text: "Unit topic: feelings / friends / school / food / nature / festival." },
+                { id: "b", text: "How to drive a car." },
                 { id: "c", text: "Playing computer games only." },
               ],
               answer: "a",
@@ -3933,21 +4138,49 @@ window.ENGLISH_DESK_DATA = {
             "教材练·阅读大意"
           )
         );
+      } else {
+        const pat = (unit.patterns || []).filter(function (p) {
+          return !p.extend;
+        })[0];
+        const line = pat && pat.demos && pat.demos[0] && pat.demos[0].text;
+        if (line) {
+          const choices = shuffle([
+            { id: "a", text: line },
+            { id: "b", text: "I can fly to the moon today." },
+            { id: "c", text: "The robot is cooking rocks." },
+          ]);
+          const ans = (choices.filter(function (c) {
+            return c.text === line;
+          })[0] || choices[0]).id;
+          cards.push(
+            paperChoiceCard(
+              {
+                ask: "Which sentence matches this unit?",
+                prompt: "选出最符合本单元主题的句子",
+                choices: choices,
+                answer: ans,
+                tip: "教材主题句",
+              },
+              "教材练·主题句"
+            )
+          );
+        }
       }
     }
 
     const sent = sentenceCard(unit, 0, store, { saySelf: true });
     if (sent) {
-      sent.title = "试卷练·仿写";
+      sent.title = hasPaper ? "试卷练·仿写" : "教材练·仿写";
       sent.prompt =
         unit.id === "u2"
           ? "仿写（同试卷任务二）：写两句介绍自己的朋友"
-          : "仿写（同试卷任务二）：I'm ______ when / because ______.（说自己的事）";
+          : "仿写：I'm ______ when / because ______.（说自己的事 · 同试卷仿写）";
       cards.push(sent);
     }
 
     return cards;
   }
+
 
   function buildChallengeCards(unit, store) {
     store = store || {};

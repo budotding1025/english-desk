@@ -622,7 +622,7 @@
           else if (state.lessonMode === "phonics") alert("发音小站还在准备词，先去上一课吧。");
           else if (state.lessonMode === "minimal") alert("易混音小站还在准备，先去上一课吧。");
           else if (state.lessonMode === "listenDrill") alert("本单元暂无听力长句，先去上一课吧。");
-          else if (state.lessonMode === "miniExam") alert("本单元教材/试卷练习还在准备，先去上课或换一单元吧。");
+          else if (state.lessonMode === "miniExam") alert("本单元暂时组不出练习，先换一单元或去上课吧。");
           else if (state.lessonMode === "preview") alert("这一课的预习还在准备，先去「复习」上课吧。");
           else if (state.lessonMode === "reviewWrite") alert("这一课的词句默写还在准备，先去「复习」上课吧。");
           else alert("本单元暂无练习内容。");
@@ -826,7 +826,7 @@
           miniBtn.type = "button";
           miniBtn.className = "rec-action challenge";
           miniBtn.innerHTML =
-            "<strong>教材·试卷练</strong><span>按校内卷题型 · 教材句型改编 · 听力材料优先</span>";
+            "<strong>教材·试卷练</strong><span>以教材为主 · U1–U2 完整卷题型 · 其它单元同型改编</span>";
           miniBtn.addEventListener("click", () => startLesson(null, { mode: "miniExam" }));
           const challengeBtn = document.createElement("button");
           challengeBtn.type = "button";
@@ -961,7 +961,7 @@
           else if (state.lessonMode === "phonics") $("lessonNameTitle").textContent = "Phonics · 发音小站";
           else if (state.lessonMode === "minimal") $("lessonNameTitle").textContent = "Minimal · 易混音";
           else if (state.lessonMode === "listenDrill") $("lessonNameTitle").textContent = "Listen · 听力加练";
-          else if (state.lessonMode === "miniExam") $("lessonNameTitle").textContent = "Paper · 教材与试卷改编练习";
+          else if (state.lessonMode === "miniExam") $("lessonNameTitle").textContent = "教材为主 · 试卷题型练";
           else if (state.lessonMode === "preview") {
             $("lessonNameTitle").textContent = node
               ? "Preview · Lesson " + (node.bookLesson || node.lesson) + " · " + node.lessonTitle
