@@ -69,6 +69,7 @@ window.ENGLISH_DESK_DATA = {
         "重难点：How do you feel today? I'm worried / happy / excited.",
         "重难点：What's the matter? I can't find… Let's look for… together.",
         "重难点：Please don't be angry. I feel better. Calm down.",
+        "听力材料：心情词 + because；短文陷阱（房间乱≠没写作业）。",
         "复习心情和帮助；延展 because，以及 a_e / e / e_e（cake, he, these）。",
       ],
       words: [
@@ -206,14 +207,52 @@ window.ENGLISH_DESK_DATA = {
         },
       ],
       listen: {
+        // 官方听力材料第一单元（与校内试卷三/四对应）
         judge: [
           {
             lesson: 1,
             role: "boyChild",
-            speak: "Dad, I'm a little worried. Am I late?",
-            show: "判断：男孩有点担心自己迟到了。",
+            speak: "This is my first day of school. I'm happy, because I can play with my friend in the classroom.",
+            show: "判断：今天是上学第一天，他很高兴。",
             answer: true,
-            tip: "课文：I'm a little worried.",
+            tip: "听力材料·短文：first day / happy",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak: "I'm happy, because I can play with my friend in the classroom. And we can read interesting books.",
+            show: "判断：他高兴是因为能和朋友玩、读有趣的书。",
+            answer: true,
+            tip: "听力材料·短文：because + play / read",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "girlChild",
+            speak: "My mother is angry, because my room is not tidy.",
+            show: "判断：妈妈生气是因为孩子没写作业。",
+            answer: false,
+            tip: "陷阱：原文是房间乱，不是不写作业",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak: "So after school I clean my room. My mother is happy again.",
+            show: "判断：放学后他在教室里玩游戏。",
+            answer: false,
+            tip: "原文：放学后打扫房间",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "girlChild",
+            speak: "So after school I clean my room. My mother is happy again.",
+            show: "判断：打扫房间后，妈妈又高兴了。",
+            answer: true,
+            tip: "听力材料·短文末句",
+            paper: true,
           },
           {
             lesson: 2,
@@ -229,15 +268,7 @@ window.ENGLISH_DESK_DATA = {
             speak: "Please don't be angry. A walk always helps me calm down.",
             show: "判断：散步能帮助冷静下来。",
             answer: true,
-            tip: "课文：calm down",
-          },
-          {
-            lesson: 4,
-            role: "boyChild",
-            speak: "The mouse has an idea, but the cat does not stop.",
-            show: "判断：老鼠有主意，可是猫没有停。",
-            answer: true,
-            tip: "故事课：idea / but / stop",
+            tip: "听力一：Taking a walk always helps me calm down.",
           },
           {
             lesson: 4,
@@ -255,36 +286,60 @@ window.ENGLISH_DESK_DATA = {
             role: "adultFemale",
             speak: "How do you feel today?",
             choices: [
-              { id: "a", text: "I'm so happy." },
-              { id: "b", text: "I'd like some chicken." },
-              { id: "c", text: "Open the door, please." },
+              { id: "a", text: "I'm excited." },
+              { id: "b", text: "I'm reading a book." },
             ],
             answer: "a",
-            tip: "回应心情",
+            tip: "听力材料三·1 / 试卷三·1",
+            paper: true,
           },
           {
             lesson: 2,
-            role: "girlChild",
-            speak: "What's the matter?",
+            role: "adultFemale",
+            speak: "Your brother looks sad. What's the matter?",
             choices: [
-              { id: "a", text: "I can't find my dog." },
-              { id: "b", text: "Happy New Year!" },
-              { id: "c", text: "Use the fork." },
+              { id: "a", text: "He can't find his cat." },
+              { id: "b", text: "It is small and thin." },
             ],
             answer: "a",
-            tip: "说说怎么了",
+            tip: "听力材料三·2 / 试卷三·2",
+            paper: true,
+          },
+          {
+            lesson: 3,
+            role: "adultFemale",
+            speak: "Why are you so angry?",
+            choices: [
+              { id: "a", text: "Let's go and play football." },
+              { id: "b", text: "I'm angry because he broke my pencil." },
+            ],
+            answer: "b",
+            tip: "听力材料三·3 / 试卷三·3 · because",
+            paper: true,
           },
           {
             lesson: 3,
             role: "adultFemale",
             speak: "How do you feel now?",
             choices: [
-              { id: "a", text: "I feel better." },
-              { id: "b", text: "He is a mouse." },
-              { id: "c", text: "Fifty." },
+              { id: "a", text: "I'm happy now." },
+              { id: "b", text: "I don't like it." },
             ],
             answer: "a",
-            tip: "现在感觉好些了",
+            tip: "听力材料三·4 / 试卷三·4",
+            paper: true,
+          },
+          {
+            lesson: 2,
+            role: "adultFemale",
+            speak: "Why does she look worried?",
+            choices: [
+              { id: "a", text: "She looks worried." },
+              { id: "b", text: "She can't find her English book." },
+            ],
+            answer: "b",
+            tip: "听力材料三·5 / 试卷三·5",
+            paper: true,
           },
         ],
         challenge: {
@@ -321,6 +376,21 @@ window.ENGLISH_DESK_DATA = {
           },
           ],
         },
+        // 听力材料一/二脚本摘要（选图、排序；数字题用文字选项）
+        pictureSentences: [
+          "The boy is happy. He got an A in the test.",
+          "The boy is excited. He is going to the amusement park.",
+          "The girl is worried. She can't find her new book.",
+          "They are looking for the key together.",
+          "Taking a walk always helps me calm down.",
+          "Don't cry. Your dog will come back.",
+        ],
+        orderDialogues: [
+          "How do you feel today? I am really happy. I'm back at school.",
+          "What's wrong? You look sad. I can't find my dog.",
+          "My brother is ill. I'm worried about him.",
+          "My toy plane is broken. Let's try to fix it together.",
+        ],
       },
       questions: [
         {
@@ -502,6 +572,7 @@ window.ENGLISH_DESK_DATA = {
         "重难点：We can read it together. The story is interesting.",
         "重难点：Let me help you. May I try? It's hard.",
         "重难点：You should have a good rest.",
+        "听力材料：May I speak to…；Tina 短文陷阱（walk≠car，park≠zoo）。",
         "复习朋友互助；延展 should … because …，以及 i / i_e / o。",
       ],
       words: [
@@ -608,14 +679,52 @@ window.ENGLISH_DESK_DATA = {
         },
       ],
       listen: {
+        // 官方听力材料第二单元（与校内试卷三/四 Tina 短文对应）
         judge: [
           {
             lesson: 1,
-            role: "boyChild",
-            speak: "We can read this animal story together. It is interesting.",
-            show: "判断：他们可以一起读有趣的动物故事。",
+            role: "girlChild",
+            speak: "I have a wonderful friend named Tina. We are in the same class.",
+            show: "判断：Tina is my good friend.",
             answer: true,
-            tip: "课文：together / interesting",
+            tip: "听力材料四 / 试卷四·1",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "girlChild",
+            speak: "Every day, we walk to school together.",
+            show: "判断：We go to school by car every day.",
+            answer: false,
+            tip: "陷阱：原文是 walk，不是 by car",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "girlChild",
+            speak: "At school, we love art class. We like drawing pictures.",
+            show: "判断：Art is our favourite class.",
+            answer: true,
+            tip: "听力材料四 / 试卷四·3",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "girlChild",
+            speak: "We often help each other. Once, I forgot my crayons, and Tina shared her crayons with me.",
+            show: "判断：We help each other only in art class.",
+            answer: false,
+            tip: "陷阱：often help，不是只在美术课",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "girlChild",
+            speak: "On weekends, we go to the park and fly kites.",
+            show: "判断：We go to the zoo and fly kites on weekends.",
+            answer: false,
+            tip: "陷阱：park，不是 zoo",
+            paper: true,
           },
           {
             lesson: 2,
@@ -631,15 +740,7 @@ window.ENGLISH_DESK_DATA = {
             speak: "She is ill. You should have a good rest and I will call her tomorrow.",
             show: "判断：她病了，应该好好休息。",
             answer: true,
-            tip: "课文：should / rest",
-          },
-          {
-            lesson: 4,
-            role: "boyChild",
-            speak: "The cupcake is small. We can wait and share it.",
-            show: "判断：杯子蛋糕很小，他们可以分享。",
-            answer: true,
-            tip: "故事：share / small",
+            tip: "听力一：My friend Amy is ill. I should call her.",
           },
           {
             lesson: 4,
@@ -653,28 +754,64 @@ window.ENGLISH_DESK_DATA = {
         ],
         reply: [
           {
-            lesson: 1,
-            role: "boyChild",
-            speak: "Can we read it together?",
-            choices: [
-              { id: "a", text: "Yes. The story is interesting." },
-              { id: "b", text: "Open the door." },
-              { id: "c", text: "I'm a mouse." },
-            ],
-            answer: "a",
-            tip: "一起读",
-          },
-          {
             lesson: 3,
             role: "adultFemale",
-            speak: "Yangyang is ill. What should he do?",
+            speak: "May I speak to Sara?",
             choices: [
-              { id: "a", text: "He should have a good rest." },
-              { id: "b", text: "He should play with chopsticks." },
-              { id: "c", text: "He is a pig." },
+              { id: "a", text: "I am Sara." },
+              { id: "b", text: "Sorry, she is not home." },
+            ],
+            answer: "b",
+            tip: "听力材料三·1 / 试卷三·1",
+            paper: true,
+          },
+          {
+            lesson: 2,
+            role: "adultFemale",
+            speak: "What's the matter, Tina?",
+            choices: [
+              { id: "a", text: "I can't remember the poem." },
+              { id: "b", text: "She can't remember the poem." },
             ],
             answer: "a",
-            tip: "应该休息",
+            tip: "听力材料三·2 / 试卷三·2",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "adultFemale",
+            speak: "What is Mike doing?",
+            choices: [
+              { id: "a", text: "She is doing homework." },
+              { id: "b", text: "He is doing homework." },
+            ],
+            answer: "b",
+            tip: "听力材料三·3 / 试卷三·3 · he/she",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak: "Can I read it with you?",
+            choices: [
+              { id: "a", text: "Sure." },
+              { id: "b", text: "Sorry, I can't." },
+            ],
+            answer: "a",
+            tip: "听力材料三·4 / 试卷三·4",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "adultFemale",
+            speak: "What are you doing?",
+            choices: [
+              { id: "a", text: "I'm drawing a picture." },
+              { id: "b", text: "I'm going to the park tomorrow." },
+            ],
+            answer: "a",
+            tip: "听力材料三·5 / 试卷三·5 · 进行时",
+            paper: true,
           },
         ],
         challenge: {
@@ -703,6 +840,21 @@ window.ENGLISH_DESK_DATA = {
           },
           ],
         },
+        pictureSentences: [
+          "I'm reading a story book at home. I love story books.",
+          "My brother is writing a poem.",
+          "Reading aloud is a good way to study English.",
+          "My friend Amy is ill. I should call her.",
+          "This book is about animals.",
+          "You should drink some warm water.",
+        ],
+        matchDialogues: [
+          "What are you doing? I'm writing a story.",
+          "What's the matter? I can't remember English words.",
+          "What are you reading? I'm reading a story book.",
+          "May I speak to Lingling? Sorry, she is not at home.",
+          "You should drink some warm water. Thank you.",
+        ],
       },
       questions: [
         {
@@ -2227,6 +2379,14 @@ window.ENGLISH_DESK_DATA = {
     return mine.length ? mine : L.filter(function (x) { return !x.extend; });
   }
 
+  /** 迷你卷 / 听力加练：优先官方听力材料（paper:true）全单元题 */
+  function listenPaperBank(unit, kind) {
+    const L = ((unit.listen && unit.listen[kind]) || []).filter(function (x) { return !x.extend; });
+    const paper = L.filter(function (x) { return x.paper; });
+    if (paper.length) return paper.concat(L.filter(function (x) { return !x.paper; }));
+    return L;
+  }
+
   function questionsFor(unit, store, extendOnly) {
     const all = unit.questions || [];
     if (extendOnly) {
@@ -3513,18 +3673,24 @@ window.ENGLISH_DESK_DATA = {
   function buildListenDrillCards(unit, store) {
     store = store || {};
     const cards = [];
-    const judges = listenFor(unit, store, "judge", true);
-    const becauseFirst = judges.filter((j) => /because|when/i.test(j.speak || ""));
+    const judges = listenPaperBank(unit, "judge");
+    const replies = listenPaperBank(unit, "reply");
+    const becauseFirst = judges.filter((j) => /because|when|tidy|walk|park|art class/i.test((j.speak || "") + (j.show || "")));
     const pool = becauseFirst.length ? becauseFirst.concat(judges) : judges;
     const seen = {};
     shuffle(pool).forEach((j) => {
-      if (cards.length >= 5) return;
-      const key = j.speak || j.id || "";
+      if (cards.length >= 4) return;
+      const key = (j.speak || "") + "|" + (j.show || "");
       if (seen[key]) return;
       seen[key] = true;
       const c = listenCard(j, "judge", { hearTimes: 2 });
-      c.title = "听力加练";
-      c.tip = (j.tip || "") + " · 听两遍，盯后半句";
+      c.title = j.paper ? "听力加练·材料判断" : "听力加练";
+      c.tip = (j.tip || "") + " · 听两遍，盯细节/陷阱";
+      cards.push(c);
+    });
+    shuffle(replies).slice(0, 2).forEach((r) => {
+      const c = listenCard(r, "reply", { hearTimes: 0 });
+      c.title = r.paper ? "听力加练·材料答语" : "听力加练·答语";
       cards.push(c);
     });
     return cards;
@@ -3589,7 +3755,7 @@ window.ENGLISH_DESK_DATA = {
   }
 
   /**
-   * 迷你卷题型对齐校内 U1/U2 试卷：
+   * 迷你卷题型对齐校内 U1/U2 试卷 + 官方听力材料：
    * 听选答语 → 听判断 → 画线音 → 词分类/异类 → 问句答语 → 看图选句 → 补全对话 → 阅读 → 仿写
    */
   function buildMiniExamCards(unit, store) {
@@ -3597,15 +3763,15 @@ window.ENGLISH_DESK_DATA = {
     const cards = [];
     const paper = unit.paperExam || {};
 
-    shuffle(listenFor(unit, store, "reply")).slice(0, 2).forEach((r) => {
+    shuffle(listenPaperBank(unit, "reply")).slice(0, 3).forEach((r) => {
       const c = listenCard(r, "reply", { hearTimes: 0 });
-      c.title = "迷你卷·听选答语";
+      c.title = r.paper ? "迷你卷·听选答语（材料）" : "迷你卷·听选答语";
       cards.push(c);
     });
 
-    shuffle(listenFor(unit, store, "judge")).slice(0, 2).forEach((j) => {
+    shuffle(listenPaperBank(unit, "judge")).slice(0, 3).forEach((j) => {
       const c = listenCard(j, "judge", { hearTimes: 2 });
-      c.title = "迷你卷·听短文判断";
+      c.title = j.paper ? "迷你卷·听短文判断（材料）" : "迷你卷·听短文判断";
       cards.push(c);
     });
 

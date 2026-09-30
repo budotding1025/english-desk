@@ -810,7 +810,7 @@
           const listenBtn = document.createElement("button");
           listenBtn.type = "button";
           listenBtn.className = "rec-action";
-          listenBtn.innerHTML = "<strong>听力加练</strong><span>长句听两遍 · 盯后半句 because</span>";
+          listenBtn.innerHTML = "<strong>听力加练</strong><span>对齐听力材料 · 短文判断陷阱 + 听选答语</span>";
           listenBtn.addEventListener("click", () => startLesson(null, { mode: "listenDrill" }));
           const phonicsBtn = document.createElement("button");
           phonicsBtn.type = "button";
@@ -825,7 +825,7 @@
           const miniBtn = document.createElement("button");
           miniBtn.type = "button";
           miniBtn.className = "rec-action challenge";
-          miniBtn.innerHTML = "<strong>迷你卷</strong><span>对齐 U1/U2 试卷 · 听答语·判断·画线音·分类·问答·阅读·仿写</span>";
+          miniBtn.innerHTML = "<strong>迷你卷</strong><span>对齐试卷+听力材料 · 答语·判断·音·分类·阅读·仿写</span>";
           miniBtn.addEventListener("click", () => startLesson(null, { mode: "miniExam" }));
           const challengeBtn = document.createElement("button");
           challengeBtn.type = "button";
@@ -983,10 +983,10 @@
           } else if (state.lessonMode === "minimal") {
             $("lessonFocus").textContent = "一对一对比：听完选相同/不同，再跟读（比音标表更贴卷）";
           } else if (state.lessonMode === "listenDrill") {
-            $("lessonFocus").textContent = "同一长句听两遍再判，盯后半句 because / when";
+            $("lessonFocus").textContent = "官方听力材料：短文判断陷阱 + 听选答语（U1/U2 已对试卷）";
           } else if (state.lessonMode === "miniExam") {
             $("lessonFocus").textContent =
-              "对齐校内卷：听选答语 · 听判断 · 画线音 · 词分类 · 问句答语 · 看图/对话 · 阅读 · 仿写";
+              "对齐校内卷 + 听力材料：听选答语 · 短文判断（盯陷阱）· 画线音 · 分类 · 问答 · 阅读 · 仿写";
           } else if (state.lessonMode === "preview") {
             $("lessonFocus").textContent = "约 10 分钟：听重点 → 课文一句一句跟读（绿字）→ 单词跟读";
           } else if (state.lessonMode === "reviewWrite") {
