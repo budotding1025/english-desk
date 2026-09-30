@@ -1245,6 +1245,10 @@ button { cursor: pointer; border: none; background: none; }
   background: #fff;
   text-align: left;
   font-weight: 800;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  box-sizing: border-box;
 }
 .rec-action strong { font-size: 0.95rem; color: var(--ink); }
 .rec-action span { font-size: 0.72rem; color: var(--muted); font-weight: 700; }

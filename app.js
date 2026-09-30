@@ -828,6 +828,19 @@
           miniBtn.innerHTML =
             "<strong>教材·试卷练</strong><span>以教材为主 · U1–U2 完整卷题型 · 其它单元同型改编</span>";
           miniBtn.addEventListener("click", () => startLesson(null, { mode: "miniExam" }));
+          const printBtn = document.createElement("a");
+          printBtn.className = "rec-action rec-action-soft";
+          printBtn.href = "./exams/U1_Unit1_Practice.pdf";
+          printBtn.target = "_blank";
+          printBtn.rel = "noopener";
+          printBtn.innerHTML =
+            "<strong>打印包 · 高清卷</strong><span>U1/U2 PDF 可下载 · 图题已重绘 · 附答案</span>";
+          const printU2 = document.createElement("a");
+          printU2.className = "rec-action rec-action-soft";
+          printU2.href = "./exams/U2_Unit2_Practice.pdf";
+          printU2.target = "_blank";
+          printU2.rel = "noopener";
+          printU2.innerHTML = "<strong>U2 单元卷 PDF</strong><span>第二单元 · 高清插图版 · 可打印</span>";
           const challengeBtn = document.createElement("button");
           challengeBtn.type = "button";
           challengeBtn.className = "rec-action challenge";
@@ -840,6 +853,8 @@
           writeBtn.addEventListener("click", () => startLesson(null, { mode: "reviewWrite" }));
           $("recordsActions").appendChild(retryBtn);
           $("recordsActions").appendChild(miniBtn);
+          $("recordsActions").appendChild(printBtn);
+          $("recordsActions").appendChild(printU2);
           $("recordsActions").appendChild(listenBtn);
           $("recordsActions").appendChild(phonicsBtn);
           $("recordsActions").appendChild(minimalBtn);
