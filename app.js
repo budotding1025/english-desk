@@ -622,7 +622,7 @@
           else if (state.lessonMode === "phonics") alert("发音小站还在准备词，先去上一课吧。");
           else if (state.lessonMode === "minimal") alert("易混音小站还在准备，先去上一课吧。");
           else if (state.lessonMode === "listenDrill") alert("本单元暂无听力长句，先去上一课吧。");
-          else if (state.lessonMode === "miniExam") alert("迷你卷还在准备，先去上一课吧。");
+          else if (state.lessonMode === "miniExam") alert("本单元教材/试卷练习还在准备，先去上课或换一单元吧。");
           else if (state.lessonMode === "preview") alert("这一课的预习还在准备，先去「复习」上课吧。");
           else if (state.lessonMode === "reviewWrite") alert("这一课的词句默写还在准备，先去「复习」上课吧。");
           else alert("本单元暂无练习内容。");
@@ -794,7 +794,7 @@
             '<div class="rec-stat float"><strong>' + (floatAcc == null ? "—" : floatAcc + "%") + "</strong><span>浮动正确率</span><small>近 " + (recentN || Progress.FLOAT_WINDOW) + " 题</small></div>" +
             '<div class="rec-stat"><strong>' + retries.length + "</strong><span>错题待练</span><small>错词本</small></div>" +
             "</div>" +
-            '<p class="score-sub">上课和错题复习计入正确率。发音小站、易混音、听力加练、迷你卷、难度挑战不算。</p>';
+            '<p class="score-sub">上课和错题复习计入正确率。发音小站、易混音、听力加练、教材·试卷练、难度挑战不算。</p>';
         }
         if ($("recordsActions")) {
           $("recordsActions").innerHTML = "";
@@ -825,7 +825,8 @@
           const miniBtn = document.createElement("button");
           miniBtn.type = "button";
           miniBtn.className = "rec-action challenge";
-          miniBtn.innerHTML = "<strong>迷你卷</strong><span>对齐试卷+听力材料 · 答语·判断·音·分类·阅读·仿写</span>";
+          miniBtn.innerHTML =
+            "<strong>教材·试卷练</strong><span>按校内卷题型 · 教材句型改编 · 听力材料优先</span>";
           miniBtn.addEventListener("click", () => startLesson(null, { mode: "miniExam" }));
           const challengeBtn = document.createElement("button");
           challengeBtn.type = "button";
@@ -838,10 +839,10 @@
           writeBtn.innerHTML = "<strong>词句默写</strong><span>同首页「默写」· 本课词+句</span>";
           writeBtn.addEventListener("click", () => startLesson(null, { mode: "reviewWrite" }));
           $("recordsActions").appendChild(retryBtn);
+          $("recordsActions").appendChild(miniBtn);
           $("recordsActions").appendChild(listenBtn);
           $("recordsActions").appendChild(phonicsBtn);
           $("recordsActions").appendChild(minimalBtn);
-          $("recordsActions").appendChild(miniBtn);
           $("recordsActions").appendChild(challengeBtn);
           $("recordsActions").appendChild(writeBtn);
           paintRetryBadge(retryBtn, retries.length);
@@ -949,7 +950,7 @@
           if (state.lessonMode === "phonics") $("lessonUnitTitle").textContent = "发音小站";
           else if (state.lessonMode === "minimal") $("lessonUnitTitle").textContent = "易混音小站";
           else if (state.lessonMode === "listenDrill") $("lessonUnitTitle").textContent = "听力加练";
-          else if (state.lessonMode === "miniExam") $("lessonUnitTitle").textContent = "迷你卷";
+          else if (state.lessonMode === "miniExam") $("lessonUnitTitle").textContent = "教材·试卷练";
           else if (state.lessonMode === "preview") $("lessonUnitTitle").textContent = "预习";
           else if (state.lessonMode === "reviewWrite") $("lessonUnitTitle").textContent = "默写";
           else $("lessonUnitTitle").textContent = (node && node.unitTitle) || (u && u.name) || "";
@@ -960,7 +961,7 @@
           else if (state.lessonMode === "phonics") $("lessonNameTitle").textContent = "Phonics · 发音小站";
           else if (state.lessonMode === "minimal") $("lessonNameTitle").textContent = "Minimal · 易混音";
           else if (state.lessonMode === "listenDrill") $("lessonNameTitle").textContent = "Listen · 听力加练";
-          else if (state.lessonMode === "miniExam") $("lessonNameTitle").textContent = "Mini · 单元迷你卷";
+          else if (state.lessonMode === "miniExam") $("lessonNameTitle").textContent = "Paper · 教材与试卷改编练习";
           else if (state.lessonMode === "preview") {
             $("lessonNameTitle").textContent = node
               ? "Preview · Lesson " + (node.bookLesson || node.lesson) + " · " + node.lessonTitle
@@ -986,7 +987,7 @@
             $("lessonFocus").textContent = "官方听力材料：短文判断陷阱 + 听选答语（U1/U2 已对试卷）";
           } else if (state.lessonMode === "miniExam") {
             $("lessonFocus").textContent =
-              "对齐校内卷 + 听力材料：听选答语 · 短文判断（盯陷阱）· 画线音 · 分类 · 问答 · 阅读 · 仿写";
+              "教材+校内卷改编：听选答语 · 判断陷阱 · 画线音 · 分类 · 问答 · 阅读 · 仿写（约 10–15 分钟）";
           } else if (state.lessonMode === "preview") {
             $("lessonFocus").textContent = "约 10 分钟：听重点 → 课文一句一句跟读（绿字）→ 单词跟读";
           } else if (state.lessonMode === "reviewWrite") {
@@ -2856,7 +2857,7 @@
                 : settle.practiceKind === "listenDrill"
                   ? "听力加练完成！"
                   : settle.practiceKind === "miniExam"
-                    ? "迷你卷完成！"
+                    ? "教材·试卷练完成！"
                     : settle.practiceKind === "retry"
                       ? "错题复习完成！"
                   : settle.practiceKind === "preview"

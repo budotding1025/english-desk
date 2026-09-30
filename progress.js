@@ -227,7 +227,7 @@
       : kind === "challenge"
         ? "限时挑战奖励"
         : kind === "miniExam"
-          ? "迷你卷奖励"
+          ? "教材·试卷练奖励"
           : kind === "phonics"
             ? "发音小站奖励"
             : kind === "minimal"
@@ -307,7 +307,7 @@
     if (!tips.length) {
       tips.push({
         title: "真棒",
-        text: "这套迷你卷过关了，可以去挑战或预习下一课",
+        text: "这套教材·试卷练过关了，可以去挑战或预习下一课",
         mode: "",
       });
     }
