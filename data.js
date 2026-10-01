@@ -650,16 +650,19 @@ window.ENGLISH_DESK_DATA = {
         {
           id: "share",
           lesson: 4,
-          label: "Friends share",
-          frame: "Good friends share ____.",
+          label: "A Cupcake（课本对话）",
+          frame: "May I have a cupcake, please? / I should share it with him.",
           steps: [
-            "原句：We can share.",
-            "little / small / best",
-            "说说好朋友会分享什么",
+            "原句：May I have a cupcake, please?",
+            "店员：Yes. Here you go.",
+            "心里话：I should share it with him.（Joe is my best friend.）",
           ],
           demos: [
-            { role: "girlChild", text: "This cupcake is little, but we can share." },
-            { role: "boyChild", text: "You are my best friend." },
+            { role: "boyChild", text: "Oh, cakes! I love cakes!" },
+            { role: "boyChild", text: "May I have a cupcake, please?" },
+            { role: "girlChild", text: "Yes. Here you go." },
+            { role: "boyChild", text: "Thank you." },
+            { role: "boyChild", text: "Wait. Joe loves cakes, too. Joe is my best friend. I should share it with him." },
           ],
         },
         {
@@ -2537,6 +2540,17 @@ window.ENGLISH_DESK_DATA = {
       "He should have a good rest.": "他应该好好休息。",
       "This cupcake is little, but we can share.": "这个杯子蛋糕很小，但我们可以分享。",
       "You are my best friend.": "你是我最好的朋友。",
+      "Oh, cakes! I love cakes!": "哦，蛋糕！我爱蛋糕！",
+      "May I have a cupcake, please?": "请问我可以要一个杯子蛋糕吗？",
+      "Yes. Here you go.": "好的。给你。",
+      "Oh, my love! I can't wait to put you in my mouth.": "哦，我的最爱！我等不及要把你放进嘴里。",
+      "Wait. Joe loves cakes, too. Joe is my best friend. I should share it with him.": "等等。Joe 也爱蛋糕。Joe 是我最好的朋友。我应该和他分享。",
+      "Should I? My little cake? It's too small to share. I should eat it all.": "该不该呢？我的小蛋糕？太小了不好分享。我该全吃掉。",
+      "Should I? Joe may be sad. He always shares good things with me.": "该不该呢？Joe 也许会难过。他总是和我分享好东西。",
+      "Can I?": "可以吗？",
+      "Oh, no!": "哦，不！",
+      "I should share it with him.": "我应该和他分享。",
+      "Joe is my best friend.": "Joe 是我最好的朋友。",
       "You should rest because you are ill.": "你应该休息，因为你生病了。",
       "You should rest, and I can help you. May I try with you?": "你应该休息，我可以帮你。我可以和你一起试吗？",
       "Excuse me. Can you help me, please?": "打扰一下。请问你能帮我吗？",
@@ -2947,19 +2961,7 @@ window.ENGLISH_DESK_DATA = {
 
     const lines = (lesson && lesson.lines) || [];
     if (lines.length) {
-      const demos = [];
-      lines.forEach(function (l) {
-        const enParts = splitEnSentences(l.text);
-        const zhParts = splitZhSentences(l.zh || lineZh(l.text) || "");
-        enParts.forEach(function (text, i) {
-          demos.push({
-            role: l.role || "girlChild",
-            text: text,
-            name: l.name || "",
-            zh: zhParts[i] || (enParts.length === 1 ? zhParts[0] || "" : "") || "",
-          });
-        });
-      });
+      const demos = demosFromPreviewLesson(lesson) || [];
       cards.push({
         type: "pattern",
         title: "预习·读课文",
@@ -2967,7 +2969,7 @@ window.ENGLISH_DESK_DATA = {
         demos: demos,
         speakText: demos[0] ? demos[0].text : "",
         speakRole: (demos[0] && demos[0].role) || "girlChild",
-        tip: "一句一句听、跟读。读到的句子会变绿，方便背诵。",
+        tip: "一句一句听、跟读。双人对话已分不同人声；读到的句子会变绿，方便背诵。",
         coach: "bee",
         autoPlay: false,
         previewScript: true,
@@ -3045,30 +3047,97 @@ window.ENGLISH_DESK_DATA = {
     };
   }
 
+  function contrastSpeakRole(role) {
+    if (role === "boyChild") return "girlChild";
+    if (role === "girlChild") return "boyChild";
+    if (role === "adultFemale") return "adultMale";
+    if (role === "adultMale") return "adultFemale";
+    return "girlChild";
+  }
+
+  /** 双人对话换人时换声（小男孩 / 小女孩等），避免两人同一音色 */
+  function withDialogVoiceContrast(lines) {
+    const out = [];
+    let prevName = "";
+    let prevRole = "";
+    (lines || []).forEach(function (l) {
+      const item = Object.assign({}, l);
+      const name = item.name || "";
+      const role = item.role || "girlChild";
+      if (name && prevName && name !== prevName && role === prevRole) {
+        item.role = contrastSpeakRole(role);
+      } else {
+        item.role = role;
+      }
+      out.push(item);
+      if (name) prevName = name;
+      prevRole = item.role;
+    });
+    return out;
+  }
+
+  function demosFromPreviewLesson(lesson) {
+    if (!lesson || !(lesson.lines || []).length) return null;
+    const demos = [];
+    withDialogVoiceContrast(lesson.lines).forEach(function (l) {
+      const enParts = splitEnSentences(l.text);
+      const zhParts = splitZhSentences(l.zh || lineZh(l.text) || "");
+      enParts.forEach(function (text, i) {
+        demos.push({
+          role: l.role || "girlChild",
+          text: text,
+          name: l.name || "",
+          zh: zhParts[i] || (enParts.length === 1 ? zhParts[0] || "" : "") || "",
+        });
+      });
+    });
+    return demos.length ? demos : null;
+  }
+
   function patternCard(unit, index, store, extendFirst) {
     const list = patternsFor(unit, store || {}, !!extendFirst);
     const p = list[typeof index === "number" ? index : 0] || null;
-    if (!p) return null;
-    const demos = (p.demos || []).map((d) => ({
-      role: d.role || "girlChild",
-      text: d.text,
-    }));
+    if (!p && !demosFromPreviewLesson(previewLesson(unit, store))) return null;
+    // 只要本课有课本对话，跟读一律用教材原文（含第 4 课故事课，不走延展改写句）
+    const bookDemos = demosFromPreviewLesson(previewLesson(unit, store));
+    let demos = bookDemos;
+    if (!demos || !demos.length) {
+      if (!p) return null;
+      demos = withDialogVoiceContrast(
+        (p.demos || []).map(function (d) {
+          return { role: d.role || "girlChild", text: d.text, name: d.name || "" };
+        })
+      );
+    }
+    if (!demos || !demos.length) return null;
     const student = demos.filter((d) => d.role === "boyChild" || d.role === "girlChild")[0] || demos[0];
-    const glosses = demos.map((d) => ({ en: d.text, zh: lineZh(d.text) })).filter((g) => g.zh);
+    const glosses = demos
+      .map((d) => ({ en: d.text, zh: d.zh || lineZh(d.text) }))
+      .filter((g) => g.zh);
+    const bookTitle = (previewLesson(unit, store) || {}).title || "";
+    const label = (p && p.label) || bookTitle || "课本对话";
     return {
       type: "pattern",
-      title: "跟读练习",
-      prompt: (extendFirst ? "复习加一句\n" : "") + p.label + "\n" + (student ? student.text : p.frame || ""),
+      title: bookDemos ? "跟读·课本对话" : "跟读练习",
+      prompt:
+        (extendFirst && !bookDemos ? "复习加一句\n" : "") +
+        (bookDemos && bookTitle ? bookTitle + "\n" : "") +
+        (bookDemos ? "对照教材原文一句一句跟读" : label + "\n" + (student ? student.text : (p && p.frame) || "")),
       demos: demos,
       glosses: glosses,
       zh: lineZh(student ? student.text : ""),
-      speakText: student ? student.text : p.label,
+      speakText: student ? student.text : label,
       speakRole: (student && student.role) || "girlChild",
       coach: "bee",
-      tip: extendFirst ? "复习课，大声读。这句会了，单元测试更有把握。" : "先听，再跟着读 3 遍。读出来就算会了。",
+      tip: bookDemos
+        ? "双人对话已分男女声。先听完整句，再跟读；读到的句子会变绿。"
+        : extendFirst
+          ? "复习课，大声读。这句会了，单元测试更有把握。"
+          : "先听，再跟着读 3 遍。读出来就算会了。",
       autoPlay: true,
       followRead: true,
-      frame: p.frame || "",
+      previewScript: !!bookDemos,
+      frame: (p && p.frame) || "",
     };
   }
 
