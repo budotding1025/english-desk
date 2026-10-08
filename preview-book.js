@@ -215,16 +215,17 @@ window.ENGLISH_DESK_PREVIEW = {
         { en: "Sure. Here you are.", zh: "当然。给你。" },
         { en: "We can fix it.", zh: "我们可以修好它。" },
       ],
+      // 课本第9课：Mike / Baobao 都是小男孩。库里童声只有两种，分用 boyChild / girlChild 以听出两人区别。
       lines: [
         { name: "Mike", role: "boyChild", text: "Excuse me, Baobao, can you help me, please?", zh: "打扰一下，宝宝，请问你能帮我吗？" },
-        { name: "Baobao", role: "boyChild", text: "Sure, Mike. What can I do for you?", zh: "当然，Mike。我能为你做什么？" },
+        { name: "Baobao", role: "girlChild", text: "Sure, Mike. What can I do for you?", zh: "当然，Mike。我能为你做什么？" },
         { name: "Mike", role: "boyChild", text: "I can't find my ping-pong bat. May I use your bat?", zh: "我找不到我的乒乓球拍。我可以用你的球拍吗？" },
-        { name: "Baobao", role: "boyChild", text: "Sure. Here you are.", zh: "当然。给你。" },
+        { name: "Baobao", role: "girlChild", text: "Sure. Here you are.", zh: "当然。给你。" },
         { name: "Mike", role: "boyChild", text: "Thank you.", zh: "谢谢。" },
         { name: "Mike", role: "boyChild", text: "Oh, no!", zh: "哦，不！" },
         { name: "Mike", role: "boyChild", text: "I'm so sorry, Baobao!", zh: "非常对不起，宝宝！" },
-        { name: "Baobao", role: "boyChild", text: "Don't worry. Let me see.", zh: "别担心。让我看看。" },
-        { name: "Baobao", role: "boyChild", text: "That's OK! We can fix it.", zh: "没关系！我们可以修好它。" },
+        { name: "Baobao", role: "girlChild", text: "Don't worry. Let me see.", zh: "别担心。让我看看。" },
+        { name: "Baobao", role: "girlChild", text: "That's OK! We can fix it.", zh: "没关系！我们可以修好它。" },
       ],
     },
     2: {
