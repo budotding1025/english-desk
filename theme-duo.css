@@ -1539,15 +1539,16 @@ button { cursor: pointer; border: none; background: none; }
   padding: 6px 12px;
   border-radius: 999px;
   border: 2px solid #111;
-  background: #58cc02;
+  background: #fff;
   color: #111;
   font-weight: 800;
   font-size: 0.78rem;
   text-decoration: none;
 }
 .extend-listen-card .el-links a.el-bili {
-  background: #fff;
-  border-style: dashed;
+  background: #fb7299;
+  border-color: #111;
+  color: #111;
 }
 .extend-listen-empty {
   margin: 8px 0;

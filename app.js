@@ -855,7 +855,7 @@
           extendBtn.type = "button";
           extendBtn.className = "rec-action";
           extendBtn.innerHTML =
-            "<strong>扩展听力</strong><span>按单元直达视频 · YouTube / B站 · 可配合 Language Reactor</span>";
+            "<strong>扩展听力</strong><span>按单元直达 · B站优先 · 也可开 YouTube</span>";
           extendBtn.addEventListener("click", () => openExtendListen(true));
           $("recordsActions").appendChild(retryBtn);
           $("recordsActions").appendChild(miniBtn);
@@ -3305,24 +3305,25 @@
           }
           const links = document.createElement("div");
           links.className = "el-links";
+          const biliHref = item.bili || biliSearchUrl(item.query || item.title);
+          const bili = document.createElement("a");
+          bili.href = biliHref;
+          bili.target = "_blank";
+          bili.rel = "noopener";
+          bili.className = "el-bili";
+          bili.textContent = item.bili ? "打开B站" : "B站搜索";
+          bili.title = item.bili ? "直达哔哩哔哩视频（国内可看）" : "B站搜索同主题儿歌";
+          links.appendChild(bili);
           const ytHref = item.yt || ytSearchUrl(item.query || item.title);
           const yt = document.createElement("a");
           yt.href = ytHref;
           yt.target = "_blank";
           yt.rel = "noopener";
-          yt.textContent = item.yt ? "打开视频" : "YouTube 搜索";
+          yt.textContent = item.yt ? "打开 YouTube" : "YouTube 搜索";
           yt.title = item.yt
             ? "直达 YouTube（需外网）；装 Language Reactor 后可双语跟读"
             : "需能访问外网；装 Language Reactor 后在视频页跟读";
-          const bili = document.createElement("a");
-          bili.href = biliSearchUrl(item.query || item.title);
-          bili.target = "_blank";
-          bili.rel = "noopener";
-          bili.className = "el-bili";
-          bili.textContent = "B站搜索";
-          bili.title = "无外网时找同主题儿歌";
           links.appendChild(yt);
-          links.appendChild(bili);
           card.appendChild(links);
           list.appendChild(card);
         });
