@@ -851,11 +851,18 @@
           writeBtn.className = "rec-action rec-action-soft";
           writeBtn.innerHTML = "<strong>词句默写</strong><span>同首页「默写」· 本课词+句</span>";
           writeBtn.addEventListener("click", () => startLesson(null, { mode: "reviewWrite" }));
+          const extendBtn = document.createElement("button");
+          extendBtn.type = "button";
+          extendBtn.className = "rec-action";
+          extendBtn.innerHTML =
+            "<strong>扩展听力</strong><span>按单元关键词 · YouTube / B站 · 配合 Language Reactor</span>";
+          extendBtn.addEventListener("click", () => openExtendListen(true));
           $("recordsActions").appendChild(retryBtn);
           $("recordsActions").appendChild(miniBtn);
           $("recordsActions").appendChild(printBtn);
           $("recordsActions").appendChild(printU2);
           $("recordsActions").appendChild(listenBtn);
+          $("recordsActions").appendChild(extendBtn);
           $("recordsActions").appendChild(phonicsBtn);
           $("recordsActions").appendChild(minimalBtn);
           $("recordsActions").appendChild(challengeBtn);
@@ -3235,6 +3242,89 @@
         $("settingsOverlay").setAttribute("aria-hidden", open ? "false" : "true");
       }
 
+      function ytSearchUrl(q) {
+        return "https://www.youtube.com/results?search_query=" + encodeURIComponent(q || "");
+      }
+
+      function biliSearchUrl(q) {
+        return "https://search.bilibili.com/all?keyword=" + encodeURIComponent(q || "");
+      }
+
+      function openExtendListen(open) {
+        const overlay = $("extendListenOverlay");
+        if (!overlay) return;
+        overlay.classList.toggle("hidden", !open);
+        overlay.setAttribute("aria-hidden", open ? "false" : "true");
+        if (open) renderExtendListen();
+      }
+
+      function renderExtendListen() {
+        const sel = $("extendListenUnit");
+        const list = $("extendListenList");
+        const meta = $("extendListenMeta");
+        if (!sel || !list) return;
+        const units = DATA.units || [];
+        const prev = sel.value || state.unitId;
+        sel.innerHTML = units
+          .map((u) => '<option value="' + u.id + '">' + u.name + "</option>")
+          .join("");
+        if (units.some((u) => u.id === prev)) sel.value = prev;
+        else if (state.unitId) sel.value = state.unitId;
+        const u = units.find((x) => x.id === sel.value) || units[0];
+        if (meta) {
+          meta.textContent = u
+            ? u.name + " · 每单元 1–3 条 · 先课本预习，再点搜索跟读"
+            : "按当前设置里的单元查看关键词";
+        }
+        list.innerHTML = "";
+        const items = (u && u.extendListen) || [];
+        if (!items.length) {
+          const empty = document.createElement("p");
+          empty.className = "extend-listen-empty";
+          empty.textContent = "本单元暂无扩展听力推荐。";
+          list.appendChild(empty);
+          return;
+        }
+        items.forEach((item, i) => {
+          const card = document.createElement("article");
+          card.className = "extend-listen-card";
+          const title = document.createElement("strong");
+          title.textContent = i + 1 + ". " + (item.title || item.query || "视频");
+          card.appendChild(title);
+          if (item.focus) {
+            const f = document.createElement("p");
+            f.className = "el-focus";
+            f.textContent = "对接：" + item.focus;
+            card.appendChild(f);
+          }
+          if (item.tip) {
+            const t = document.createElement("p");
+            t.className = "el-tip";
+            t.textContent = item.tip;
+            card.appendChild(t);
+          }
+          const links = document.createElement("div");
+          links.className = "el-links";
+          const yt = document.createElement("a");
+          yt.href = ytSearchUrl(item.query || item.title);
+          yt.target = "_blank";
+          yt.rel = "noopener";
+          yt.textContent = "YouTube 搜索";
+          yt.title = "需能访问外网；装 Language Reactor 后在视频页跟读";
+          const bili = document.createElement("a");
+          bili.href = biliSearchUrl(item.query || item.title);
+          bili.target = "_blank";
+          bili.rel = "noopener";
+          bili.className = "el-bili";
+          bili.textContent = "B站搜索";
+          bili.title = "无外网时可用";
+          links.appendChild(yt);
+          links.appendChild(bili);
+          card.appendChild(links);
+          list.appendChild(card);
+        });
+      }
+
       function renderSettings() {
         $("unitSelect").innerHTML = DATA.units
           .map((u) => '<option value="' + u.id + '">' + u.name + "</option>")
@@ -3299,6 +3389,17 @@
           $("pathLessonOverlay").addEventListener("click", (e) => {
             if (e.target === $("pathLessonOverlay")) closePathLessonPicker();
           });
+        }
+        if ($("extendListenClose")) {
+          $("extendListenClose").addEventListener("click", () => openExtendListen(false));
+        }
+        if ($("extendListenOverlay")) {
+          $("extendListenOverlay").addEventListener("click", (e) => {
+            if (e.target === $("extendListenOverlay")) openExtendListen(false);
+          });
+        }
+        if ($("extendListenUnit")) {
+          $("extendListenUnit").addEventListener("change", () => renderExtendListen());
         }
         function startFromPath(mode) {
           const id = state.pathPickId || walletStore().currentPathId;

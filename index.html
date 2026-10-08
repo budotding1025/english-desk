@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Noto+Sans+SC:wght@500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./theme-duo.css?v=44" />
+  <link rel="stylesheet" href="./theme-duo.css?v=45" />
   <script src="./assets/vendor/lottie.min.js"></script>
 </head>
 <body>
@@ -93,6 +93,32 @@
         <button type="button" class="btn-dictation" id="pathBtnWrite">默写</button>
         <button type="button" class="btn-start" id="pathBtnReview">复习</button>
       </div>
+    </div>
+  </div>
+
+  <!-- EXTEND LISTEN (YouTube / Bilibili search keywords) -->
+  <div class="overlay is-center hidden" id="extendListenOverlay" aria-hidden="true">
+    <div class="sheet extend-listen-sheet" role="dialog" aria-labelledby="extendListenTitle">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <h2 id="extendListenTitle">扩展听力</h2>
+        <button type="button" class="icon-btn" id="extendListenClose" aria-label="关闭">×</button>
+      </div>
+      <p class="extend-listen-meta" id="extendListenMeta"></p>
+      <div class="extend-listen-note" id="extendListenNote">
+        <p><strong>Language Reactor 不能嵌在本页里。</strong>它是 Chrome/Edge 扩展，只在打开的 YouTube / Netflix 页面上生效。</p>
+        <p>大陆访问 YouTube 与 Language Reactor 站点通常需要<strong>可访问外网</strong>的环境。先装扩展 → 能打开 YouTube → 再点下方关键词搜索；装了扩展后，视频页会出现双语字幕与逐句循环。</p>
+        <p>没有外网时，可用「B站搜索」找同主题儿歌（功能不如 LR，但能练听）。</p>
+      </div>
+      <div class="extend-listen-unit-row">
+        <label for="extendListenUnit">单元</label>
+        <select id="extendListenUnit"></select>
+      </div>
+      <div class="extend-listen-list" id="extendListenList"></div>
+      <p class="extend-listen-foot">
+        <a href="https://www.languagereactor.com/" target="_blank" rel="noopener">Language Reactor 官网</a>
+        ·
+        <a href="https://chromewebstore.google.com/detail/language-reactor/hoombieeljmmljlkjmnheibnpciblicm" target="_blank" rel="noopener">安装扩展</a>
+      </p>
     </div>
   </div>
 
@@ -204,9 +230,9 @@
   </nav>
 
   <script src="./preview-book.js?v=5"></script>
-  <script src="./data.js?v=34"></script>
+  <script src="./data.js?v=35"></script>
   <script src="./progress.js?v=15"></script>
   <script src="./voice.js?v=22"></script>
-  <script src="./app.js?v=31"></script>
+  <script src="./app.js?v=32"></script>
 </body>
 </html>

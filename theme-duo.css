@@ -1446,3 +1446,121 @@ button { cursor: pointer; border: none; background: none; }
 }
 .btn-gem-time:disabled { opacity: 0.45; }
 .rank-need { margin: 6px 0 2px; font-size: 0.78rem; font-weight: 800; color: var(--muted); }
+
+/* 扩展听力 · YouTube / B站关键词 */
+.extend-listen-sheet {
+  max-width: 420px;
+  max-height: min(88vh, 720px);
+  overflow: auto;
+}
+.extend-listen-meta {
+  margin: 0 0 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.extend-listen-note {
+  margin: 0 0 14px;
+  padding: 12px 12px;
+  border-radius: 14px;
+  background: #f3f8ff;
+  border: 1px solid #cfe3ff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #3c3c3c;
+  line-height: 1.5;
+}
+.extend-listen-note p { margin: 0 0 8px; }
+.extend-listen-note p:last-child { margin: 0; }
+.extend-listen-unit-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+}
+.extend-listen-unit-row label {
+  font-weight: 800;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+.extend-listen-unit-row select {
+  flex: 1;
+  min-height: 40px;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  padding: 6px 10px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.extend-listen-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.extend-listen-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 2px solid var(--line);
+  background: #fff;
+}
+.extend-listen-card strong {
+  font-size: 0.92rem;
+  color: var(--ink);
+  line-height: 1.35;
+}
+.extend-listen-card .el-focus {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--sky);
+  line-height: 1.35;
+}
+.extend-listen-card .el-tip {
+  margin: 0;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.extend-listen-card .el-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+.extend-listen-card .el-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 2px solid #111;
+  background: #58cc02;
+  color: #111;
+  font-weight: 800;
+  font-size: 0.78rem;
+  text-decoration: none;
+}
+.extend-listen-card .el-links a.el-bili {
+  background: #fff;
+  border-style: dashed;
+}
+.extend-listen-empty {
+  margin: 8px 0;
+  font-weight: 700;
+  color: var(--muted);
+  text-align: center;
+}
+.extend-listen-foot {
+  margin: 14px 0 0;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.5;
+}
+.extend-listen-foot a { color: var(--sky); font-weight: 800; }

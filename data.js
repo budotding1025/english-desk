@@ -72,6 +72,27 @@ window.ENGLISH_DESK_DATA = {
         "听力材料：心情词 + because；短文陷阱（房间乱≠没写作业）。",
         "复习心情和帮助；延展 because，以及 a_e / e / e_e（cake, he, these）。",
       ],
+      // 扩展听力：YouTube / B站搜索关键词（配合 Language Reactor 等外站跟读；本站只给链接）
+      extendListen: [
+        {
+          title: "This Is A Happy Face · Super Simple Songs",
+          query: "Super Simple Songs This Is A Happy Face",
+          focus: "How do you feel? happy / sad / angry / excited",
+          tip: "先唱表情词，再对照课本说 I'm ____.",
+        },
+        {
+          title: "How's The Weather? · Super Simple Songs",
+          query: "Super Simple Songs How's The Weather",
+          focus: "sunny / rainy / windy · Yoyo and Joe",
+          tip: "练天气词，对接第四课放风筝对话。",
+        },
+        {
+          title: "What's the Matter? · English Singsing / Feelings",
+          query: "English Singsing What's the Matter feelings kids",
+          focus: "What's the matter? I can't find…",
+          tip: "听问答节奏，跟读后自己说一句怎么了。",
+        },
+      ],
       words: [
         { en: "worried", zh: "担心的", src: "课本", lesson: 1, priority: "high" },
         { en: "late", zh: "晚的", src: "课本", lesson: 1, priority: "high" },
@@ -575,6 +596,26 @@ window.ENGLISH_DESK_DATA = {
         "听力材料：May I speak to…；Tina 短文陷阱（walk≠car，park≠zoo）。",
         "复习朋友互助；延展 should … because …，以及 i / i_e / o。",
       ],
+      extendListen: [
+        {
+          title: "Sharing Song · Super Simple Songs",
+          query: "Super Simple Songs Sharing Song Share",
+          focus: "share · May I have…? · Cupcake",
+          tip: "分享主题，对接第四课杯子蛋糕。",
+        },
+        {
+          title: "Please and Thank You · Super Simple Songs",
+          query: "Super Simple Songs Please and Thank You",
+          focus: "Please / Thank you / May I…?",
+          tip: "礼貌用语口头习惯，预习后跟读。",
+        },
+        {
+          title: "You Should / At the Doctor · English Singsing",
+          query: "English Singsing You should rest drink water kids",
+          focus: "You should have a good rest.",
+          tip: "练 should 建议句，扮演朋友生病。",
+        },
+      ],
       words: [
         { en: "animal", zh: "动物", src: "课本", lesson: 1, priority: "high" },
         { en: "different", zh: "不同的", src: "课本", lesson: 1, priority: "high" },
@@ -1067,6 +1108,26 @@ window.ENGLISH_DESK_DATA = {
         "重难点：I'm sorry. Could you get it?",
         "复习礼貌请求；延展 Could I / Would you，以及 o / o_e / u_e。",
       ],
+      extendListen: [
+        {
+          title: "Please and Thank You · Super Simple Songs",
+          query: "Super Simple Songs Please and Thank You",
+          focus: "please / thank you · Can you…please?",
+          tip: "本单元核心：礼貌请求，优先跟熟。",
+        },
+        {
+          title: "Can You Help Me? · English Singsing",
+          query: "English Singsing Can you help me please kids",
+          focus: "Can you help me, please? May I use…?",
+          tip: "对接第9课 Mike / Baobao 求助对话。",
+        },
+        {
+          title: "Excuse Me / I'm Sorry · Dream English",
+          query: "Dream English Kids Excuse me I'm sorry polite",
+          focus: "Excuse me · I'm sorry · Could I have…?",
+          tip: "练打扰与道歉，再练 Could I have a banana?",
+        },
+      ],
       words: [
         { en: "excuse me", zh: "打扰一下", src: "课本", lesson: 1, priority: "high" },
         { en: "please", zh: "请", src: "课本", lesson: 1, priority: "high" },
@@ -1315,6 +1376,20 @@ window.ENGLISH_DESK_DATA = {
         "复习 Unit One 到 Unit Three：心情、帮助、礼貌。",
         "知识延展：把 because、should、Could I 串成更长的句子。",
       ],
+      extendListen: [
+        {
+          title: "Feelings 复习 · Super Simple Songs",
+          query: "Super Simple Songs This Is A Happy Face",
+          focus: "I feel ____ because ____",
+          tip: "复习心情，串 because。",
+        },
+        {
+          title: "礼貌用语复习 · Please and Thank You",
+          query: "Super Simple Songs Please and Thank You",
+          focus: "Could I ____, please? / I'm sorry.",
+          tip: "复习 U3，口头三句连说。",
+        },
+      ],
       words: [
         { en: "worried", zh: "担心的", src: "课本", lesson: 1, priority: "high" },
         { en: "together", zh: "一起", src: "课本", lesson: 1, priority: "high" },
@@ -1446,6 +1521,26 @@ window.ENGLISH_DESK_DATA = {
       lessonCount: 4,
       lessonStart: 15,
       lessonTitles: ["I'd Like Some Chicken", "What Would You Like to Have?", "Please Don't Play with the Chopsticks", "How to Make Fruit Salad"],
+      extendListen: [
+        {
+          title: "Food Songs · Super Simple Songs",
+          query: "Super Simple Songs Do You Like Broccoli Ice Cream food",
+          focus: "I'd like some ____. / I like …",
+          tip: "食物词 + I'd like，点餐口头练。",
+        },
+        {
+          title: "What Would You Like? · English Singsing",
+          query: "English Singsing What would you like to eat restaurant kids",
+          focus: "What would you like to have?",
+          tip: "餐厅问答，对接第二课。",
+        },
+        {
+          title: "How to Make Fruit Salad / Sandwich · 步骤",
+          query: "kids English how to make fruit salad First Next Then Last",
+          focus: "First / Next / Then / Last",
+          tip: "每步暂停，自己说 First… Next…",
+        },
+      ],
       focus: [
         "重难点：I'd like some chicken / a sandwich.",
         "重难点：What would you like to have?",
@@ -1693,6 +1788,26 @@ window.ENGLISH_DESK_DATA = {
         "重难点：Snow turns into water.",
         "复习自然之旅；延展 can't live without … because …，以及 ar / or。",
       ],
+      extendListen: [
+        {
+          title: "The Earth / Nature Song · Super Simple",
+          query: "Super Simple Songs We Love the Earth nature kids",
+          focus: "We can't live without nature / air / water",
+          tip: "自然主题歌，练 can't live without。",
+        },
+        {
+          title: "Old MacDonald · 农场",
+          query: "Super Simple Songs Old MacDonald Had a Farm",
+          focus: "farm · feed the ____ · I hear",
+          tip: "农场动物词，对接第二课。",
+        },
+        {
+          title: "Water Cycle / Snowflake · 简单动画",
+          query: "kids English water cycle snow turns into water song",
+          focus: "Snow turns into water",
+          tip: "选短动画；难就换成 Snowflake Song。",
+        },
+      ],
       words: [
         { en: "nature", zh: "自然", src: "课本", lesson: 1, priority: "high" },
         { en: "Internet", zh: "互联网", src: "课本", lesson: 1, priority: "mid" },
@@ -1931,6 +2046,26 @@ window.ENGLISH_DESK_DATA = {
         "重难点：Happy Spring Festival! Lucky money. I wish …",
         "重难点：Can you guess the riddle?",
         "复习节日；延展 I wish …，以及 er（her, winter）。",
+      ],
+      extendListen: [
+        {
+          title: "Chinese New Year Song · Kids ESL",
+          query: "Chinese New Year Song for kids English Spring Festival",
+          focus: "Happy Spring Festival · lantern · dumpling",
+          tip: "春节词汇；跟读后说 I wish ____.",
+        },
+        {
+          title: "Happy New Year · English Singsing",
+          query: "English Singsing Happy New Year kids song",
+          focus: "Happy New Year! My goal is …",
+          tip: "新年问候 + goal。",
+        },
+        {
+          title: "Story of Nian · kids English",
+          query: "Story of Nian for kids English cartoon",
+          focus: "Nian is loud. People run / firecracker",
+          tip: "选 5–8 分钟版；听完用三句复述。",
+        },
       ],
       words: [
         { en: "gift", zh: "礼物", src: "课本", lesson: 1, priority: "high" },
@@ -2181,6 +2316,26 @@ window.ENGLISH_DESK_DATA = {
       focus: [
         "复习 Unit Five 到 Unit Seven：饮食、自然、节日。",
         "知识延展：I'd like、can't live without、I wish 连成一段话。",
+      ],
+      extendListen: [
+        {
+          title: "点餐复习 · Food Songs",
+          query: "Super Simple Songs food I'd like kids",
+          focus: "I'd like some ____",
+          tip: "复习 U5 点餐。",
+        },
+        {
+          title: "自然复习 · Earth Song",
+          query: "Super Simple Songs We Love the Earth",
+          focus: "We can't live without ____",
+          tip: "复习 U6。",
+        },
+        {
+          title: "节日复习 · Spring Festival",
+          query: "Chinese New Year Song for kids English",
+          focus: "I wish ____",
+          tip: "复习 U7；三段串说。",
+        },
       ],
       words: [
         { en: "chicken", zh: "鸡肉", src: "课本", lesson: 1, priority: "high" },
