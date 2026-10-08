@@ -2535,6 +2535,22 @@ window.ENGLISH_DESK_DATA = {
       "Let me help you.": "让我来帮助你。",
       "It's hard. May I try?": "这很难。我可以试试吗？",
       "Let me help you. May I try with you?": "让我来帮助你。我可以和你一起试吗？",
+      "What's the matter, Guoguo?": "怎么了，果果？",
+      "I can't remember the poem.": "我记不住这首诗。",
+      "It's so hard.": "太难了。",
+      "You can remember the first word of every line.": "你可以记住每一行的第一个词。",
+      "I still can't remember it.": "我还是记不住。",
+      "You can draw a picture for the poem.": "你可以为这首诗画一幅画。",
+      "It may help.": "也许有帮助。",
+      "Let me try.": "让我试试。",
+      "It works, Lingling!": "管用了，玲玲！",
+      "It works!": "管用了！",
+      "I can remember it now.": "我现在能记住了。",
+      "Good for you!": "太棒了！",
+      "Thank you so much.": "太谢谢你了。",
+      "It's great to have a friend like you!": "有你这样的朋友真好！",
+      "Thank you so much. It's great to have a friend like you!": "太谢谢你了。有你这样的朋友真好！",
+      "It's great to have a friend like you.": "有你这样的朋友真好。",
       "She is ill.": "她生病了。",
       "You should have a good rest.": "你应该好好休息。",
       "He should have a good rest.": "他应该好好休息。",
@@ -3055,23 +3071,26 @@ window.ENGLISH_DESK_DATA = {
     return "girlChild";
   }
 
-  /** 双人对话换人时换声（小男孩 / 小女孩等），避免两人同一音色 */
+  /** 双人对话换人时换声（小男孩 / 小女孩等）；同一说话人全程固定音色 */
   function withDialogVoiceContrast(lines) {
     const out = [];
+    const assigned = {};
     let prevName = "";
     let prevRole = "";
     (lines || []).forEach(function (l) {
       const item = Object.assign({}, l);
       const name = item.name || "";
-      const role = item.role || "girlChild";
-      if (name && prevName && name !== prevName && role === prevRole) {
-        item.role = contrastSpeakRole(role);
-      } else {
-        item.role = role;
+      let role = item.role || "girlChild";
+      if (name && assigned[name]) {
+        role = assigned[name];
+      } else if (name && prevName && name !== prevName && role === prevRole) {
+        role = contrastSpeakRole(role);
       }
+      item.role = role;
+      if (name) assigned[name] = role;
       out.push(item);
       if (name) prevName = name;
-      prevRole = item.role;
+      prevRole = role;
     });
     return out;
   }

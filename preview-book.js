@@ -143,7 +143,7 @@ window.ENGLISH_DESK_PREVIEW = {
         { name: "Guoguo", role: "girlChild", text: "Let me try.", zh: "让我试试。" },
         { name: "Guoguo", role: "girlChild", text: "It works, Lingling! It works! I can remember it now.", zh: "管用了，玲玲！管用了！我现在能记住了。" },
         { name: "Lingling", role: "girlChild", text: "Good for you!", zh: "太棒了！" },
-        { name: "Guoguo", role: "girlChild", text: "Thank you so much. It's great to have a friend like you.", zh: "太谢谢你了。有你这样的朋友真好。" },
+        { name: "Guoguo", role: "girlChild", text: "Thank you so much. It's great to have a friend like you!", zh: "太谢谢你了。有你这样的朋友真好！" },
       ],
     },
     3: {
