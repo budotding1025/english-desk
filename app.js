@@ -855,7 +855,7 @@
           extendBtn.type = "button";
           extendBtn.className = "rec-action";
           extendBtn.innerHTML =
-            "<strong>扩展听力</strong><span>按单元关键词 · YouTube / B站 · 配合 Language Reactor</span>";
+            "<strong>扩展听力</strong><span>按单元直达视频 · YouTube / B站 · 可配合 Language Reactor</span>";
           extendBtn.addEventListener("click", () => openExtendListen(true));
           $("recordsActions").appendChild(retryBtn);
           $("recordsActions").appendChild(miniBtn);
@@ -3273,8 +3273,8 @@
         const u = units.find((x) => x.id === sel.value) || units[0];
         if (meta) {
           meta.textContent = u
-            ? u.name + " · 每单元 1–3 条 · 先课本预习，再点搜索跟读"
-            : "按当前设置里的单元查看关键词";
+            ? u.name + " · 每单元 1–3 条直达视频 · 先课本预习再跟读"
+            : "按当前设置里的单元查看视频";
         }
         list.innerHTML = "";
         const items = (u && u.extendListen) || [];
@@ -3305,19 +3305,22 @@
           }
           const links = document.createElement("div");
           links.className = "el-links";
+          const ytHref = item.yt || ytSearchUrl(item.query || item.title);
           const yt = document.createElement("a");
-          yt.href = ytSearchUrl(item.query || item.title);
+          yt.href = ytHref;
           yt.target = "_blank";
           yt.rel = "noopener";
-          yt.textContent = "YouTube 搜索";
-          yt.title = "需能访问外网；装 Language Reactor 后在视频页跟读";
+          yt.textContent = item.yt ? "打开视频" : "YouTube 搜索";
+          yt.title = item.yt
+            ? "直达 YouTube（需外网）；装 Language Reactor 后可双语跟读"
+            : "需能访问外网；装 Language Reactor 后在视频页跟读";
           const bili = document.createElement("a");
           bili.href = biliSearchUrl(item.query || item.title);
           bili.target = "_blank";
           bili.rel = "noopener";
           bili.className = "el-bili";
           bili.textContent = "B站搜索";
-          bili.title = "无外网时可用";
+          bili.title = "无外网时找同主题儿歌";
           links.appendChild(yt);
           links.appendChild(bili);
           card.appendChild(links);
