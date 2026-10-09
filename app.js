@@ -771,11 +771,115 @@
         }
       }
 
+      function importRealPapersOnce() {
+        const RP = window.ENGLISH_DESK_REAL_PAPERS;
+        if (!RP || !RP.importIntoStore) return;
+        const store = loadStore();
+        const had = store.importedRealPapers || {};
+        const before = (store.retryWords || []).length;
+        const res = RP.importIntoStore(store);
+        if (res && res.changed) {
+          const next = res.store;
+          // 首次导入 U2 真实卷时，把当前单元切到 u2，方便错题复习/加练对口
+          const papers = RP.list ? RP.list() : [];
+          papers.forEach((p) => {
+            if (!had[p.id] && next.importedRealPapers && next.importedRealPapers[p.id] && p.unitId) {
+              next.unitId = p.unitId;
+              state.unitId = p.unitId;
+            }
+          });
+          localStorage.setItem(STORE_KEY, JSON.stringify(next));
+          const added = (next.retryWords || []).length - before;
+          if (added > 0) {
+            try {
+              console.info("[english-desk] imported real-paper wrongs:", added);
+            } catch (e) {}
+          }
+        }
+      }
+
+      function renderRealPaperPanel(store) {
+        const host = $("realPaperPanel");
+        const RP = window.ENGLISH_DESK_REAL_PAPERS;
+        if (!host || !RP) return;
+        const papers = RP.list ? RP.list() : [];
+        if (!papers.length) {
+          host.classList.add("hidden");
+          host.innerHTML = "";
+          return;
+        }
+        host.classList.remove("hidden");
+        host.innerHTML = "";
+        const head = document.createElement("div");
+        head.className = "real-paper-head";
+        head.innerHTML = "<strong>真实试卷 · 薄弱项</strong><span>已写入错题本 · 按此重点练</span>";
+        host.appendChild(head);
+        papers.forEach((paper) => {
+          const box = document.createElement("article");
+          box.className = "real-paper-card";
+          const title = document.createElement("h3");
+          title.textContent = paper.title + (paper.score != null ? " · " + paper.score + " 分" : "");
+          box.appendChild(title);
+          if (paper.note) {
+            const note = document.createElement("p");
+            note.className = "real-paper-note";
+            note.textContent = paper.note;
+            box.appendChild(note);
+          }
+          const wrongN = (paper.wrongs || []).length;
+          const meta = document.createElement("p");
+          meta.className = "real-paper-meta";
+          meta.textContent = "录入错题 " + wrongN + " 道 · 打开「错题复习」可练";
+          box.appendChild(meta);
+          const list = document.createElement("ul");
+          list.className = "real-paper-wrongs";
+          (paper.wrongs || []).slice(0, 8).forEach((w) => {
+            const li = document.createElement("li");
+            li.innerHTML =
+              "<em>" +
+              (w.section || "") +
+              "</em> " +
+              (w.en || "") +
+              (w.zh ? "<small>" + w.zh + "</small>" : "");
+            list.appendChild(li);
+          });
+          box.appendChild(list);
+          const focusLab = document.createElement("p");
+          focusLab.className = "real-paper-focus-lab";
+          focusLab.textContent = "以后练习重点";
+          box.appendChild(focusLab);
+          const focusRow = document.createElement("div");
+          focusRow.className = "real-paper-focus";
+          (paper.weakFocus || []).forEach((f) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "real-focus-chip" + (f.priority === "high" ? " is-high" : "");
+            btn.innerHTML = "<strong>" + f.title + "</strong><span>" + (f.text || "") + "</span>";
+            btn.addEventListener("click", () => {
+              if (paper.unitId) {
+                state.unitId = paper.unitId;
+                saveStore({ unitId: paper.unitId });
+              }
+              if (f.mode === "listenDrill") startLesson(null, { mode: "listenDrill" });
+              else if (f.mode === "miniExam") startLesson(null, { mode: "miniExam" });
+              else if (f.mode === "reviewWrite") startLesson(null, { mode: "reviewWrite" });
+              else if (f.mode === "retry") startLesson(null, { mode: "retry" });
+              else if (f.mode === "phonics") startLesson(null, { mode: "phonics" });
+              else if (f.mode === "minimal") startLesson(null, { mode: "minimal" });
+            });
+            focusRow.appendChild(btn);
+          });
+          box.appendChild(focusRow);
+          host.appendChild(box);
+        });
+      }
+
       function renderRecords() {
         const store = walletStore();
         syncWalletUI();
         paintHuiwen(store);
         renderRankShop(store);
+        renderRealPaperPanel(store);
         const acc = Progress.accuracyPct(store);
         const floatAcc = Progress.floatAccuracyPct(store);
         const answered = (store.stats && store.stats.answered) || 0;
@@ -3352,6 +3456,8 @@
         try { renderHome(); } catch (e) {}
         let store = Progress.ensureProgress(loadStore());
         localStorage.setItem(STORE_KEY, JSON.stringify(store));
+        try { importRealPapersOnce(); } catch (e) {}
+        store = Progress.ensureProgress(loadStore());
         if (store.unitId && DATA.units.some((u) => u.id === store.unitId)) {
           state.unitId = store.unitId;
         }

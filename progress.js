@@ -85,6 +85,8 @@
     if (typeof store.gems !== "number") store.gems = 0;
     if (!store.completedLessons) store.completedLessons = {};
     if (!store.retryWords) store.retryWords = [];
+    if (!store.importedRealPapers) store.importedRealPapers = {};
+    if (!store.weakFocus) store.weakFocus = [];
     if (!store.stats) {
       store.stats = { answered: 0, correct: 0, recent: [] };
     } else {
