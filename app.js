@@ -558,7 +558,21 @@
       }
 
       function startLesson(pathId, opts) {
-        if (V && V.prime) V.prime();
+        if (V) {
+          // 听力/跟读入口强制开声音，避免静音后「听完」却没声
+          if (
+            opts &&
+            (opts.mode === "listenDrill" ||
+              opts.mode === "paperListen" ||
+              opts.mode === "miniExam" ||
+              opts.mode === "phonics")
+          ) {
+            V.setEnabled(true);
+            saveStore({ voiceOn: true });
+            if ($("btnMute")) $("btnMute").textContent = "♪";
+          }
+          if (V.prime) V.prime();
+        }
         opts = opts || {};
         const mode = opts.mode || "normal";
         state.lessonMode = mode;
@@ -567,6 +581,7 @@
           mode === "challenge" ||
           mode === "phonics" ||
           mode === "listenDrill" ||
+          mode === "paperListen" ||
           mode === "minimal" ||
           mode === "miniExam";
         state.returnTo = fromRecords ? "records" : "home";
@@ -574,7 +589,14 @@
         if (pathId) state.pathId = pathId;
         else state.pathId = store.currentPathId || state.pathId;
         const node = Progress.nodeById(state.pathId);
-        if (node) {
+        // 听力/试卷练跟设置里选的单元走，避免被当前课路径带跑到别的单元
+        if (
+          mode === "listenDrill" ||
+          mode === "paperListen" ||
+          mode === "miniExam"
+        ) {
+          if (store.unitId) state.unitId = store.unitId;
+        } else if (node) {
           state.unitId = node.unitId;
           if (state.lessonMode === "normal") {
             saveStore({ unitId: state.unitId, currentPathId: state.pathId });
@@ -595,11 +617,13 @@
                     ? "reviewWrite"
                     : state.lessonMode === "listenDrill"
                       ? "listenDrill"
-                      : state.lessonMode === "minimal"
-                        ? "minimal"
-                        : state.lessonMode === "miniExam"
-                          ? "miniExam"
-                          : "weekdayListen";
+                      : state.lessonMode === "paperListen"
+                        ? "paperListen"
+                        : state.lessonMode === "minimal"
+                          ? "minimal"
+                          : state.lessonMode === "miniExam"
+                            ? "miniExam"
+                            : "weekdayListen";
         const cardStore = Object.assign({}, store, {
           currentPathId: state.pathId,
           needSaySelf: needSaySelfThisWeek(),
@@ -622,6 +646,8 @@
           else if (state.lessonMode === "phonics") alert("发音小站还在准备词，先去上一课吧。");
           else if (state.lessonMode === "minimal") alert("易混音小站还在准备，先去上一课吧。");
           else if (state.lessonMode === "listenDrill") alert("本单元暂无听力长句，先去上一课吧。");
+          else if (state.lessonMode === "paperListen")
+            alert("本单元暂无校内卷听力材料（目前 U1/U2 已配套）。请先在设置里选 Unit 1 或 Unit 2。");
           else if (state.lessonMode === "miniExam") alert("本单元暂时组不出练习，先换一单元或去上课吧。");
           else if (state.lessonMode === "preview") alert("这一课的预习还在准备，先去「复习」上课吧。");
           else if (state.lessonMode === "reviewWrite") alert("这一课的词句默写还在准备，先去「复习」上课吧。");
@@ -916,6 +942,19 @@
           listenBtn.className = "rec-action";
           listenBtn.innerHTML = "<strong>听力加练</strong><span>对齐听力材料 · 短文判断陷阱 + 听选答语</span>";
           listenBtn.addEventListener("click", () => startLesson(null, { mode: "listenDrill" }));
+          const paperListenBtn = document.createElement("button");
+          paperListenBtn.type = "button";
+          paperListenBtn.className = "rec-action challenge";
+          paperListenBtn.innerHTML =
+            "<strong>试卷听力（配套音频）</strong><span>U1/U2 练习卷一→四整套 · 边听边做卷</span>";
+          paperListenBtn.addEventListener("click", () => {
+            const uid = (walletStore().unitId || state.unitId || "").toLowerCase();
+            if (uid !== "u1" && uid !== "u2") {
+              alert("请先在设置里选择 Unit 1 或 Unit 2，再练试卷配套听力。");
+              return;
+            }
+            startLesson(null, { mode: "paperListen" });
+          });
           const phonicsBtn = document.createElement("button");
           phonicsBtn.type = "button";
           phonicsBtn.className = "rec-action";
@@ -938,13 +977,14 @@
           printBtn.target = "_blank";
           printBtn.rel = "noopener";
           printBtn.innerHTML =
-            "<strong>打印包 · 高清卷</strong><span>U1/U2 PDF 可下载 · 图题已重绘 · 附答案</span>";
+            "<strong>打印包 · U1 PDF</strong><span>高清插图 · 配合「试卷听力」配套音频</span>";
           const printU2 = document.createElement("a");
           printU2.className = "rec-action rec-action-soft";
           printU2.href = "./exams/U2_Unit2_Practice.pdf";
           printU2.target = "_blank";
           printU2.rel = "noopener";
-          printU2.innerHTML = "<strong>U2 单元卷 PDF</strong><span>第二单元 · 高清插图版 · 可打印</span>";
+          printU2.innerHTML =
+            "<strong>打印包 · U2 PDF</strong><span>高清插图 · 配合「试卷听力」配套音频</span>";
           const challengeBtn = document.createElement("button");
           challengeBtn.type = "button";
           challengeBtn.className = "rec-action challenge";
@@ -963,6 +1003,7 @@
           extendBtn.addEventListener("click", () => openExtendListen(true));
           $("recordsActions").appendChild(retryBtn);
           $("recordsActions").appendChild(miniBtn);
+          $("recordsActions").appendChild(paperListenBtn);
           $("recordsActions").appendChild(printBtn);
           $("recordsActions").appendChild(printU2);
           $("recordsActions").appendChild(listenBtn);
@@ -1076,6 +1117,7 @@
           if (state.lessonMode === "phonics") $("lessonUnitTitle").textContent = "发音小站";
           else if (state.lessonMode === "minimal") $("lessonUnitTitle").textContent = "易混音小站";
           else if (state.lessonMode === "listenDrill") $("lessonUnitTitle").textContent = "听力加练";
+          else if (state.lessonMode === "paperListen") $("lessonUnitTitle").textContent = "试卷听力";
           else if (state.lessonMode === "miniExam") $("lessonUnitTitle").textContent = "教材·试卷练";
           else if (state.lessonMode === "preview") $("lessonUnitTitle").textContent = "预习";
           else if (state.lessonMode === "reviewWrite") $("lessonUnitTitle").textContent = "默写";
@@ -1087,6 +1129,8 @@
           else if (state.lessonMode === "phonics") $("lessonNameTitle").textContent = "Phonics · 发音小站";
           else if (state.lessonMode === "minimal") $("lessonNameTitle").textContent = "Minimal · 易混音";
           else if (state.lessonMode === "listenDrill") $("lessonNameTitle").textContent = "Listen · 听力加练";
+          else if (state.lessonMode === "paperListen")
+            $("lessonNameTitle").textContent = "Paper · U1/U2 练习卷配套听力";
           else if (state.lessonMode === "miniExam") $("lessonNameTitle").textContent = "教材为主 · 试卷题型练";
           else if (state.lessonMode === "preview") {
             $("lessonNameTitle").textContent = node
@@ -1111,6 +1155,9 @@
             $("lessonFocus").textContent = "一对一对比：听完选相同/不同，再跟读（比音标表更贴卷）";
           } else if (state.lessonMode === "listenDrill") {
             $("lessonFocus").textContent = "官方听力材料：短文判断陷阱 + 听选答语（U1/U2 已对试卷）";
+          } else if (state.lessonMode === "paperListen") {
+            $("lessonFocus").textContent =
+              "校内练习卷配套音频：听力一→四按顺序练 · 可打开 PDF 边听边做";
           } else if (state.lessonMode === "miniExam") {
             $("lessonFocus").textContent =
               "教材+校内卷改编：听选答语 · 判断陷阱 · 画线音 · 分类 · 问答 · 阅读 · 仿写（约 10–15 分钟）";
@@ -1133,35 +1180,44 @@
         });
       }
 
+      function ensureVoiceOn() {
+        if (!V) return;
+        V.setEnabled(true);
+        saveStore({ voiceOn: true });
+        if ($("btnMute")) $("btnMute").textContent = "♪";
+      }
+
       function speakCard(c, rate) {
-        if (!V || !c) return Promise.resolve();
+        if (!V || !c) return Promise.resolve(false);
         setCoachTalking(true);
         const done = () => setTimeout(() => setCoachTalking(false), 200);
-        const opts = rate && rate !== 1 ? { rate: rate } : undefined;
+        const opts = rate && rate !== 1 ? { rate: rate } : {};
+        // 听力材料句常有整段预录音；勿拆句导致找不到 mp3
+        if (c.type === "listen") opts.keepJoined = true;
         let p;
         if (c.type === "dialogue" && c.lines) {
-          p = V.speakSequence(c.lines.map((l) => ({ role: l.role, text: l.text, rate: opts && opts.rate })));
+          p = V.speakSequence(c.lines.map((l) => ({ role: l.role, text: l.text, rate: opts.rate })));
         } else if (c.type === "pattern" && c.demos && c.demos.length) {
           p = V.speakSequence(
             c.demos.map((d) => ({
               role: d.role || c.speakRole || "girlChild",
               text: d.text,
-              rate: opts && opts.rate,
+              rate: opts.rate,
             }))
           );
         } else if (c.type === "write" && c.passage) {
           const parts = c.passage.split(/\n+/).map((s) => s.trim()).filter(Boolean);
-          p = V.speakSequence(parts.map((text) => ({ role: c.narratorRole || "boyChild", text: text, rate: opts && opts.rate })));
+          p = V.speakSequence(parts.map((text) => ({ role: c.narratorRole || "boyChild", text: text, rate: opts.rate })));
         } else if (c.type === "phonics" && c.left && c.right) {
           p = V.speakSequence([
-            { role: c.speakRole || "girlChild", text: c.left.en, rate: opts && opts.rate },
-            { role: c.speakRole || "girlChild", text: c.right.en, rate: opts && opts.rate },
+            { role: c.speakRole || "girlChild", text: c.left.en, rate: opts.rate },
+            { role: c.speakRole || "girlChild", text: c.right.en, rate: opts.rate },
           ]);
         } else if (c.type === "talk" || c.forceZh) {
           p = V.speak(
             c.speakText,
             c.speakRole || "adultFemale",
-            Object.assign({}, opts || {}, { forceAll: true })
+            Object.assign({}, opts, { forceAll: true })
           );
         } else if (c.speakText) {
           p = V.speak(c.speakText, c.speakRole || "adultFemale", opts);
@@ -1171,7 +1227,7 @@
           return p;
         }
         done();
-        return Promise.resolve();
+        return Promise.resolve(false);
       }
 
       function normalizeAnswer(s) {
@@ -1438,16 +1494,69 @@
       }
 
       function replayListenFocus(c, focus) {
-        if (!V) return Promise.resolve();
+        if (!V) return Promise.resolve(false);
+        ensureVoiceOn();
         const role = c.speakRole || "girlChild";
-        let chain = V.speak(focus.original, role) || Promise.resolve();
-        if (focus.answerEn && focus.answerEn !== focus.original) {
-          chain = chain.then(() => V.speak(focus.answerEn, "girlChild"));
+        const go = () => {
+          let chain = V.speak(focus.original, role, { keepJoined: true }) || Promise.resolve(false);
+          if (focus.answerEn && focus.answerEn !== focus.original) {
+            chain = chain.then(() => V.speak(focus.answerEn, "girlChild", { keepJoined: true }));
+          }
+          return chain;
+        };
+        if (V.prime) return V.prime().then(go).catch(go);
+        return go();
+      }
+
+      function showListenScript(c, wasCorrect) {
+        const focus = listenFocus(c);
+        const extra = $("cardExtra");
+        const panel = document.createElement("div");
+        panel.className = "listen-repair";
+        const lab = document.createElement("p");
+        lab.className = "repair-label";
+        lab.textContent = wasCorrect ? "正确答案 · 听力原文" : "看原文和中文，听懂再继续";
+        panel.appendChild(lab);
+        const en = document.createElement("p");
+        en.className = "repair-en";
+        fillHighlight(en, focus.original, focus.key);
+        panel.appendChild(en);
+        const zhText = focus.zh || (Lesson.lineZh ? Lesson.lineZh(focus.original) : "");
+        if (zhText) {
+          const zh = document.createElement("p");
+          zh.className = "repair-zh";
+          zh.textContent = "中文：" + zhText;
+          panel.appendChild(zh);
+        }
+        if (c.kind === "judge") {
+          const ans = document.createElement("p");
+          ans.className = "repair-key";
+          ans.textContent = "判断：" + (c.answer ? "对 √" : "错 ×");
+          panel.appendChild(ans);
         }
         if (focus.explain) {
-          chain = chain.then(() => V.speak(focus.explain, "adultFemale", { forceAll: true }));
+          const ex = document.createElement("p");
+          ex.className = "repair-zh";
+          ex.textContent = focus.explain;
+          panel.appendChild(ex);
         }
-        return chain;
+        if (focus.answerEn) {
+          const ans = document.createElement("p");
+          ans.className = "repair-en";
+          ans.appendChild(document.createTextNode("正确答语："));
+          const mark = document.createElement("mark");
+          mark.textContent = focus.answerEn;
+          ans.appendChild(mark);
+          panel.appendChild(ans);
+          if (focus.answerZh) {
+            const az = document.createElement("p");
+            az.className = "repair-zh";
+            az.textContent = "中文：" + focus.answerZh;
+            panel.appendChild(az);
+          }
+        }
+        extra.appendChild(panel);
+        return focus;
       }
 
       function followJudgeOnce(c) {
@@ -1691,18 +1800,15 @@
 
       function renderListenCard(c) {
         const extra = $("cardExtra");
-        const needHear = c.hearTimes > 0 ? c.hearTimes : c.kind === "judge" && !c.hard ? 2 : c.hard ? 1 : 0;
+        const needHear = typeof c.hearTimes === "number" ? c.hearTimes : 1;
         let heardCount = needHear === 0 ? 1 : 0;
+        let autoTried = false;
         if (c.hard) {
           $("cardSub").textContent = (c.tip ? c.tip + " · " : "") + "挑战：先听完整句，再点选项";
         } else if (c.coach === "bee") {
           $("cardPrompt").textContent = c.prompt || "";
-          $("cardSub").textContent =
-            (c.tip ? c.tip + " · " : "") +
-            (needHear >= 2 ? "先听两遍再选（听清后半句）" : "听「翻翻蜂」读完再选");
-          extra.appendChild(
-            coachBanner("bee", needHear >= 2 ? "长句要听两遍，再判断对错" : "听「翻翻蜂」读，再判断对错")
-          );
+          $("cardSub").textContent = (c.tip ? c.tip + " · " : "") + "听「翻翻蜂」读完再选";
+          extra.appendChild(coachBanner("bee", "进页自动播一遍；听不清点「再听」"));
         } else if (c.kind === "reply") {
           $("cardSub").textContent = (c.tip ? c.tip + " · " : "") + "听问句，选正确应答";
         }
@@ -1712,7 +1818,7 @@
         const hearHint = document.createElement("p");
         hearHint.className = "follow-tip";
         hearHint.id = "hearHint";
-        if (needHear >= 2) hearHint.textContent = "还需要听 " + needHear + " 遍才能选";
+        if (needHear > 0) hearHint.textContent = "正在播放听力…";
         extra.appendChild(hearHint);
 
         const box = document.createElement("div");
@@ -1720,6 +1826,24 @@
         box.id = "listenChoices";
         function choicesReady() {
           return needHear === 0 || heardCount >= needHear;
+        }
+        function afterAnswer(ok) {
+          const focus = showListenScript(c, ok);
+          $("cardActions").innerHTML = "";
+          actionSpeak("再听原文", () => replayListenFocus(c, focus));
+          const go = document.createElement("button");
+          go.type = "button";
+          go.className = "btn-ok";
+          go.textContent = c.kind === "judge" ? "跟读一遍" : "下一题";
+          go.addEventListener("click", () => {
+            if (c.kind === "judge") followJudgeOnce(c);
+            else advance(ok, c);
+          });
+          $("cardActions").appendChild(go);
+          afterPraise(() => {
+            if (state.view !== "lesson" || card() !== c) return;
+            replayListenFocus(c, focus);
+          });
         }
         (c.choices || []).forEach((ch) => {
           const b = document.createElement("button");
@@ -1738,132 +1862,87 @@
             box.querySelectorAll(".choice").forEach((el, i) => {
               if (String(c.choices[i].id) === String(c.answer)) el.classList.add("correct");
             });
-            if (ok) {
-              $("cardSub").textContent = "对了。 " + (c.tip || "");
-              scoreAnswer(true, c);
-              if (c.kind === "judge") {
-                afterPraise(() => {
-                  if (state.view !== "lesson" || card() !== c) return;
-                  followJudgeOnce(c);
-                });
-              } else {
-                afterPraise(() => advance(true, c));
-              }
-              return;
-            }
-            const focus = listenFocus(c);
-            scoreAnswer(false, c);
-            $("cardSub").textContent = "先听鼓励。再看英文和中文，听懂。";
-            const panel = document.createElement("div");
-            panel.className = "listen-repair";
-            const lab = document.createElement("p");
-            lab.className = "repair-label";
-            lab.textContent = "英文原文和中文，认真看";
-            const en = document.createElement("p");
-            en.className = "repair-en";
-            fillHighlight(en, focus.original, focus.key);
-            panel.appendChild(lab);
-            panel.appendChild(en);
-            if (focus.zh) {
-              const zh = document.createElement("p");
-              zh.className = "repair-zh";
-              zh.textContent = "中文：" + focus.zh;
-              panel.appendChild(zh);
-            }
-            if (focus.explain) {
-              const ex = document.createElement("p");
-              ex.className = "repair-zh";
-              ex.textContent = focus.explain;
-              panel.appendChild(ex);
-            }
-            if (focus.answerEn) {
-              const ans = document.createElement("p");
-              ans.className = "repair-en";
-              ans.appendChild(document.createTextNode("正确答语："));
-              const mark = document.createElement("mark");
-              mark.textContent = focus.answerEn;
-              ans.appendChild(mark);
-              panel.appendChild(ans);
-              if (focus.answerZh) {
-                const az = document.createElement("p");
-                az.className = "repair-zh";
-                az.textContent = "中文：" + focus.answerZh;
-                panel.appendChild(az);
-              }
-            } else if (focus.key) {
-              const keyLine = document.createElement("p");
-              keyLine.className = "repair-key";
-              keyLine.appendChild(document.createTextNode("重点："));
-              const mark = document.createElement("mark");
-              mark.textContent = focus.key;
-              keyLine.appendChild(mark);
-              panel.appendChild(keyLine);
-            }
-            extra.appendChild(panel);
-            $("cardActions").innerHTML = "";
-            actionSpeak("再听英文", () => replayListenFocus(c, focus));
-            const go = document.createElement("button");
-            go.type = "button";
-            go.className = "btn-ok";
-            go.textContent = c.kind === "judge" ? "跟读一遍" : "听懂了";
-            go.disabled = true;
-            go.addEventListener("click", () => {
-              if (c.kind === "judge") followJudgeOnce(c);
-              else advance(false);
-            });
-            $("cardActions").appendChild(go);
-            afterPraise(() => {
-              if (state.view !== "lesson" || card() !== c) return;
-              const chain = replayListenFocus(c, focus);
-              const enable = () => {
-                if (state.view !== "lesson" || card() !== c) return;
-                go.disabled = false;
-              };
-              if (chain && chain.then) chain.then(enable);
-              else enable();
-            });
+            scoreAnswer(ok, c);
+            $("cardSub").textContent = ok ? "对了！看听力原文和中文。" : "先看鼓励，再看原文和中文。";
+            afterAnswer(ok);
           });
           box.appendChild(b);
         });
         extra.appendChild(box);
         function unlockChoices() {
           if (!choicesReady()) {
-            if (hearHint) hearHint.textContent = "还需要听 " + Math.max(0, needHear - heardCount) + " 遍才能选";
+            if (hearHint) {
+              hearHint.textContent =
+                heardCount < needHear
+                  ? "没听到声音？请点下方「再听」按钮"
+                  : "还需要听 " + Math.max(0, needHear - heardCount) + " 遍才能选";
+              if (heardCount < needHear) hearHint.classList.add("warn");
+            }
             return;
           }
-          if (hearHint) hearHint.textContent = "可以选了";
+          if (hearHint) {
+            hearHint.textContent = "可以选了";
+            hearHint.classList.remove("warn");
+          }
           box.querySelectorAll(".choice").forEach((el) => {
             if (!state.listenLocked) el.disabled = false;
           });
         }
-        function onHeard() {
-          heardCount += 1;
+        function onHeard(ok) {
+          if (ok === true) heardCount += 1;
+          else if (hearHint && heardCount < needHear) {
+            hearHint.textContent = "没听到声音？请点下方「再听」按钮（并确认右上角未静音）";
+            hearHint.classList.add("warn");
+          }
           unlockChoices();
         }
-        function playListen(rate) {
-          const p = speakCard(c, rate);
-          const finish = () => onHeard();
-          if (p && p.then) p.then(finish).catch(finish);
-          else setTimeout(finish, rate && rate < 1 ? 2800 : 1600);
+        function playListen(rate, countTowardUnlock) {
+          ensureVoiceOn();
+          const go = () => {
+            if (state.view !== "lesson" || card() !== c) return;
+            if (hearHint && !choicesReady()) {
+              hearHint.textContent = "正在播放听力…";
+              hearHint.classList.remove("warn");
+            }
+            const p = speakCard(c, rate);
+            const finish = (ok) => {
+              if (countTowardUnlock) onHeard(ok === true);
+              else if (ok !== true && hearHint && !choicesReady()) {
+                hearHint.textContent = "没听到声音？请再点「再听」";
+                hearHint.classList.add("warn");
+              }
+            };
+            if (p && p.then) p.then((ok) => finish(!!ok)).catch(() => finish(false));
+            else setTimeout(() => finish(false), 400);
+          };
+          if (V && V.prime) V.prime().then(go).catch(go);
+          else go();
         }
-        actionSpeak(c.coach === "bee" ? "再听翻翻蜂" : "再听一遍", () => playListen(1));
-        actionSpeak("慢速 0.5×", () => playListen(0.5), true);
-        if (needHear > 0) {
-          let seq = Promise.resolve();
-          for (let i = 0; i < needHear; i++) {
-            seq = seq.then(() => {
-              if (state.view !== "lesson" || card() !== c) return;
-              return new Promise((resolve) => {
-                const p = speakCard(c, 1);
-                const finish = () => {
-                  onHeard();
-                  setTimeout(resolve, 350);
-                };
-                if (p && p.then) p.then(finish).catch(finish);
-                else setTimeout(finish, 1600);
-              });
-            });
-          }
+        actionSpeak(c.coach === "bee" ? "再听翻翻蜂" : "再听一遍", () => {
+          // 用户手势内播放：计入解锁；已解锁则只重播
+          playListen(1, !choicesReady());
+        });
+        actionSpeak("慢速 0.5×", () => playListen(0.5, !choicesReady()), true);
+        if ((needHear > 0 || c.autoPlay) && !autoTried) {
+          autoTried = true;
+          // 进页自动播一遍；失败则提示点「再听」（用户手势才能解锁）
+          const kick = () => {
+            if (state.view !== "lesson" || card() !== c) return;
+            ensureVoiceOn();
+            const p = speakCard(c, 1);
+            const finish = (ok) => {
+              if (needHear > 0) onHeard(ok === true);
+              else if (ok !== true && hearHint) {
+                hearHint.textContent = "没听到声音？请点「再听」";
+                hearHint.classList.add("warn");
+              }
+            };
+            if (p && p.then) p.then((ok) => finish(!!ok)).catch(() => finish(false));
+            else setTimeout(() => finish(false), 400);
+          };
+          if (V && V.prime) V.prime().then(kick).catch(kick);
+          else kick();
+          if (needHear === 0) unlockChoices();
         } else {
           unlockChoices();
         }
@@ -2819,6 +2898,7 @@
           state.lessonMode === "phonics" ||
           state.lessonMode === "minimal" ||
           state.lessonMode === "listenDrill" ||
+          state.lessonMode === "paperListen" ||
           state.lessonMode === "miniExam";
         if (!noStats) {
           const tracked = Progress.recordAnswer(walletStore(), !!ok);
@@ -2855,6 +2935,7 @@
           state.lessonMode === "phonics" ||
           state.lessonMode === "minimal" ||
           state.lessonMode === "listenDrill" ||
+          state.lessonMode === "paperListen" ||
           state.lessonMode === "miniExam" ||
           state.lessonMode === "preview" ||
           state.lessonMode === "reviewWrite"
@@ -2982,17 +3063,19 @@
                 ? "易混音完成！"
                 : settle.practiceKind === "listenDrill"
                   ? "听力加练完成！"
-                  : settle.practiceKind === "miniExam"
-                    ? "教材·试卷练完成！"
-                    : settle.practiceKind === "retry"
-                      ? "错题复习完成！"
-                  : settle.practiceKind === "preview"
-                    ? "预习完成！"
-                    : settle.practiceKind === "reviewWrite"
-                      ? "词句默写完成！"
-                      : settle.isReview
-                        ? "复习完成！"
-                        : "本课完成！";
+                  : settle.practiceKind === "paperListen"
+                    ? "试卷听力完成！"
+                    : settle.practiceKind === "miniExam"
+                      ? "教材·试卷练完成！"
+                      : settle.practiceKind === "retry"
+                        ? "错题复习完成！"
+                        : settle.practiceKind === "preview"
+                          ? "预习完成！"
+                          : settle.practiceKind === "reviewWrite"
+                            ? "词句默写完成！"
+                            : settle.isReview
+                              ? "复习完成！"
+                              : "本课完成！";
         wrap.appendChild(title);
 
         const score = document.createElement("p");
@@ -3095,15 +3178,17 @@
                   ? "再练易混音"
                   : settle.practiceKind === "listenDrill"
                     ? "再练听力"
-                    : settle.practiceKind === "miniExam"
-                      ? "再测一次"
-                      : settle.practiceKind === "reviewWrite"
-                        ? "再默写一次"
-                        : settle.practiceKind === "retry"
-                          ? "继续错题"
-                          : settle.next
-                            ? "下一课 · " + settle.next.label
-                            : "看学期路径",
+                    : settle.practiceKind === "paperListen"
+                      ? "再练试卷听力"
+                      : settle.practiceKind === "miniExam"
+                        ? "再测一次"
+                        : settle.practiceKind === "reviewWrite"
+                          ? "再默写一次"
+                          : settle.practiceKind === "retry"
+                            ? "继续错题"
+                            : settle.next
+                              ? "下一课 · " + settle.next.label
+                              : "看学期路径",
           "btn-start",
           () => {
             if (settle.practiceKind === "preview") startLesson();
@@ -3111,6 +3196,7 @@
             else if (settle.practiceKind === "phonics") startLesson(null, { mode: "phonics" });
             else if (settle.practiceKind === "minimal") startLesson(null, { mode: "minimal" });
             else if (settle.practiceKind === "listenDrill") startLesson(null, { mode: "listenDrill" });
+            else if (settle.practiceKind === "paperListen") startLesson(null, { mode: "paperListen" });
             else if (settle.practiceKind === "miniExam") startLesson(null, { mode: "miniExam" });
             else if (settle.practiceKind === "reviewWrite") startLesson(null, { mode: "reviewWrite" });
             else if (settle.practiceKind === "retry") startLesson(null, { mode: "retry" });

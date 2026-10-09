@@ -418,6 +418,12 @@ window.ENGLISH_DESK_DATA = {
           "My brother is ill. I'm worried about him.",
           "My toy plane is broken. Let's try to fix it together.",
         ],
+        // 试卷四完整听力短文（打印卷配套整篇音频）
+        passage: {
+          role: "boyChild",
+          speak:
+            "This is my first day of school. I'm happy, because I can play with my friend in the classroom. And we can read interesting books. But my mother is angry, because my room is not tidy. So after school I clean my room. My mother is happy again.",
+        },
       },
       questions: [
         {
@@ -911,6 +917,12 @@ window.ENGLISH_DESK_DATA = {
           "May I speak to Lingling? Sorry, she is not at home.",
           "You should drink some warm water. Thank you.",
         ],
+        // 试卷四 Tina 完整听力短文（打印卷配套整篇音频）
+        passage: {
+          role: "girlChild",
+          speak:
+            "I have a wonderful friend named Tina. We are in the same class. Every day, we walk to school together. At school, we love art class. We like drawing pictures. We often help each other. Once, I forgot my crayons, and Tina shared her crayons with me. After class, we play games. After school, we do homework at each other's homes. On weekends, we go to the park and fly kites. I'm so lucky to have Tina as my friend!",
+        },
       },
       questions: [
         {
@@ -2867,6 +2879,47 @@ window.ENGLISH_DESK_DATA = {
       "How are you feeling, Lingling?": "你感觉怎么样，玲玲？",
       "Thank you, Guoguo.": "谢谢你，果果。",
       "Not so good. I have a bad cold. I can't go to school tomorrow.": "不太好。我得了重感冒。明天不能去上学。",
+      // —— U1/U2 试卷听力原文释义 ——
+      "The boy is happy. He got an A in the test.": "男孩很高兴。他考试得了 A。",
+      "The boy is excited. He is going to the amusement park.": "男孩很兴奋。他要去游乐园。",
+      "The girl is worried. She can't find her new book.": "女孩很担心。她找不到她的新书。",
+      "They are looking for the key together.": "他们正在一起找钥匙。",
+      "Taking a walk always helps me calm down.": "散散步总是能帮我冷静下来。",
+      "Don't cry. Your dog will come back.": "别哭。你的狗会回来的。",
+      "How do you feel today? I am really happy. I'm back at school.": "你今天感觉怎么样？我真的很高兴。我又回到学校了。",
+      "What's wrong? You look sad. I can't find my dog.": "怎么了？你看起来很难过。我找不到我的狗。",
+      "My brother is ill. I'm worried about him.": "我弟弟病了。我很担心他。",
+      "My toy plane is broken. Let's try to fix it together.": "我的玩具飞机坏了。我们一起试着修吧。",
+      "Your brother looks sad. What's the matter?": "你弟弟看起来很难过。怎么了？",
+      "Why are you so angry?": "你为什么这么生气？",
+      "Why does she look worried?": "她为什么看起来很担心？",
+      "This is my first day of school. I'm happy, because I can play with my friend in the classroom.": "这是我上学的第一天。我很高兴，因为我能在教室里和朋友玩。",
+      "I'm happy, because I can play with my friend in the classroom. And we can read interesting books.": "我很高兴，因为我能在教室里和朋友玩。我们还能读有趣的书。",
+      "My mother is angry, because my room is not tidy.": "妈妈很生气，因为我的房间不整洁。",
+      "So after school I clean my room. My mother is happy again.": "所以放学后我打扫房间。妈妈又高兴了。",
+      "This is my first day of school. I'm happy, because I can play with my friend in the classroom. And we can read interesting books. But my mother is angry, because my room is not tidy. So after school I clean my room. My mother is happy again.": "这是我上学的第一天。我很高兴，因为我能在教室里和朋友玩，还能读有趣的书。可是妈妈很生气，因为我的房间不整洁。所以放学后我打扫房间，妈妈又高兴了。",
+      "I'm reading a story book at home. I love story books.": "我在家看故事书。我爱故事书。",
+      "My brother is writing a poem.": "我哥哥在写诗。",
+      "Reading aloud is a good way to study English.": "大声朗读是学英语的好方法。",
+      "My friend Amy is ill. I should call her.": "我的朋友 Amy 病了。我应该给她打电话。",
+      "This book is about animals.": "这本书是关于动物的。",
+      "You should drink some warm water.": "你应该喝点温水。",
+      "What are you doing? I'm writing a story.": "你在做什么？我在写故事。",
+      "What's the matter? I can't remember English words.": "怎么了？我记不住英语单词。",
+      "What are you reading? I'm reading a story book.": "你在读什么？我在读故事书。",
+      "May I speak to Lingling? Sorry, she is not at home.": "我可以和玲玲讲话吗？对不起，她不在家。",
+      "You should drink some warm water. Thank you.": "你应该喝点温水。谢谢。",
+      "May I speak to Sara?": "我可以和 Sara 讲话吗？",
+      "What's the matter, Tina?": "怎么了，Tina？",
+      "What is Mike doing?": "Mike 在做什么？",
+      "Can I read it with you?": "我可以和你一起读吗？",
+      "What are you doing?": "你在做什么？",
+      "I have a wonderful friend named Tina. We are in the same class.": "我有一个很棒的朋友叫 Tina。我们在同一个班。",
+      "Every day, we walk to school together.": "每天我们一起走路去上学。",
+      "At school, we love art class. We like drawing pictures.": "在学校我们喜欢美术课。我们喜欢画画。",
+      "We often help each other. Once, I forgot my crayons, and Tina shared her crayons with me.": "我们经常互相帮助。有一次我忘带蜡笔，Tina 把她的蜡笔分给我用。",
+      "On weekends, we go to the park and fly kites.": "周末我们去公园放风筝。",
+      "I have a wonderful friend named Tina. We are in the same class. Every day, we walk to school together. At school, we love art class. We like drawing pictures. We often help each other. Once, I forgot my crayons, and Tina shared her crayons with me. After class, we play games. After school, we do homework at each other's homes. On weekends, we go to the park and fly kites. I'm so lucky to have Tina as my friend!": "我有一个很棒的朋友叫 Tina。我们同班。每天一起走路上学。在学校我们喜欢美术课、爱画画。我们经常互相帮助。有一次我忘带蜡笔，Tina 把蜡笔分给我。课后我们做游戏，放学后去对方家写作业。周末去公园放风筝。有 Tina 做朋友，我真幸运！",
     };
     return map[text] || "";
   }
@@ -3229,14 +3282,8 @@ window.ENGLISH_DESK_DATA = {
     } else {
       prompt = item.show || item.prompt || "听完再选";
     }
-    const hearTimes =
-      typeof opts.hearTimes === "number"
-        ? opts.hearTimes
-        : isJudge
-          ? hard
-            ? 1
-            : 2
-          : 0;
+    // 进页自动播 1 遍即可选题；「再听」可重复播
+    const hearTimes = typeof opts.hearTimes === "number" ? opts.hearTimes : 1;
     return {
       type: "listen",
       kind: kind,
@@ -3502,6 +3549,8 @@ window.ENGLISH_DESK_DATA = {
       return buildMinimalCards(store);
     } else if (sessionId === "listenDrill") {
       return buildListenDrillCards(unit, store);
+    } else if (sessionId === "paperListen") {
+      return buildPaperListenCards(unit, store);
     } else if (sessionId === "miniExam") {
       return buildMiniExamCards(unit, store);
     } else if (sessionId === "preview") {
@@ -3972,16 +4021,155 @@ window.ENGLISH_DESK_DATA = {
       const key = (j.speak || "") + "|" + (j.show || "");
       if (seen[key]) return;
       seen[key] = true;
-      const c = listenCard(j, "judge", { hearTimes: 2 });
+      const c = listenCard(j, "judge", { hearTimes: 1 });
       c.title = j.paper ? "听力加练·材料判断" : "听力加练";
-      c.tip = (j.tip || "") + " · 听两遍，盯细节/陷阱";
+      c.tip = (j.tip || "") + " · 听完再选，盯细节/陷阱";
       cards.push(c);
     });
     shuffle(replies).slice(0, 2).forEach((r) => {
-      const c = listenCard(r, "reply", { hearTimes: 0 });
+      const c = listenCard(r, "reply", { hearTimes: 1 });
       c.title = r.paper ? "听力加练·材料答语" : "听力加练·答语";
       cards.push(c);
     });
+    return cards;
+  }
+
+  /** U1/U2 校内练习卷配套听力：按卷面一→四顺序练（打印卷可边听边做） */
+  function buildPaperListenCards(unit, store) {
+    store = store || {};
+    const L = unit.listen || {};
+    const cards = [];
+    const pics = L.pictureSentences || [];
+    pics.forEach(function (t, i) {
+      const decoys = shuffle(
+        pics
+          .filter(function (x) {
+            return x !== t;
+          })
+          .concat(["I am cooking dinner.", "She is watching TV."])
+      ).slice(0, 1);
+      const choices = shuffle([
+        { id: "a", text: t },
+        { id: "b", text: decoys[0] || "I am cooking dinner." },
+      ]);
+      const ans = (choices.filter(function (c) {
+        return c.text === t;
+      })[0] || choices[0]).id;
+      const c = listenCard(
+        {
+          speak: t,
+          role: /girl|she |Amy|worried/i.test(t) ? "girlChild" : /walk|call her|animals|warm water|looking for|Don't cry/i.test(t) ? "adultFemale" : "boyChild",
+          choices: choices,
+          answer: ans,
+          tip: "试卷一·" + (i + 1) + " · 听选图原文",
+          show: "听句子，选择你听到的内容（对照卷·一）",
+          paper: true,
+        },
+        "reply",
+        { hearTimes: 1 }
+      );
+      c.title = "试卷听力·一·听选图";
+      cards.push(c);
+    });
+
+    const dialogs = L.orderDialogues || L.matchDialogues || [];
+    const isMatchPaper = !!(L.matchDialogues && L.matchDialogues.length);
+    dialogs.forEach(function (t, i) {
+      if (isMatchPaper) {
+        // U2 二：偶数为「相符听原文→判对」，奇数为「听改写→判错」
+        const twist = t
+          .replace(/writing a story/i, "reading a poem")
+          .replace(/can't remember English words/i, "can't find my pencil")
+          .replace(/story book/i, "maths book")
+          .replace(/not at home/i, "sleeping")
+          .replace(/warm water/i, "cold juice");
+        const matchOk = i % 2 === 0 || twist === t;
+        const c = listenCard(
+          {
+            speak: matchOk ? t : twist,
+            role: "boyChild",
+            show: "判断：这与卷面图片情景相符。",
+            answer: matchOk,
+            tip:
+              "试卷二·" +
+              (i + 1) +
+              (matchOk ? " · 相符 √" : " · 不相符 ×（听清细节）"),
+            paper: true,
+          },
+          "judge",
+          { hearTimes: 1 }
+        );
+        c.title = "试卷听力·二·听对话判断";
+        cards.push(c);
+      } else {
+        const decoys = shuffle(
+          dialogs
+            .filter(function (x) {
+              return x !== t;
+            })
+            .concat(["Happy New Year! Let's eat yuanxiao."])
+        ).slice(0, 1);
+        const choices = shuffle([
+          { id: "a", text: t },
+          { id: "b", text: decoys[0] || "Happy New Year!" },
+        ]);
+        const ans = (choices.filter(function (c) {
+          return c.text === t;
+        })[0] || choices[0]).id;
+        const c = listenCard(
+          {
+            speak: t,
+            role: "boyChild",
+            choices: choices,
+            answer: ans,
+            tip: "试卷二·" + (i + 1) + " · 听对话排序原文",
+            show: "听对话，选择你听到的内容（对照卷·二）",
+            paper: true,
+          },
+          "reply",
+          { hearTimes: 1 }
+        );
+        c.title = "试卷听力·二·听对话";
+        cards.push(c);
+      }
+    });
+
+    listenPaperBank(unit, "reply").forEach(function (r, i) {
+      if (!r.paper) return;
+      const c = listenCard(r, "reply", { hearTimes: 1 });
+      c.title = "试卷听力·三·听选答语";
+      c.tip = (r.tip || "") + " · 对照卷·三";
+      cards.push(c);
+    });
+
+    const passage = L.passage;
+    if (passage && passage.speak) {
+      const hear = listenCard(
+        {
+          speak: passage.speak,
+          role: passage.role || "girlChild",
+          choices: [{ id: "ok", text: "听完了，开始判断正误" }],
+          answer: "ok",
+          tip: "试卷四 · 短文听两遍（打印卷同步）",
+          show: "先听完整篇短文（同练习卷听力四）",
+          paper: true,
+        },
+        "reply",
+        { hearTimes: 2 }
+      );
+      hear.title = "试卷听力·四·听短文";
+      hear.coach = "bee";
+      cards.push(hear);
+    }
+
+    listenPaperBank(unit, "judge").forEach(function (j) {
+      if (!j.paper) return;
+      const c = listenCard(j, "judge", { hearTimes: 1 });
+      c.title = "试卷听力·四·短文判断";
+      c.tip = (j.tip || "") + " · 对照卷·四";
+      cards.push(c);
+    });
+
     return cards;
   }
 
@@ -4313,7 +4501,7 @@ window.ENGLISH_DESK_DATA = {
       const key = r.speak || "";
       if (seenR[key]) return;
       seenR[key] = true;
-      const c = listenCard(r, "reply", { hearTimes: 0 });
+      const c = listenCard(r, "reply", { hearTimes: 1 });
       c.title = r.paper ? "试卷练·听选答语" : "教材练·听选答语";
       cards.push(c);
     });
@@ -4326,7 +4514,7 @@ window.ENGLISH_DESK_DATA = {
       const key = (j.speak || "") + "|" + (j.show || "");
       if (seenJ[key]) return;
       seenJ[key] = true;
-      const c = listenCard(j, "judge", { hearTimes: 2 });
+      const c = listenCard(j, "judge", { hearTimes: 1 });
       c.title = j.paper ? "试卷练·听短文判断" : "教材练·听力判断";
       cards.push(c);
     });
@@ -4508,6 +4696,7 @@ window.ENGLISH_DESK_DATA = {
     buildPhonicsCards,
     buildMinimalCards,
     buildListenDrillCards,
+    buildPaperListenCards,
     buildMiniExamCards,
     buildPreviewCards,
     buildReviewWriteCards,

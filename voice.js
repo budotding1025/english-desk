@@ -71,7 +71,7 @@
   function loadManifest() {
     if (manifest) return Promise.resolve(manifest);
     if (manifestPromise) return manifestPromise;
-    manifestPromise = fetch("./audio/manifest.json?v=16")
+    manifestPromise = fetch("./audio/manifest.json?v=17")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         manifest = data;
@@ -418,16 +418,10 @@
     const langHint = opts.lang || (/[\u4e00-\u9fff]/.test(utterText) ? "zh" : "en");
     const rateScale = opts.rate && opts.rate > 0 ? opts.rate : 1;
 
-    // 英文多句：拆开顺序读，避免叠音；中文讲解 forceAll 保持整段
-    if (!opts.forceAll && !opts.keepJoined && langHint === "en") {
-      const bits = splitUtterances(utterText);
-      if (bits.length > 1) {
-        return speakSequence(
-          bits.map((t) => ({ text: t, role: roleKey, rate: rateScale })),
-          opts.gapMs != null ? opts.gapMs : 420
-        );
-      }
-    }
+    // 英文多句：若已有整段预录音，优先整段播（听力材料常是一句一条 mp3）
+    // 否则再拆开顺序读，避免叠音；中文讲解 forceAll 保持整段
+    const wantSplit =
+      !opts.forceAll && !opts.keepJoined && langHint === "en" && splitUtterances(utterText).length > 1;
 
     return loadManifest().then((man) => {
       if (!opts.queue) stop();
@@ -441,13 +435,20 @@
         return speakSynth(utterText, roleKey, langHint, rateScale);
       }
       const candidates = clipCandidates(roleKey, utterText);
+      if (wantSplit && !candidates.length) {
+        const bits = splitUtterances(utterText);
+        return speakSequence(
+          bits.map((t) => ({ text: t, role: roleKey, rate: rateScale })),
+          opts.gapMs != null ? opts.gapMs : 420
+        );
+      }
       const tryNext = (i) => {
         if (i >= candidates.length) {
           // 孩子句尽量不用系统男声；仍失败再 synth
           return speakSynth(utterText, roleKey, langHint, rateScale);
         }
         const rel = candidates[i];
-        return playUrl(rel + (rel.indexOf("?") >= 0 ? "&" : "?") + "v=10", rateScale).then((ok) => {
+        return playUrl(rel + (rel.indexOf("?") >= 0 ? "&" : "?") + "v=11", rateScale).then((ok) => {
           if (ok) return true;
           return tryNext(i + 1);
         });
@@ -515,21 +516,24 @@
   }
 
   function prime() {
+    // 必须用独立 Audio 解锁，绝不能动 playEl——否则会把紧接着的听力 mp3 掐掉
     return new Promise((resolve) => {
       try {
-        const a = ensurePlayEl();
+        const a = new Audio();
+        a.preload = "auto";
+        a.setAttribute("playsinline", "true");
         a.muted = false;
-        a.volume = 0.05;
-        a.onended = null;
-        a.onerror = null;
-        // 用静音几乎听不见的短音解锁；没有 fx 时用空 data uri 仍可解锁部分浏览器
+        a.volume = 0.01;
         const unlockSrc = absUrl("./audio/fx/sparkle.wav");
+        let settled = false;
         const finish = (ok) => {
+          if (settled) return;
+          settled = true;
           unlocked = !!ok;
           try {
             a.pause();
-            a.currentTime = 0;
-            a.volume = 1;
+            a.removeAttribute("src");
+            a.load();
           } catch (e) {}
           resolve(!!ok);
         };
@@ -538,13 +542,12 @@
         a.src = unlockSrc;
         const p = a.play();
         if (p && p.then) {
-          p.then(() => {
-            // 立刻停掉解锁音，保留已授权状态
-            setTimeout(() => finish(true), 30);
-          }).catch(() => finish(false));
+          p.then(() => setTimeout(() => finish(true), 50)).catch(() => finish(false));
         } else {
           finish(true);
         }
+        // 兜底：避免挂死
+        setTimeout(() => finish(unlocked), 800);
       } catch (e) {
         resolve(false);
       }

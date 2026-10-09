@@ -18,5 +18,12 @@
 
 ## Records 音频
 
-用仓库根目录 `_gen_listening_audio.py` 为 U1/U2 官方问句与短文生成 edge-tts 片段，并写入 `audio/manifest.json`。  
-迷你卷 / 听力加练优先播放标注 `paper:true` 的材料句。
+用仓库根目录 `_gen_listening_audio.py` 为 U1/U2 官方问句与短文生成 edge-tts 片段，并写入 `audio/manifest.json`。
+
+| Records 入口 | 说明 |
+|--------------|------|
+| **试卷听力（配套音频）** | U1/U2 练习卷听力一→四整套（选图 / 对话 / 答语 / 短文），可打开 PDF 边听边做 |
+| **听力加练** | 短文判断陷阱 + 听选答语（`paper:true`） |
+| **教材·试卷练** | 卷面题型混合练，听力优先官方材料句 |
+
+重新生成：`python _gen_listening_audio.py`

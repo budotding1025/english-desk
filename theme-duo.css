@@ -764,6 +764,7 @@ button { cursor: pointer; border: none; background: none; }
 .heard-line:empty { display: none; }
 .follow-tip.ok { color: var(--accent-deep); }
 .follow-tip.bad { color: var(--bad); }
+.follow-tip.warn { color: var(--bad); font-weight: 600; }
 
 .done-reward {
   text-align: center;

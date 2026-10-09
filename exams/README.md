@@ -30,3 +30,9 @@
 
 U1 四参考答案：**1√ 2√ 3× 4× 5√**  
 U2 四参考答案：**1T 2F 3T 4F 5F**
+
+## 配套音频（练习用）
+
+站点 Records → **试卷听力（配套音频）**（设置里先选 Unit 1 / Unit 2）：  
+按卷面听力一→四顺序播放官方材料 TTS，可与 PDF 打印卷同步练习。  
+音频由 `_gen_listening_audio.py` 写入 `audio/manifest.json`。
