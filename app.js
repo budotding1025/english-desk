@@ -1560,8 +1560,14 @@
       }
 
       function followJudgeOnce(c) {
+        let moved = false;
+        const goNext = () => {
+          if (moved) return;
+          moved = true;
+          advance(!!state.results[state.results.length - 1], c);
+        };
         $("cardSub").textContent = "跟读一遍，记住这句话";
-        startFollowRead(c, () => advance(!!state.results[state.results.length - 1], c), {
+        startFollowRead(c, goNext, {
           times: 1,
           zh: c.zh || "",
           tip: "跟读一遍，加深记忆（也可直接点「下一题」）",
@@ -1573,9 +1579,7 @@
         skip.type = "button";
         skip.className = "btn-ok";
         skip.textContent = "下一题";
-        skip.addEventListener("click", () => {
-          advance(!!state.results[state.results.length - 1], c);
-        });
+        skip.addEventListener("click", goNext);
         $("cardActions").appendChild(skip);
       }
 
