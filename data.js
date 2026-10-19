@@ -3296,7 +3296,7 @@ window.ENGLISH_DESK_DATA = {
       coach: isJudge ? "bee" : null,
       autoPlay: true,
       answer: item.answer,
-      tip: (item.tip || "") + (hard ? " · 先听再选" : hearTimes >= 2 ? " · 听两遍再选" : ""),
+      tip: (item.tip || "") + (hard ? " · 先听再选" : hearTimes >= 1 ? " · 听完再选" : ""),
       zh: item.zh || lineZh(item.speak) || (isJudge ? "" : String(item.show || "").replace(/^判断[:：]\s*/, "")),
       explain: judgeExplain(item),
       answerZh: item.answerZh || lineZh(((item.choices || []).filter((ch) => String(ch.id) === String(item.answer))[0] || {}).text || ""),
@@ -4076,19 +4076,20 @@ window.ENGLISH_DESK_DATA = {
     const isMatchPaper = !!(L.matchDialogues && L.matchDialogues.length);
     dialogs.forEach(function (t, i) {
       if (isMatchPaper) {
-        // U2 二：偶数为「相符听原文→判对」，奇数为「听改写→判错」
-        const twist = t
-          .replace(/writing a story/i, "reading a poem")
-          .replace(/can't remember English words/i, "can't find my pencil")
-          .replace(/story book/i, "maths book")
-          .replace(/not at home/i, "sleeping")
-          .replace(/warm water/i, "cold juice");
-        const matchOk = i % 2 === 0 || twist === t;
+        // U2 二：始终播有录音的原文；奇数题用「错误情景」作判断句 → 应判错
+        const wrongShows = [
+          "判断：他在读诗（不是写故事）。",
+          "判断：他找不到铅笔（不是记不住单词）。",
+          "判断：她在读数学书（不是故事书）。",
+          "判断：玲玲在睡觉（不是不在家）。",
+          "判断：建议喝冰果汁（不是温水）。",
+        ];
+        const matchOk = i % 2 === 0;
         const c = listenCard(
           {
-            speak: matchOk ? t : twist,
+            speak: t,
             role: "boyChild",
-            show: "判断：这与卷面图片情景相符。",
+            show: matchOk ? "判断：这与卷面图片情景相符。" : wrongShows[i] || "判断：图片与所听内容相符。",
             answer: matchOk,
             tip:
               "试卷二·" +
@@ -4150,12 +4151,12 @@ window.ENGLISH_DESK_DATA = {
           role: passage.role || "girlChild",
           choices: [{ id: "ok", text: "听完了，开始判断正误" }],
           answer: "ok",
-          tip: "试卷四 · 短文听两遍（打印卷同步）",
+          tip: "试卷四 · 短文听一遍即可（可点再听）",
           show: "先听完整篇短文（同练习卷听力四）",
           paper: true,
         },
         "reply",
-        { hearTimes: 2 }
+        { hearTimes: 1 }
       );
       hear.title = "试卷听力·四·听短文";
       hear.coach = "bee";

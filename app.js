@@ -1445,11 +1445,11 @@
           if (count < times) return;
           btn.disabled = true;
           if (manual) {
-            tip.textContent = opts.doneTip || "读得很棒！点「完成」";
+            tip.textContent = opts.doneTip || "读得很棒！点「下一题」";
             const done = document.createElement("button");
             done.type = "button";
             done.className = "btn-ok";
-            done.textContent = "完成";
+            done.textContent = "下一题";
             done.addEventListener("click", () => leaveFollow());
             $("cardActions").appendChild(done);
             return;
@@ -1564,8 +1564,19 @@
         startFollowRead(c, () => advance(!!state.results[state.results.length - 1], c), {
           times: 1,
           zh: c.zh || "",
-          tip: "跟读一遍，加深记忆",
+          tip: "跟读一遍，加深记忆（也可直接点「下一题」）",
+          manualDone: true,
+          doneTip: "读得很棒！点「下一题」继续",
         });
+        // 跟读旁始终放「下一题」，避免卡在跟读点不出去
+        const skip = document.createElement("button");
+        skip.type = "button";
+        skip.className = "btn-ok";
+        skip.textContent = "下一题";
+        skip.addEventListener("click", () => {
+          advance(!!state.results[state.results.length - 1], c);
+        });
+        $("cardActions").appendChild(skip);
       }
 
       function renderWordCard(c) {
@@ -1800,7 +1811,8 @@
 
       function renderListenCard(c) {
         const extra = $("cardExtra");
-        const needHear = typeof c.hearTimes === "number" ? c.hearTimes : 1;
+        // 进页听 1 遍即可选题；「再听」可重复。避免 hearTimes≥2 却只自动播 1 遍导致选项一直灰掉
+        const needHear = typeof c.hearTimes === "number" ? Math.min(c.hearTimes, 1) : 1;
         let heardCount = needHear === 0 ? 1 : 0;
         let autoTried = false;
         if (c.hard) {
@@ -1831,19 +1843,20 @@
           const focus = showListenScript(c, ok);
           $("cardActions").innerHTML = "";
           actionSpeak("再听原文", () => replayListenFocus(c, focus));
+          if (c.kind === "judge") {
+            const follow = document.createElement("button");
+            follow.type = "button";
+            follow.className = "btn-speak secondary";
+            follow.textContent = "跟读一遍";
+            follow.addEventListener("click", () => followJudgeOnce(c));
+            $("cardActions").appendChild(follow);
+          }
           const go = document.createElement("button");
           go.type = "button";
           go.className = "btn-ok";
-          go.textContent = c.kind === "judge" ? "跟读一遍" : "下一题";
-          go.addEventListener("click", () => {
-            if (c.kind === "judge") followJudgeOnce(c);
-            else advance(ok, c);
-          });
+          go.textContent = "下一题";
+          go.addEventListener("click", () => advance(ok, c));
           $("cardActions").appendChild(go);
-          afterPraise(() => {
-            if (state.view !== "lesson" || card() !== c) return;
-            replayListenFocus(c, focus);
-          });
         }
         (c.choices || []).forEach((ch) => {
           const b = document.createElement("button");
@@ -1863,7 +1876,7 @@
               if (String(c.choices[i].id) === String(c.answer)) el.classList.add("correct");
             });
             scoreAnswer(ok, c);
-            $("cardSub").textContent = ok ? "对了！看听力原文和中文。" : "先看鼓励，再看原文和中文。";
+            $("cardSub").textContent = ok ? "对了！看听力原文和中文。" : "看原文和中文，再点「下一题」。";
             afterAnswer(ok);
           });
           box.appendChild(b);
@@ -1872,11 +1885,8 @@
         function unlockChoices() {
           if (!choicesReady()) {
             if (hearHint) {
-              hearHint.textContent =
-                heardCount < needHear
-                  ? "没听到声音？请点下方「再听」按钮"
-                  : "还需要听 " + Math.max(0, needHear - heardCount) + " 遍才能选";
-              if (heardCount < needHear) hearHint.classList.add("warn");
+              hearHint.textContent = "没听到声音？请点下方「再听」；点一次即可选题";
+              hearHint.classList.add("warn");
             }
             return;
           }
@@ -1888,28 +1898,33 @@
             if (!state.listenLocked) el.disabled = false;
           });
         }
+        function markHeard() {
+          if (needHear <= 0) return;
+          heardCount = needHear;
+          unlockChoices();
+        }
         function onHeard(ok) {
-          if (ok === true) heardCount += 1;
-          else if (hearHint && heardCount < needHear) {
+          if (ok === true) markHeard();
+          else if (hearHint && !choicesReady()) {
             hearHint.textContent = "没听到声音？请点下方「再听」按钮（并确认右上角未静音）";
             hearHint.classList.add("warn");
           }
-          unlockChoices();
         }
-        function playListen(rate, countTowardUnlock) {
+        function playListen(rate, unlockOnGesture) {
           ensureVoiceOn();
+          // 用户手势点「再听」：立刻允许选题，避免播放失败时选项一直灰掉
+          if (unlockOnGesture) markHeard();
           const go = () => {
             if (state.view !== "lesson" || card() !== c) return;
-            if (hearHint && !choicesReady()) {
-              hearHint.textContent = "正在播放听力…";
+            if (hearHint && choicesReady()) {
+              hearHint.textContent = "可以选了 · 正在播放…";
               hearHint.classList.remove("warn");
             }
             const p = speakCard(c, rate);
             const finish = (ok) => {
-              if (countTowardUnlock) onHeard(ok === true);
-              else if (ok !== true && hearHint && !choicesReady()) {
-                hearHint.textContent = "没听到声音？请再点「再听」";
-                hearHint.classList.add("warn");
+              if (!unlockOnGesture) onHeard(ok === true);
+              else if (ok !== true && hearHint) {
+                hearHint.textContent = "可以选了（若仍无声，检查右上角静音）";
               }
             };
             if (p && p.then) p.then((ok) => finish(!!ok)).catch(() => finish(false));
@@ -1919,13 +1934,11 @@
           else go();
         }
         actionSpeak(c.coach === "bee" ? "再听翻翻蜂" : "再听一遍", () => {
-          // 用户手势内播放：计入解锁；已解锁则只重播
           playListen(1, !choicesReady());
         });
         actionSpeak("慢速 0.5×", () => playListen(0.5, !choicesReady()), true);
         if ((needHear > 0 || c.autoPlay) && !autoTried) {
           autoTried = true;
-          // 进页自动播一遍；失败则提示点「再听」（用户手势才能解锁）
           const kick = () => {
             if (state.view !== "lesson" || card() !== c) return;
             ensureVoiceOn();
