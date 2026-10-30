@@ -1,0 +1,236 @@
+[
+  {
+    "text": "八、读句子，选择正确的答语，将序号写在题前括号内。",
+    "x": 507,
+    "y": 123,
+    "score": 0.986
+  },
+  {
+    "text": ")1.You look worried. What's the matter?",
+    "x": 472,
+    "y": 214,
+    "score": 0.935
+  },
+  {
+    "text": "A.You should have a good rest.",
+    "x": 1118,
+    "y": 220,
+    "score": 0.955
+  },
+  {
+    "text": ")2. I have a stomachache.",
+    "x": 358,
+    "y": 272,
+    "score": 0.958
+  },
+  {
+    "text": "B.Weplayfootball together.",
+    "x": 1111,
+    "y": 278,
+    "score": 0.96
+  },
+  {
+    "text": ")3. May I have a cupcake?",
+    "x": 367,
+    "y": 333,
+    "score": 0.93
+  },
+  {
+    "text": "C.Sure. Here you are.",
+    "x": 1058,
+    "y": 337,
+    "score": 0.975
+  },
+  {
+    "text": ")4.What doyou do with your friend?",
+    "x": 473,
+    "y": 392,
+    "score": 0.927
+  },
+  {
+    "text": "D. It's OK.I can fix it.",
+    "x": 1059,
+    "y": 395,
+    "score": 0.904
+  },
+  {
+    "text": ")5. I'm sorry I broke your toy.",
+    "x": 406,
+    "y": 451,
+    "score": 0.958
+  },
+  {
+    "text": "E. I can't find my Chinese book.",
+    "x": 1116,
+    "y": 455,
+    "score": 0.979
+  },
+  {
+    "text": "九、Max一家在参观博物馆，他们在说些什么？读对话，从方框中选择合适的",
+    "x": 713,
+    "y": 543,
+    "score": 0.98
+  },
+  {
+    "text": "句子补全对话，将序号写在横线上。",
+    "x": 400,
+    "y": 601,
+    "score": 0.99
+  },
+  {
+    "text": "Max:Dad, 1.",
+    "x": 142,
+    "y": 682,
+    "score": 0.941
+  },
+  {
+    "text": "Dad:It'sa rock(岩石).",
+    "x": 228,
+    "y": 740,
+    "score": 0.887
+  },
+  {
+    "text": "Max:Itlooksbeautiful!Iwanttorememberit.",
+    "x": 454,
+    "y": 798,
+    "score": 0.978
+  },
+  {
+    "text": "Dad;2.",
+    "x": 83,
+    "y": 859,
+    "score": 0.92
+  },
+  {
+    "text": "Max:Oh, no!",
+    "x": 147,
+    "y": 915,
+    "score": 0.986
+  },
+  {
+    "text": "Mum:3.",
+    "x": 96,
+    "y": 975,
+    "score": 0.954
+  },
+  {
+    "text": "A.May I use your notebook?",
+    "x": 1112,
+    "y": 993,
+    "score": 0.944
+  },
+  {
+    "text": "Max:I can't find my notebook.",
+    "x": 300,
+    "y": 1034,
+    "score": 0.95
+  },
+  {
+    "text": "B.What's the matter?",
+    "x": 1060,
+    "y": 1050,
+    "score": 0.971
+  },
+  {
+    "text": "Sister;Don't worry.I have my notebook.",
+    "x": 374,
+    "y": 1094,
+    "score": 0.941
+  },
+  {
+    "text": "C. What is this?",
+    "x": 1005,
+    "y": 1108,
+    "score": 0.997
+  },
+  {
+    "text": "Max;4.",
+    "x": 89,
+    "y": 1152,
+    "score": 0.877
+  },
+  {
+    "text": "D.You can draw it down on",
+    "x": 1112,
+    "y": 1168,
+    "score": 0.967
+  },
+  {
+    "text": "Sister:Sure. Here you are.",
+    "x": 265,
+    "y": 1211,
+    "score": 0.958
+  },
+  {
+    "text": "yournotebook.",
+    "x": 1044,
+    "y": 1229,
+    "score": 0.962
+  },
+  {
+    "text": "Ican remember thisrock",
+    "x": 573,
+    "y": 1268,
+    "score": 0.955
+  },
+  {
+    "text": "Max:5.",
+    "x": 88,
+    "y": 1269,
+    "score": 0.987
+  },
+  {
+    "text": "E. Thanks a lot!",
+    "x": 1009,
+    "y": 1285,
+    "score": 0.962
+  },
+  {
+    "text": "whenI go back home!",
+    "x": 330,
+    "y": 1329,
+    "score": 0.954
+  },
+  {
+    "text": "十、看图读故事，根据故事内容，用数字1一6给下列图片排序。",
+    "x": 579,
+    "y": 1408,
+    "score": 0.977
+  },
+  {
+    "text": "It was sports day. Wilma was in the long jump. She came first. She",
+    "x": 757,
+    "y": 1468,
+    "score": 0.949
+  },
+  {
+    "text": "was happy. Wilf and Chip were in a race. They came second. They were",
+    "x": 715,
+    "y": 1526,
+    "score": 0.968
+  },
+  {
+    "text": "excited. Dad was in the egg and spoon race. He came third. Dad was",
+    "x": 716,
+    "y": 1585,
+    "score": 0.974
+  },
+  {
+    "text": "surprised. Mum was in a race, But Mum came last. She was unhappy.",
+    "x": 708,
+    "y": 1644,
+    "score": 0.971
+  },
+  {
+    "text": "Kids have a surprise for Mum, Mum is happy now.",
+    "x": 492,
+    "y": 1702,
+    "score": 0.949
+  },
+  {
+    "text": "英语·四上·第四单元第3页（共4页）",
+    "x": 700,
+    "y": 2139,
+    "score": 0.946
+  }
+]

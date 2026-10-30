@@ -1,0 +1,368 @@
+[
+  {
+    "text": "四、听对话，判断句子正误，正确的写“T”，错误的写“F”。",
+    "x": 523,
+    "y": 108,
+    "score": 0.964
+  },
+  {
+    "text": ")1.Linda is happy today.",
+    "x": 345,
+    "y": 169,
+    "score": 0.94
+  },
+  {
+    "text": ")2.Lindadoesn'trememberapoem.",
+    "x": 451,
+    "y": 227,
+    "score": 0.976
+  },
+  {
+    "text": ")3.Mike needs to use Linda'spencil.",
+    "x": 457,
+    "y": 285,
+    "score": 0.935
+  },
+  {
+    "text": ")4.They drawapicture to understand the maths problem.",
+    "x": 663,
+    "y": 345,
+    "score": 0.949
+  },
+  {
+    "text": ")5. Mike is a polite boy.",
+    "x": 335,
+    "y": 404,
+    "score": 0.985
+  },
+  {
+    "text": "五、听短文，选择正确答案，将序号写在题前括号内。",
+    "x": 481,
+    "y": 463,
+    "score": 0.991
+  },
+  {
+    "text": ")1.Where are the children?",
+    "x": 368,
+    "y": 519,
+    "score": 0.932
+  },
+  {
+    "text": "B.In a park.",
+    "x": 712,
+    "y": 577,
+    "score": 0.947
+  },
+  {
+    "text": "A.At home.",
+    "x": 290,
+    "y": 578,
+    "score": 0.928
+  },
+  {
+    "text": "C. At school.",
+    "x": 1202,
+    "y": 578,
+    "score": 0.939
+  },
+  {
+    "text": ")2.Howdothe children feel?",
+    "x": 388,
+    "y": 637,
+    "score": 0.94
+  },
+  {
+    "text": "C. They are sad.",
+    "x": 1232,
+    "y": 695,
+    "score": 0.998
+  },
+  {
+    "text": "A. They are excited.B. They are happy.",
+    "x": 565,
+    "y": 696,
+    "score": 0.956
+  },
+  {
+    "text": ")3.Who isMiss Green?",
+    "x": 334,
+    "y": 753,
+    "score": 0.942
+  },
+  {
+    "text": "C. A music teacher.",
+    "x": 1243,
+    "y": 813,
+    "score": 0.96
+  },
+  {
+    "text": "A.An English teacher.B.A Chinese teacher.",
+    "x": 568,
+    "y": 814,
+    "score": 0.965
+  },
+  {
+    "text": ")4.Why is Amy surprised?",
+    "x": 366,
+    "y": 872,
+    "score": 0.946
+  },
+  {
+    "text": "B. She gets 100 in exam.",
+    "x": 799,
+    "y": 930,
+    "score": 0.972
+  },
+  {
+    "text": "C. She gets a cake.",
+    "x": 1240,
+    "y": 930,
+    "score": 0.986
+  },
+  {
+    "text": "A. She gets a gift.",
+    "x": 349,
+    "y": 931,
+    "score": 0.974
+  },
+  {
+    "text": ")5.Where is Mike's Englishbook?",
+    "x": 440,
+    "y": 988,
+    "score": 0.934
+  },
+  {
+    "text": "A.It's in his desk.",
+    "x": 353,
+    "y": 1045,
+    "score": 0.929
+  },
+  {
+    "text": "B.It's under the chair.",
+    "x": 798,
+    "y": 1045,
+    "score": 0.944
+  },
+  {
+    "text": "C. It's in his bag.",
+    "x": 1243,
+    "y": 1045,
+    "score": 0.962
+  },
+  {
+    "text": "笔试部分",
+    "x": 714,
+    "y": 1108,
+    "score": 1.0
+  },
+  {
+    "text": "六、读单词，选出不同类的一项，将序号写在题前括号内。",
+    "x": 527,
+    "y": 1168,
+    "score": 0.99
+  },
+  {
+    "text": ")1.A.worried",
+    "x": 244,
+    "y": 1224,
+    "score": 0.983
+  },
+  {
+    "text": "（",
+    "x": 24,
+    "y": 1225,
+    "score": 0.579
+  },
+  {
+    "text": "C. feeling",
+    "x": 932,
+    "y": 1225,
+    "score": 0.946
+  },
+  {
+    "text": "B. happy",
+    "x": 601,
+    "y": 1226,
+    "score": 0.987
+  },
+  {
+    "text": "D,angry",
+    "x": 1241,
+    "y": 1229,
+    "score": 0.957
+  },
+  {
+    "text": "C. Chinese",
+    "x": 942,
+    "y": 1282,
+    "score": 0.976
+  },
+  {
+    "text": "B. English",
+    "x": 617,
+    "y": 1283,
+    "score": 0.956
+  },
+  {
+    "text": "D. maths",
+    "x": 1246,
+    "y": 1283,
+    "score": 0.943
+  },
+  {
+    "text": ")2.A.story",
+    "x": 222,
+    "y": 1284,
+    "score": 0.974
+  },
+  {
+    "text": ")3.A.stand",
+    "x": 225,
+    "y": 1341,
+    "score": 0.977
+  },
+  {
+    "text": "C.water",
+    "x": 923,
+    "y": 1341,
+    "score": 0.996
+  },
+  {
+    "text": "B.sweep",
+    "x": 603,
+    "y": 1343,
+    "score": 0.988
+  },
+  {
+    "text": "D. open",
+    "x": 1233,
+    "y": 1345,
+    "score": 0.96
+  },
+  {
+    "text": "C.draw",
+    "x": 916,
+    "y": 1398,
+    "score": 0.998
+  },
+  {
+    "text": ")4.A.polite",
+    "x": 227,
+    "y": 1399,
+    "score": 0.975
+  },
+  {
+    "text": "B. help",
+    "x": 586,
+    "y": 1399,
+    "score": 0.93
+  },
+  {
+    "text": "D.remember",
+    "x": 1283,
+    "y": 1399,
+    "score": 0.992
+  },
+  {
+    "text": "B.wait",
+    "x": 587,
+    "y": 1456,
+    "score": 0.991
+  },
+  {
+    "text": "C.door",
+    "x": 913,
+    "y": 1456,
+    "score": 0.99
+  },
+  {
+    "text": ")5.A.try",
+    "x": 203,
+    "y": 1457,
+    "score": 0.99
+  },
+  {
+    "text": "D. use",
+    "x": 1219,
+    "y": 1458,
+    "score": 0.911
+  },
+  {
+    "text": "七、看图读短语，选择与图片相符的短语，将序号写在括号内。",
+    "x": 571,
+    "y": 1517,
+    "score": 0.99
+  },
+  {
+    "text": "A.talk to a friend",
+    "x": 232,
+    "y": 1588,
+    "score": 0.922
+  },
+  {
+    "text": "B.a bad cold",
+    "x": 722,
+    "y": 1588,
+    "score": 0.963
+  },
+  {
+    "text": "C.listen to music",
+    "x": 1207,
+    "y": 1589,
+    "score": 0.947
+  },
+  {
+    "text": "D. tidy up the table",
+    "x": 244,
+    "y": 1648,
+    "score": 0.943
+  },
+  {
+    "text": "E.open the window",
+    "x": 787,
+    "y": 1648,
+    "score": 0.978
+  },
+  {
+    "text": "2.(",
+    "x": 364,
+    "y": 2001,
+    "score": 0.874
+  },
+  {
+    "text": "D",
+    "x": 490,
+    "y": 2001,
+    "score": 0.589
+  },
+  {
+    "text": "4.(",
+    "x": 917,
+    "y": 2001,
+    "score": 0.942
+  },
+  {
+    "text": "1. (",
+    "x": 89,
+    "y": 2002,
+    "score": 0.929
+  },
+  {
+    "text": "3.（",
+    "x": 640,
+    "y": 2002,
+    "score": 0.826
+  },
+  {
+    "text": "5.(",
+    "x": 1192,
+    "y": 2002,
+    "score": 0.87
+  },
+  {
+    "text": "英语·四上·第四单元第2页（共4页）",
+    "x": 712,
+    "y": 2084,
+    "score": 0.934
+  }
+]

@@ -985,6 +985,27 @@
           printU2.rel = "noopener";
           printU2.innerHTML =
             "<strong>打印包 · U2 PDF</strong><span>高清插图 · 配合「试卷听力」配套音频</span>";
+          const printU4 = document.createElement("a");
+          printU4.className = "rec-action rec-action-soft";
+          printU4.href = "./exams/U4_Unit4_Practice.pdf";
+          printU4.target = "_blank";
+          printU4.rel = "noopener";
+          printU4.innerHTML =
+            "<strong>打印包 · U4 PDF</strong><span>第四单元练习 · 含原卷附图裁切</span>";
+          const printU4Ans = document.createElement("a");
+          printU4Ans.className = "rec-action rec-action-soft";
+          printU4Ans.href = "./exams/U4_Unit4_Practice_Answers.pdf";
+          printU4Ans.target = "_blank";
+          printU4Ans.rel = "noopener";
+          printU4Ans.innerHTML =
+            "<strong>U4 参考答案</strong><span>听力据材料脚本 · 笔试对照卷面</span>";
+          const printU4Scan = document.createElement("a");
+          printU4Scan.className = "rec-action rec-action-soft";
+          printU4Scan.href = "./exams/U4_Unit4_Practice_Scan.pdf";
+          printU4Scan.target = "_blank";
+          printU4Scan.rel = "noopener";
+          printU4Scan.innerHTML =
+            "<strong>U4 原卷扫描 PDF</strong><span>高清单页拼接 · 对照打印</span>";
           const challengeBtn = document.createElement("button");
           challengeBtn.type = "button";
           challengeBtn.className = "rec-action challenge";
@@ -1006,6 +1027,9 @@
           $("recordsActions").appendChild(paperListenBtn);
           $("recordsActions").appendChild(printBtn);
           $("recordsActions").appendChild(printU2);
+          $("recordsActions").appendChild(printU4);
+          $("recordsActions").appendChild(printU4Ans);
+          $("recordsActions").appendChild(printU4Scan);
           $("recordsActions").appendChild(listenBtn);
           $("recordsActions").appendChild(extendBtn);
           $("recordsActions").appendChild(phonicsBtn);

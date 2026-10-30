@@ -22,7 +22,16 @@
 - Henry 值日题干：怎么 → **如何**
 - U4 对话续：Linda / Mike 分行
 
+### U4 试卷（2026-10 入库）
+- 原卷：`Unit test/U4-1.png` `U4-2.png` + `source/crops/hq_p1–p4.jpg`
+- 成稿：`U4_Unit4_Practice.pdf`（排版+图裁切）、`U4_Unit4_Practice_Scan.pdf`（原卷扫描页）
+- 答案：`U4_Unit4_Practice_Answers.pdf`
+- 听力三：1A 2B 3B 4A 5A；四：1F 2F 3F 4T 5T；五：1C 2B 3A 4A 5C
+- **U3 校内卷**：项目内尚无照片，未做 PDF
+
 ## 听力答案（据材料原文，不变）
 
 - U1 四：1√ 2√ 3× 4× 5√  
 - U2 四：1T 2F 3T 4F 5F  
+- U4 详见答案 PDF（三/四/五已按听力材料核对）  
+
