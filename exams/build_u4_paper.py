@@ -311,61 +311,120 @@ def build_paper() -> Path:
 def build_answers() -> Path:
     doc = new_doc()
     P(doc, "英语 · 四上 · 第四单元练习 · 参考答案", size=16, bold=True, center=True, after=6)
-    P(doc, "（听力答案据《四上听力材料》脚本核对；图题答案对照原卷附图）", size=10, center=True, after=12)
+    P(doc, "含完整英语听力原文 + 全部题目答案（听力据《四上听力材料》第四单元）", size=10, center=True, after=12)
 
-    S(doc, "听力部分")
-    P(doc, "一、听句子判断 T/F（材料脚本）：", size=11, bold=True, after=4)
+    S(doc, "听力部分 · 原文与答案")
+
+    P(doc, "一、听句子判断 T/F", size=12, bold=True, after=4)
+    P(doc, "【Listening script】", size=10, bold=True, after=2)
+    for i, t in enumerate(
+        [
+            "Sometimes I feel excited.",
+            "My cat is white with a long tail.",
+            "The girl is ill today.",
+            "I often read books with my friends.",
+            "We should stand in line.",
+            "Could I have an apple, please?",
+            "May I use your eraser?",
+            "You should have a good rest.",
+        ],
+        1,
+    ):
+        P(doc, f"{i}. {t}", size=10, after=2)
+    P(doc, "【Answers】1T  2F  3T  4F  5T  6F  7F  8T", size=11, bold=True, after=2)
     P(
         doc,
-        "听力原文：1. Sometimes I feel excited.  2. My cat is white with a long tail.  "
-        "3. The girl is ill today.  4. I often read books with my friends.  "
-        "5. We should stand in line.  6. Could I have an apple, please?  "
-        "7. May I use your eraser?  8. You should have a good rest.",
-        size=9,
-        after=4,
-    )
-    P(doc, "答案：以课堂录音 + 卷面图片是否相符为准（打印卷附图同原卷）。常见卷面参考：请家长按图核验。", size=10, after=6)
-
-    P(doc, "二、听对话排序 A—E：", size=11, bold=True, after=4)
-    P(
-        doc,
-        "材料顺序：A 找英语书 → B 在读故事 → C 大声读 → D 电话找 Mike（在睡觉）→ E 借铅笔。"
-        "卷面排序：把听到的第 1–5 段依次标到对应图上（答案依图序填写，对照附图）。",
-        size=10,
-        after=6,
-    )
-
-    P(doc, "三、听选答语：1A  2B  3B  4A  5A", size=11, after=4)
-    P(
-        doc,
-        "依据：1 open the window→Sure.  2 How do you feel→I am happy.  "
-        "3 What's the matter / angry→My toy car is broken.  "
-        "4 What does he look like→tall with short hair.  "
-        "5 Can I fly a kite→Of course. Let's do it together.",
-        size=9,
-        after=6,
-    )
-
-    P(doc, "四、听对话判断：1F  2F  3F  4T  5T", size=11, after=4)
-    P(
-        doc,
-        "依据：Linda: Not very happy.（非 happy）→1F；难的是 maths problem 不是 poem→2F；"
-        "Mike 说 May I use your pen?（不是 pencil）→3F；续说 draw a picture 懂了→4T；礼貌请求→5T。",
-        size=9,
-        after=6,
-    )
-
-    P(doc, "五、听短文选择：1C  2B  3A  4A  5C", size=11, after=4)
-    P(
-        doc,
-        "依据：back at school；very happy；Miss Green is their new English teacher；"
-        "friends give her a gift；book is in Mike's schoolbag.",
+        "依据：1 兴奋跳跃相符；2 图为黑猫≠white；3 生病在床相符；4 地上玩耍≠read books；"
+        "5 排队相符；6 图为汉堡薯条≠apple；7 尺子/本子≠eraser；8 睡觉休息相符。",
         size=9,
         after=8,
     )
 
-    S(doc, "笔试部分")
-    P(doc, "六、异类词：1C  2A  3C  4A  5C", size=11, after=4)
+    P(doc, "二、听对话排序 A—E", size=12, bold=True, after=4)
+    P(doc, "【Listening script】（heard in this order = A → E）", size=10, bold=True, after=2)
+    for lab, t in [
+        ("A", "What's the matter, Amy? — I can't find my English book. — Don't worry. Let me help you look for it."),
+        ("B", "What are you reading? — I'm reading a story."),
+        ("C", "I can't remember this. — You can read it aloud."),
+        ("D", "May I speak to Mike? — Sorry, Mike is sleeping. — May I call him later? — Of course."),
+        ("E", "Would you do me a favour? — What can I do for you? — Can I use your pencil? — Sure. Here you are."),
+    ]:
+        P(doc, f"{lab}. {t}", size=9, after=2)
+    P(
+        doc,
+        "【Answers】卷面图片左→右依次标：D  B  C  E  A"
+        "（听音顺序为材料 A→E；图序对应：电话睡觉 / 读故事 / 大声读 / 借铅笔 / 找英语书）。",
+        size=10,
+        after=8,
+    )
+
+    P(doc, "三、听选答语", size=12, bold=True, after=4)
+    P(doc, "【Listening script】", size=10, bold=True, after=2)
+    for i, t in enumerate(
+        [
+            "Excuse me, would you please open the window?",
+            "How do you feel today?",
+            "What's the matter? You look angry.",
+            "What does he look like?",
+            "Can I fly a kite with you?",
+        ],
+        1,
+    ):
+        P(doc, f"{i}. {t}", size=10, after=2)
+    P(doc, "【Answers】1A  2B  3B  4A  5A", size=11, bold=True, after=2)
+    P(
+        doc,
+        "1 open the window → Sure.  2 How do you feel → I am happy.  "
+        "3 angry → My toy car is broken.  4 look like → tall with short hair.  "
+        "5 fly a kite → Of course. Let's do it together.",
+        size=9,
+        after=8,
+    )
+
+    P(doc, "四、听对话判断 T/F", size=12, bold=True, after=4)
+    P(doc, "【Listening script】", size=10, bold=True, after=2)
+    for line in [
+        "Mike: Hi! Linda. How do you feel now?",
+        "Linda: Not very happy.",
+        "Mike: What's the matter?",
+        "Linda: I don't understand this maths problem. It's so hard!",
+        "Mike: Let me help you. May I use your pen?",
+        "Linda: Sure. Here you are.",
+        "Mike: Look, you can draw a picture.",
+        "Linda: Oh! I see! Now I understand. Thank you, Mike.",
+    ]:
+        P(doc, line, size=10, after=1)
+    P(doc, "【Answers】1F  2F  3F  4T  5T", size=11, bold=True, after=2)
+    P(
+        doc,
+        "1 Not very happy ≠ happy → F；2 maths problem ≠ poem → F；"
+        "3 pen ≠ pencil → F；4 draw a picture to understand → T；5 polite request → T。",
+        size=9,
+        after=8,
+    )
+
+    P(doc, "五、听短文选择", size=12, bold=True, after=4)
+    P(doc, "【Listening script】", size=10, bold=True, after=2)
+    P(
+        doc,
+        "It's September 1st. It's the first day of school. Children are back at school. "
+        "They see many friends and teachers. They are very happy. Miss Green is their new English teacher. "
+        "She is tall and beautiful. Today is Amy's birthday. She is so surprised. Her friends give her a gift. "
+        "Mike is sad, because his new English book is missing. All the children look for it together. "
+        "Oh, it's in Mike's schoolbag.",
+        size=10,
+        after=4,
+    )
+    P(doc, "【Answers】1C  2B  3A  4A  5C", size=11, bold=True, after=2)
+    P(
+        doc,
+        "1 at school；2 happy；3 English teacher；4 gets a gift；5 in his schoolbag / bag。",
+        size=9,
+        after=10,
+    )
+
+    S(doc, "笔试部分 · 答案")
+    P(doc, "六、异类词：1C  2A  3C  4A  5C", size=11, after=2)
     P(
         doc,
         "1 feeling 非心情形容词；2 story 非学科；3 water 非动作动词；4 polite 非动词；5 door 非动词。",
@@ -373,24 +432,40 @@ def build_answers() -> Path:
         after=6,
     )
 
-    P(doc, "七、看图选短语：对照卷面附图勾选（选项 A–E）。", size=11, after=2)
-    P(doc, "建议家长按图核对：对话/感冒/听音乐/整理桌子/开窗。", size=9, after=6)
+    P(doc, "七、看图选短语：1D  2B  3A  4E  5C", size=11, after=2)
+    P(
+        doc,
+        "左→右：整理桌子 / 感冒 / 与朋友交谈 / 开窗 / 听音乐。",
+        size=9,
+        after=6,
+    )
 
     P(doc, "八、选答语：1E  2A  3C  4B  5D", size=11, after=6)
 
     P(doc, "九、补全对话：1C  2D  3B  4A  5E", size=11, after=6)
 
-    P(doc, "十、故事排序：按短文情节 1→6（Wilma 第一 → Wilf&Chip 第二 → Dad 第三 → Mum 最后 → 惊喜 → Mum 开心）。", size=11, after=6)
+    P(
+        doc,
+        "十、故事排序：按短文情节标 1–6："
+        "Wilma 第一 → Wilf & Chip 第二 → Dad 第三 → Mum 最后 → 惊喜 → Mum 开心。",
+        size=11,
+        after=6,
+    )
 
-    P(doc, "十一·任务一：1A  2C  3B  4C  5A", size=11, after=4)
+    P(doc, "十一·任务一：1A  2C  3B  4C  5A", size=11, after=2)
     P(
         doc,
         "1 周二至周日含周六；2 小孩10+成人20=30；3 可画画不可游泳/骑车；"
         "4 小吃部可买水；5 周末可去；不可踢球；可玩游戏。",
         size=9,
-        after=6,
+        after=4,
     )
-    P(doc, "十一·任务二：开放作答。例：Don't climb the trees. / Please don't swim in the lake. / You can fly a kite here.", size=10, after=8)
+    P(
+        doc,
+        "十一·任务二（参考）：Don't climb the trees. / Please don't swim in the lake. / You can fly a kite here.",
+        size=10,
+        after=8,
+    )
 
     path = OUT / "U4_第四单元练习_答案.docx"
     doc.save(path)

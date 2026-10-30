@@ -946,11 +946,11 @@
           paperListenBtn.type = "button";
           paperListenBtn.className = "rec-action challenge";
           paperListenBtn.innerHTML =
-            "<strong>试卷听力（配套音频）</strong><span>U1/U2 练习卷一→四整套 · 边听边做卷</span>";
+            "<strong>试卷听力（配套音频）</strong><span>U1–U4 练习卷配套听力 · 边听边做卷</span>";
           paperListenBtn.addEventListener("click", () => {
             const uid = (walletStore().unitId || state.unitId || "").toLowerCase();
-            if (uid !== "u1" && uid !== "u2") {
-              alert("请先在设置里选择 Unit 1 或 Unit 2，再练试卷配套听力。");
+            if (uid !== "u1" && uid !== "u2" && uid !== "u3" && uid !== "u4") {
+              alert("请先在设置里选择 Unit 1–4，再练试卷配套听力。");
               return;
             }
             startLesson(null, { mode: "paperListen" });
@@ -985,20 +985,41 @@
           printU2.rel = "noopener";
           printU2.innerHTML =
             "<strong>打印包 · U2 PDF</strong><span>高清插图 · 配合「试卷听力」配套音频</span>";
+          const printU3 = document.createElement("a");
+          printU3.className = "rec-action rec-action-soft";
+          printU3.href = "./exams/U3_Unit3_Practice.pdf";
+          printU3.target = "_blank";
+          printU3.rel = "noopener";
+          printU3.innerHTML =
+            "<strong>打印包 · U3 PDF</strong><span>第三单元练习 · 含原卷附图 · 配套听力</span>";
+          const printU3Ans = document.createElement("a");
+          printU3Ans.className = "rec-action rec-action-soft";
+          printU3Ans.href = "./exams/U3_Unit3_Practice_Answers.pdf";
+          printU3Ans.target = "_blank";
+          printU3Ans.rel = "noopener";
+          printU3Ans.innerHTML =
+            "<strong>U3 参考答案</strong><span>完整听力原文 + 全题答案</span>";
+          const printU3Scan = document.createElement("a");
+          printU3Scan.className = "rec-action rec-action-soft";
+          printU3Scan.href = "./exams/U3_Unit3_Practice_Scan.pdf";
+          printU3Scan.target = "_blank";
+          printU3Scan.rel = "noopener";
+          printU3Scan.innerHTML =
+            "<strong>U3 原卷扫描 PDF</strong><span>截图单页拼接 · 对照打印</span>";
           const printU4 = document.createElement("a");
           printU4.className = "rec-action rec-action-soft";
           printU4.href = "./exams/U4_Unit4_Practice.pdf";
           printU4.target = "_blank";
           printU4.rel = "noopener";
           printU4.innerHTML =
-            "<strong>打印包 · U4 PDF</strong><span>第四单元练习 · 含原卷附图裁切</span>";
+            "<strong>打印包 · U4 PDF</strong><span>第四单元练习 · 含原卷附图 · 配套听力</span>";
           const printU4Ans = document.createElement("a");
           printU4Ans.className = "rec-action rec-action-soft";
           printU4Ans.href = "./exams/U4_Unit4_Practice_Answers.pdf";
           printU4Ans.target = "_blank";
           printU4Ans.rel = "noopener";
           printU4Ans.innerHTML =
-            "<strong>U4 参考答案</strong><span>听力据材料脚本 · 笔试对照卷面</span>";
+            "<strong>U4 参考答案</strong><span>完整听力原文 + 全题答案</span>";
           const printU4Scan = document.createElement("a");
           printU4Scan.className = "rec-action rec-action-soft";
           printU4Scan.href = "./exams/U4_Unit4_Practice_Scan.pdf";
@@ -1027,6 +1048,9 @@
           $("recordsActions").appendChild(paperListenBtn);
           $("recordsActions").appendChild(printBtn);
           $("recordsActions").appendChild(printU2);
+          $("recordsActions").appendChild(printU3);
+          $("recordsActions").appendChild(printU3Ans);
+          $("recordsActions").appendChild(printU3Scan);
           $("recordsActions").appendChild(printU4);
           $("recordsActions").appendChild(printU4Ans);
           $("recordsActions").appendChild(printU4Scan);

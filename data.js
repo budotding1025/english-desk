@@ -1301,6 +1301,26 @@ window.ENGLISH_DESK_DATA = {
             tip: "延展 Could I",
             extend: true,
           },
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak:
+              "I am Henry. It's Wednesday today. Our team is on duty. Mary will clean the blackboard. Jane will tidy up the desks. I will sweep the floor, and Jack would like to help me sweep together. Lily helps us get some water and close all the windows. Everyone is happy to make the classroom clean.",
+            show: "判断：Mary will clean the blackboard.",
+            answer: true,
+            tip: "试卷四·值日短文",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak:
+              "I am Henry. It's Wednesday today. Our team is on duty. Mary will clean the blackboard. Jane will tidy up the desks. I will sweep the floor, and Jack would like to help me sweep together. Lily helps us get some water and close all the windows. Everyone is happy to make the classroom clean.",
+            show: "判断：Lily will sweep the floor.",
+            answer: false,
+            tip: "陷阱：扫地是 Henry/Jack",
+            paper: true,
+          },
         ],
         reply: [
           {
@@ -1339,6 +1359,66 @@ window.ENGLISH_DESK_DATA = {
             answer: "a",
             tip: "礼貌应答",
           },
+          {
+            lesson: 1,
+            role: "adultFemale",
+            speak: "You are so kind. Thank you.",
+            choices: [
+              { id: "a", text: "You're welcome." },
+              { id: "b", text: "It's OK." },
+            ],
+            answer: "a",
+            tip: "试卷三·1",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "adultFemale",
+            speak: "Could you help me to sweep the floor please?",
+            choices: [
+              { id: "a", text: "No, I don't." },
+              { id: "b", text: "Sure, no problem." },
+            ],
+            answer: "b",
+            tip: "试卷三·2",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "girlChild",
+            speak: "My eraser is missing.",
+            choices: [
+              { id: "a", text: "Don't worry. You can use mine." },
+              { id: "b", text: "I can fix it." },
+            ],
+            answer: "a",
+            tip: "试卷三·3",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak: "I'm sorry I'm late.",
+            choices: [
+              { id: "a", text: "Not at all." },
+              { id: "b", text: "It's OK." },
+            ],
+            answer: "b",
+            tip: "试卷三·4",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak: "May I come in?",
+            choices: [
+              { id: "a", text: "Come in, please." },
+              { id: "b", text: "No, you can't." },
+            ],
+            answer: "a",
+            tip: "试卷三·5",
+            paper: true,
+          },
         ],
         challenge: {
           judge: [
@@ -1365,6 +1445,26 @@ window.ENGLISH_DESK_DATA = {
             tip: "挑战：把命令改成礼貌请求",
           },
           ],
+        },
+        pictureSentences: [
+          "Could you please open the door for me?",
+          "We should stand in line and get on the bus one by one.",
+          "You want to ask the way. What will you say at first?",
+          "Could you please pass me that book?",
+          "I'd like to sweep the floor.",
+          "The boy can fix the model plane.",
+        ],
+        orderDialogues: [
+          "Could you get me some water please? Sure, no problem.",
+          "Don't push, Henry. It's not polite. I see. Sorry, Uncle.",
+          "Excuse me, could I have some rice, please? Sure, here you are.",
+          "Could you help me hold these books please? Sure, no problem.",
+          "Excuse me, I can't find my pencil case. May I borrow a pencil? Sure, here is one.",
+        ],
+        passage: {
+          role: "boyChild",
+          speak:
+            "I am Henry. It's Wednesday today. Our team is on duty. Mary will clean the blackboard. Jane will tidy up the desks. I will sweep the floor, and Jack would like to help me sweep together. Lily helps us get some water and close all the windows. Everyone is happy to make the classroom clean.",
         },
       },
       questions: [
@@ -1490,6 +1590,56 @@ window.ENGLISH_DESK_DATA = {
             tip: "延展长句",
             extend: true,
           },
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak:
+              "Hi! Linda. How do you feel now? Not very happy. What's the matter? I don't understand this maths problem. It's so hard! Let me help you. May I use your pen? Sure. Here you are. Look, you can draw a picture. Oh! I see! Now I understand. Thank you, Mike.",
+            show: "判断：Linda is happy today.",
+            answer: false,
+            tip: "试卷四·1 Not very happy",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak:
+              "Hi! Linda. How do you feel now? Not very happy. What's the matter? I don't understand this maths problem. It's so hard! Let me help you. May I use your pen? Sure. Here you are. Look, you can draw a picture. Oh! I see! Now I understand. Thank you, Mike.",
+            show: "判断：Linda doesn't remember a poem.",
+            answer: false,
+            tip: "试卷四·2 maths≠poem",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak:
+              "Hi! Linda. How do you feel now? Not very happy. What's the matter? I don't understand this maths problem. It's so hard! Let me help you. May I use your pen? Sure. Here you are. Look, you can draw a picture. Oh! I see! Now I understand. Thank you, Mike.",
+            show: "判断：Mike needs to use Linda's pencil.",
+            answer: false,
+            tip: "试卷四·3 pen≠pencil",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak:
+              "Hi! Linda. How do you feel now? Not very happy. What's the matter? I don't understand this maths problem. It's so hard! Let me help you. May I use your pen? Sure. Here you are. Look, you can draw a picture. Oh! I see! Now I understand. Thank you, Mike.",
+            show: "判断：They draw a picture to understand the maths problem.",
+            answer: true,
+            tip: "试卷四·4",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak:
+              "Hi! Linda. How do you feel now? Not very happy. What's the matter? I don't understand this maths problem. It's so hard! Let me help you. May I use your pen? Sure. Here you are. Look, you can draw a picture. Oh! I see! Now I understand. Thank you, Mike.",
+            show: "判断：Mike is a polite boy.",
+            answer: true,
+            tip: "试卷四·5",
+            paper: true,
+          },
         ],
         reply: [
           {
@@ -1503,6 +1653,66 @@ window.ENGLISH_DESK_DATA = {
             ],
             answer: "a",
             tip: "复习心情",
+          },
+          {
+            lesson: 1,
+            role: "adultFemale",
+            speak: "Excuse me, would you please open the window?",
+            choices: [
+              { id: "a", text: "Sure." },
+              { id: "b", text: "Please be polite." },
+            ],
+            answer: "a",
+            tip: "试卷三·1",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "adultFemale",
+            speak: "How do you feel today?",
+            choices: [
+              { id: "a", text: "I don't like it." },
+              { id: "b", text: "I am happy." },
+            ],
+            answer: "b",
+            tip: "试卷三·2",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "adultFemale",
+            speak: "What's the matter? You look angry.",
+            choices: [
+              { id: "a", text: "I can go to the park." },
+              { id: "b", text: "My toy car is broken." },
+            ],
+            answer: "b",
+            tip: "试卷三·3",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "adultFemale",
+            speak: "What does he look like?",
+            choices: [
+              { id: "a", text: "He is tall with short hair." },
+              { id: "b", text: "He is angry." },
+            ],
+            answer: "a",
+            tip: "试卷三·4",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak: "Can I fly a kite with you?",
+            choices: [
+              { id: "a", text: "Of course. Let's do it together." },
+              { id: "b", text: "You can remember the first word." },
+            ],
+            answer: "a",
+            tip: "试卷三·5",
+            paper: true,
           },
         ],
         challenge: {
@@ -1530,6 +1740,28 @@ window.ENGLISH_DESK_DATA = {
             tip: "挑战：安慰并帮忙",
           },
           ],
+        },
+        pictureSentences: [
+          "Sometimes I feel excited.",
+          "My cat is white with a long tail.",
+          "The girl is ill today.",
+          "I often read books with my friends.",
+          "We should stand in line.",
+          "Could I have an apple, please?",
+          "May I use your eraser?",
+          "You should have a good rest.",
+        ],
+        orderDialogues: [
+          "What's the matter, Amy? I can't find my English book. Don't worry. Let me help you look for it.",
+          "What are you reading? I'm reading a story.",
+          "I can't remember this. You can read it aloud.",
+          "May I speak to Mike? Sorry, Mike is sleeping. May I call him later? Of course.",
+          "Would you do me a favour? What can I do for you? Can I use your pencil? Sure. Here you are.",
+        ],
+        passage: {
+          role: "adultFemale",
+          speak:
+            "It's September 1st. It's the first day of school. Children are back at school. They see many friends and teachers. They are very happy. Miss Green is their new English teacher. She is tall and beautiful. Today is Amy's birthday. She is so surprised. Her friends give her a gift. Mike is sad, because his new English book is missing. All the children look for it together. Oh, it's in Mike's schoolbag.",
         },
       },
       questions: [
