@@ -4363,142 +4363,117 @@ window.ENGLISH_DESK_DATA = {
     return cards;
   }
 
-  /** U1/U2 校内练习卷配套听力：按卷面一→四顺序练（打印卷可边听边做） */
+  /** 试卷配套听力一条（边听边做卷；连续播放，不穿插答题） */
+  function paperClipCard(opts) {
+    return {
+      type: "paperClip",
+      section: opts.section,
+      sectionName: opts.sectionName,
+      itemNo: opts.itemNo,
+      itemTotal: opts.itemTotal,
+      title: opts.section + " · 第 " + opts.itemNo + " 题",
+      prompt: opts.sectionName,
+      tip:
+        "大题 " +
+        opts.section +
+        " · 小题 " +
+        opts.itemNo +
+        "/" +
+        opts.itemTotal +
+        (opts.tip ? " · " + opts.tip : ""),
+      speakText: opts.speak,
+      speakRole: opts.role || "adultFemale",
+      autoPlay: true,
+    };
+  }
+
+  /** 校内练习卷配套听力：按卷面大题一→四、小题顺序（打印卷边听边做） */
   function buildPaperListenCards(unit, store) {
     store = store || {};
     const L = unit.listen || {};
     const cards = [];
+
     const pics = L.pictureSentences || [];
+    const sec1Name = "一、听句子（对照练习卷一）";
     pics.forEach(function (t, i) {
-      const decoys = shuffle(
-        pics
-          .filter(function (x) {
-            return x !== t;
-          })
-          .concat(["I am cooking dinner.", "She is watching TV."])
-      ).slice(0, 1);
-      const choices = shuffle([
-        { id: "a", text: t },
-        { id: "b", text: decoys[0] || "I am cooking dinner." },
-      ]);
-      const ans = (choices.filter(function (c) {
-        return c.text === t;
-      })[0] || choices[0]).id;
-      const c = listenCard(
-        {
+      cards.push(
+        paperClipCard({
+          section: "一",
+          sectionName: sec1Name,
+          itemNo: i + 1,
+          itemTotal: pics.length,
+          tip: "每题读两遍",
           speak: t,
-          role: /girl|she |Amy|worried/i.test(t) ? "girlChild" : /walk|call her|animals|warm water|looking for|Don't cry/i.test(t) ? "adultFemale" : "boyChild",
-          choices: choices,
-          answer: ans,
-          tip: "试卷一·" + (i + 1) + " · 听选图原文",
-          show: "听句子，选择你听到的内容（对照卷·一）",
-          paper: true,
-        },
-        "reply",
-        { hearTimes: 1 }
+          role: /girl|she |Amy|worried/i.test(t)
+            ? "girlChild"
+            : /walk|call her|animals|warm water|looking for|Don't cry|Would you|What's|How do|Please|We always|Some orange/i.test(
+                  t
+                )
+              ? "adultFemale"
+              : "boyChild",
+        })
       );
-      c.title = "试卷听力·一·听选图";
-      cards.push(c);
     });
 
-    const dialogs = L.orderDialogues || L.matchDialogues || [];
+    let dialogs = (L.orderDialogues || L.matchDialogues || []).slice();
     const isMatchPaper = !!(L.matchDialogues && L.matchDialogues.length);
+    // U5 等「听短文排序」：第一条是整篇，后面是片段 → 只播整篇一次
+    if (!isMatchPaper && dialogs.length > 1) {
+      const first = dialogs[0] || "";
+      const restAreParts = dialogs.slice(1).every(function (d) {
+        return first.indexOf(String(d).slice(0, Math.min(24, String(d).length))) >= 0;
+      });
+      if (restAreParts) dialogs = [first];
+    }
+    const sec2Name = isMatchPaper
+      ? "二、听对话，判断图片是否相符（对照练习卷二）"
+      : "二、听对话/短文排序（对照练习卷二）";
     dialogs.forEach(function (t, i) {
-      if (isMatchPaper) {
-        // U2 二：始终播有录音的原文；奇数题用「错误情景」作判断句 → 应判错
-        const wrongShows = [
-          "判断：他在读诗（不是写故事）。",
-          "判断：他找不到铅笔（不是记不住单词）。",
-          "判断：她在读数学书（不是故事书）。",
-          "判断：玲玲在睡觉（不是不在家）。",
-          "判断：建议喝冰果汁（不是温水）。",
-        ];
-        const matchOk = i % 2 === 0;
-        const c = listenCard(
-          {
-            speak: t,
-            role: "boyChild",
-            show: matchOk ? "判断：这与卷面图片情景相符。" : wrongShows[i] || "判断：图片与所听内容相符。",
-            answer: matchOk,
-            tip:
-              "试卷二·" +
-              (i + 1) +
-              (matchOk ? " · 相符 √" : " · 不相符 ×（听清细节）"),
-            paper: true,
-          },
-          "judge",
-          { hearTimes: 1 }
-        );
-        c.title = "试卷听力·二·听对话判断";
-        cards.push(c);
-      } else {
-        const decoys = shuffle(
-          dialogs
-            .filter(function (x) {
-              return x !== t;
-            })
-            .concat(["Happy New Year! Let's eat yuanxiao."])
-        ).slice(0, 1);
-        const choices = shuffle([
-          { id: "a", text: t },
-          { id: "b", text: decoys[0] || "Happy New Year!" },
-        ]);
-        const ans = (choices.filter(function (c) {
-          return c.text === t;
-        })[0] || choices[0]).id;
-        const c = listenCard(
-          {
-            speak: t,
-            role: "boyChild",
-            choices: choices,
-            answer: ans,
-            tip: "试卷二·" + (i + 1) + " · 听对话排序原文",
-            show: "听对话，选择你听到的内容（对照卷·二）",
-            paper: true,
-          },
-          "reply",
-          { hearTimes: 1 }
-        );
-        c.title = "试卷听力·二·听对话";
-        cards.push(c);
-      }
+      cards.push(
+        paperClipCard({
+          section: "二",
+          sectionName: sec2Name,
+          itemNo: i + 1,
+          itemTotal: dialogs.length,
+          tip: isMatchPaper ? "听清细节再判断" : "按听力顺序标号",
+          speak: t,
+          role: "boyChild",
+        })
+      );
     });
 
-    listenPaperBank(unit, "reply").forEach(function (r, i) {
-      if (!r.paper) return;
-      const c = listenCard(r, "reply", { hearTimes: 1 });
-      c.title = "试卷听力·三·听选答语";
-      c.tip = (r.tip || "") + " · 对照卷·三";
-      cards.push(c);
+    const replies = listenPaperBank(unit, "reply").filter(function (r) {
+      return r.paper;
+    });
+    const sec3Name = "三、听问句，选择正确的答语（对照练习卷三）";
+    replies.forEach(function (r, i) {
+      cards.push(
+        paperClipCard({
+          section: "三",
+          sectionName: sec3Name,
+          itemNo: i + 1,
+          itemTotal: replies.length,
+          tip: (r.tip || "").replace(/^试卷三[·・]?\s*/, "") || "听选答语",
+          speak: r.speak,
+          role: r.role || "adultFemale",
+        })
+      );
     });
 
     const passage = L.passage;
     if (passage && passage.speak) {
-      const hear = listenCard(
-        {
+      cards.push(
+        paperClipCard({
+          section: "四",
+          sectionName: "四、听短文（对照练习卷四）",
+          itemNo: 1,
+          itemTotal: 1,
+          tip: "整篇短文 · 边听边做卷",
           speak: passage.speak,
           role: passage.role || "girlChild",
-          choices: [{ id: "ok", text: "听完了，开始判断正误" }],
-          answer: "ok",
-          tip: "试卷四 · 短文听一遍即可（可点再听）",
-          show: "先听完整篇短文（同练习卷听力四）",
-          paper: true,
-        },
-        "reply",
-        { hearTimes: 1 }
+        })
       );
-      hear.title = "试卷听力·四·听短文";
-      hear.coach = "bee";
-      cards.push(hear);
     }
-
-    listenPaperBank(unit, "judge").forEach(function (j) {
-      if (!j.paper) return;
-      const c = listenCard(j, "judge", { hearTimes: 1 });
-      c.title = "试卷听力·四·短文判断";
-      c.tip = (j.tip || "") + " · 对照卷·四";
-      cards.push(c);
-    });
 
     return cards;
   }

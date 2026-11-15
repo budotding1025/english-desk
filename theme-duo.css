@@ -1079,6 +1079,51 @@ button { cursor: pointer; border: none; background: none; }
 @media (max-width: 420px) {
   .path-paper-actions { grid-template-columns: 1fr; }
 }
+
+/* 试卷配套听力：大题/小题列表 + 连播 */
+.paper-listen-meta {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+.paper-listen-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 42vh;
+  overflow: auto;
+  margin: 8px 0 4px;
+  padding-right: 2px;
+}
+.paper-listen-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  padding: 8px 10px;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.paper-listen-row strong {
+  font-size: 0.88rem;
+}
+.paper-listen-row span {
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-weight: 700;
+}
+.paper-listen-row.is-active {
+  border-color: #ffc800;
+  background: #fff9e6;
+}
+.paper-listen-row.is-done {
+  opacity: 0.72;
+}
 .path-copy strong { color: #3c3c3c; }
 .path-footer {
   position: sticky;

@@ -1095,7 +1095,382 @@
         return Math.round((state.index / state.cards.length) * 100);
       }
 
+      /**
+       * 试卷配套听力：每题读两遍（中间空 3 秒），自动连播下一题，不自动暂停。
+       * 保留：暂停 / 0.5× / 上一题。大题·小题号标清。
+       */
+      function renderPaperListenPlayer(autoSpeak) {
+        const clips = state.cards || [];
+        if (!clips.length) {
+          finishLesson();
+          return;
+        }
+        if (state.index < 0) state.index = 0;
+        if (state.index >= clips.length) {
+          finishLesson();
+          return;
+        }
+
+        state.revealed = false;
+        state.listenLocked = false;
+        state.scored = false;
+        $("progressFill").style.width = progressPct() + "%";
+        paintLessonHead();
+
+        const extra = $("cardExtra");
+        const actions = $("cardActions");
+        extra.innerHTML = "";
+        actions.innerHTML = "";
+
+        const meta = document.createElement("p");
+        meta.className = "paper-listen-meta";
+        meta.id = "paperListenMeta";
+        extra.appendChild(meta);
+
+        const status = document.createElement("p");
+        status.className = "follow-tip";
+        status.id = "paperListenStatus";
+        status.textContent = "每题读两遍，中间空 3 秒，然后自动下一题。可随时暂停。";
+        extra.appendChild(status);
+
+        const list = document.createElement("div");
+        list.className = "paper-listen-list";
+        const rowEls = [];
+        clips.forEach((clip, i) => {
+          const row = document.createElement("button");
+          row.type = "button";
+          row.className = "paper-listen-row";
+          row.innerHTML =
+            "<strong>" +
+            (clip.section || "") +
+            " · 第 " +
+            (clip.itemNo || i + 1) +
+            " 题</strong>" +
+            "<span>" +
+            (clip.sectionName || clip.prompt || "") +
+            "</span>";
+          row.addEventListener("click", () => jumpTo(i));
+          list.appendChild(row);
+          rowEls.push(row);
+        });
+        extra.appendChild(list);
+
+        let playGen = 0;
+        let isPlaying = false;
+        let paused = false;
+        let listenRate = 1;
+        let started = false;
+        const GAP_MS = 3000;
+        const BETWEEN_ITEMS_MS = 800;
+
+        function stillHere(gen) {
+          return (
+            gen === playGen &&
+            state.view === "lesson" &&
+            state.lessonMode === "paperListen"
+          );
+        }
+
+        function paintHead() {
+          const c = clips[state.index];
+          if (!c) return;
+          $("cardType").textContent =
+            "大题 " + (c.section || "") + " · 小题 " + (c.itemNo || state.index + 1);
+          $("cardPrompt").textContent = c.sectionName || c.prompt || "试卷配套听力";
+          $("cardSub").textContent =
+            (c.tip || "") +
+            " · 进度 " +
+            (state.index + 1) +
+            "/" +
+            clips.length;
+          meta.textContent =
+            "正在播：【" +
+            (c.section || "") +
+            "】第 " +
+            (c.itemNo || state.index + 1) +
+            " / " +
+            (c.itemTotal || "?") +
+            " 题（本大题）";
+          $("progressFill").style.width = progressPct() + "%";
+          rowEls.forEach((el, j) => {
+            el.classList.toggle("is-active", j === state.index);
+            el.classList.toggle("is-done", j < state.index);
+          });
+          if (rowEls[state.index]) {
+            try {
+              rowEls[state.index].scrollIntoView({ block: "nearest", behavior: "smooth" });
+            } catch (e) {}
+          }
+        }
+
+        function waitMs(ms, gen) {
+          return new Promise((resolve) => {
+            const t0 = Date.now();
+            const tick = () => {
+              if (!stillHere(gen)) {
+                resolve(false);
+                return;
+              }
+              if (Date.now() - t0 >= ms) {
+                resolve(true);
+                return;
+              }
+              setTimeout(tick, 80);
+            };
+            setTimeout(tick, Math.min(80, ms));
+          });
+        }
+
+        function speakOnce(c, rate, gen) {
+          if (!V || !c) return Promise.resolve(false);
+          const opts = { keepJoined: true };
+          if (rate && rate !== 1) opts.rate = rate;
+          return new Promise((resolve) => {
+            let done = false;
+            const finish = (v) => {
+              if (done) return;
+              done = true;
+              clearInterval(iv);
+              resolve(v);
+            };
+            const iv = setInterval(() => {
+              if (playGen !== gen) finish(false);
+            }, 80);
+            const p = V.speak(c.speakText, c.speakRole || "adultFemale", opts);
+            if (p && p.then) {
+              p.then((ok) => finish(playGen === gen ? !!ok : false)).catch(() => finish(false));
+            } else {
+              finish(false);
+            }
+          });
+        }
+
+        function paintActions() {
+          actions.innerHTML = "";
+          if (isPlaying) {
+            const pc = document.createElement("button");
+            pc.type = "button";
+            pc.className = "btn-speak";
+            pc.textContent = "暂停";
+            pc.addEventListener("click", () => pausePlay());
+            actions.appendChild(pc);
+            const tip = document.createElement("p");
+            tip.className = "follow-tip";
+            tip.style.margin = "4px 0 0";
+            tip.textContent =
+              listenRate < 1
+                ? "慢速连播中 · 每题两遍 · 可暂停"
+                : "连播中 · 每题两遍 · 中间空 3 秒 · 可暂停";
+            actions.appendChild(tip);
+            return;
+          }
+
+          if (paused) {
+            const cont = document.createElement("button");
+            cont.type = "button";
+            cont.className = "btn-ok";
+            cont.textContent = "继续";
+            cont.addEventListener("click", () => {
+              ensureVoiceOn();
+              const go = () => runFrom(state.index, listenRate || 1);
+              if (V && V.prime) V.prime().then(go).catch(go);
+              else go();
+            });
+            actions.appendChild(cont);
+          } else if (!started) {
+            const start = document.createElement("button");
+            start.type = "button";
+            start.className = "btn-ok";
+            start.textContent = "开始听 · 大题一第 1 题";
+            start.addEventListener("click", () => {
+              ensureVoiceOn();
+              const go = () => {
+                started = true;
+                runFrom(0, 1);
+              };
+              if (V && V.prime) V.prime().then(go).catch(go);
+              else go();
+            });
+            actions.appendChild(start);
+          } else {
+            const again = document.createElement("button");
+            again.type = "button";
+            again.className = "btn-ok";
+            again.textContent = "从本题再听";
+            again.addEventListener("click", () => {
+              ensureVoiceOn();
+              const go = () => runFrom(state.index, listenRate || 1);
+              if (V && V.prime) V.prime().then(go).catch(go);
+              else go();
+            });
+            actions.appendChild(again);
+          }
+
+          const slow = document.createElement("button");
+          slow.type = "button";
+          slow.className = "btn-speak secondary";
+          slow.textContent = "慢速 0.5×";
+          slow.addEventListener("click", () => {
+            ensureVoiceOn();
+            const go = () => {
+              started = true;
+              runFrom(state.index, 0.5);
+            };
+            if (V && V.prime) V.prime().then(go).catch(go);
+            else go();
+          });
+          actions.appendChild(slow);
+
+          const prev = document.createElement("button");
+          prev.type = "button";
+          prev.className = "btn-speak secondary";
+          prev.textContent = "上一题";
+          prev.disabled = state.index <= 0;
+          prev.addEventListener("click", () => {
+            if (state.index <= 0) return;
+            ensureVoiceOn();
+            const go = () => {
+              started = true;
+              runFrom(state.index - 1, listenRate || 1);
+            };
+            if (V && V.prime) V.prime().then(go).catch(go);
+            else go();
+          });
+          actions.appendChild(prev);
+        }
+
+        function pausePlay() {
+          if (!isPlaying) return;
+          paused = true;
+          isPlaying = false;
+          playGen += 1;
+          if (V && V.stop) V.stop();
+          status.className = "follow-tip";
+          status.textContent =
+            "已暂停 · " +
+            (clips[state.index]
+              ? "大题 " +
+                (clips[state.index].section || "") +
+                " · 第 " +
+                (clips[state.index].itemNo || state.index + 1) +
+                " 题"
+              : "") +
+            " · 点「继续」接着听";
+          paintActions();
+        }
+
+        function jumpTo(i) {
+          if (i < 0 || i >= clips.length) return;
+          ensureVoiceOn();
+          const go = () => {
+            started = true;
+            runFrom(i, listenRate || 1);
+          };
+          if (V && V.prime) V.prime().then(go).catch(go);
+          else go();
+        }
+
+        function runFrom(startAt, rate) {
+          const from = Math.max(0, Math.min(startAt, clips.length - 1));
+          const gen = ++playGen;
+          paused = false;
+          isPlaying = true;
+          started = true;
+          listenRate = rate && rate > 0 ? rate : 1;
+          state.index = from;
+          paintHead();
+          paintActions();
+          status.className = "follow-tip";
+          status.textContent = "连播中…";
+
+          let chain = Promise.resolve(true);
+          for (let i = from; i < clips.length; i++) {
+            const idx = i;
+            chain = chain.then((ok) => {
+              if (!ok || !stillHere(gen)) return false;
+              state.index = idx;
+              paintHead();
+              const c = clips[idx];
+              status.className = "follow-tip";
+              status.textContent =
+                "大题 " +
+                (c.section || "") +
+                " · 第 " +
+                (c.itemNo || idx + 1) +
+                " 题 · 第 1 遍";
+              return speakOnce(c, listenRate, gen).then((heard) => {
+                if (!stillHere(gen)) return false;
+                if (!heard) {
+                  status.className = "follow-tip warn";
+                  status.textContent = "没有声音？点「继续」或检查右上角静音";
+                  isPlaying = false;
+                  paused = true;
+                  paintActions();
+                  return false;
+                }
+                status.textContent =
+                  "大题 " +
+                  (c.section || "") +
+                  " · 第 " +
+                  (c.itemNo || idx + 1) +
+                  " 题 · 空 3 秒…";
+                return waitMs(GAP_MS, gen);
+              }).then((gapOk) => {
+                if (!gapOk || !stillHere(gen)) return false;
+                status.textContent =
+                  "大题 " +
+                  (c.section || "") +
+                  " · 第 " +
+                  (c.itemNo || idx + 1) +
+                  " 题 · 第 2 遍";
+                return speakOnce(c, listenRate, gen);
+              }).then((heard2) => {
+                if (!stillHere(gen)) return false;
+                if (!heard2) {
+                  status.className = "follow-tip warn";
+                  status.textContent = "第二遍没有声音，已暂停";
+                  isPlaying = false;
+                  paused = true;
+                  paintActions();
+                  return false;
+                }
+                if (idx >= clips.length - 1) return true;
+                status.textContent = "即将下一题…";
+                return waitMs(BETWEEN_ITEMS_MS, gen);
+              });
+            });
+          }
+
+          return chain.then((ok) => {
+            if (!stillHere(gen)) return;
+            isPlaying = false;
+            if (ok) {
+              status.className = "follow-tip ok";
+              status.textContent = "本单元试卷听力已全部播完。";
+              paintActions();
+              const done = document.createElement("button");
+              done.type = "button";
+              done.className = "btn-ok";
+              done.textContent = "完成";
+              done.addEventListener("click", () => finishLesson());
+              actions.appendChild(done);
+            }
+          });
+        }
+
+        paintHead();
+        paintActions();
+        if (autoSpeak && !started) {
+          // 需用户点「开始听」以解锁移动端音频；不自动播避免静音拦截
+          status.textContent = "点「开始听」：每题两遍、空 3 秒、自动下一题。";
+        }
+      }
+
       function renderCard(autoSpeak) {
+        if (state.lessonMode === "paperListen") {
+          renderPaperListenPlayer(autoSpeak);
+          return;
+        }
         const c = card();
         if (!c) {
           finishLesson();
@@ -1238,7 +1613,7 @@
         const done = () => setTimeout(() => setCoachTalking(false), 200);
         const opts = rate && rate !== 1 ? { rate: rate } : {};
         // 听力材料句常有整段预录音；勿拆句导致找不到 mp3
-        if (c.type === "listen") opts.keepJoined = true;
+        if (c.type === "listen" || c.type === "paperClip") opts.keepJoined = true;
         let p;
         if (c.type === "dialogue" && c.lines) {
           p = V.speakSequence(c.lines.map((l) => ({ role: l.role, text: l.text, rate: opts.rate })));

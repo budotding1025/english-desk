@@ -305,14 +305,14 @@ def build_paper() -> Path:
         P(doc, line, size=OPT, after=2, en=True)
     add_pic(doc, CROPS / "sec6.jpg", 15.4)
 
-    # —— Page 3：七 / 八 / 九短文上半（同原卷在页中断开）——
+    # —— Page 3：七 / 八（短文整段不拆页，放到第 4 页）——
     sec3 = doc.add_section()
     apply_section_margins(sec3)
     set_page_footer(sec3, 3)
 
     S(doc, "七、看图读故事，从方框中选择合适的词语补全故事，将序号写在横线上。")
     P(doc, "A. strawberries   B. chopsticks   C. tomato soup   D. fork   E. good", size=OPT, after=2, en=True)
-    add_pic(doc, CROPS / "sec7.jpg", 14.8)
+    add_pic(doc, CROPS / "sec7.jpg", 14.2)
 
     S(doc, "八、读对话，从方框中选择合适的句子补全对话，将序号写在横线上。")
     for line in [
@@ -328,46 +328,39 @@ def build_paper() -> Path:
         "Maomao: Cake. That's my favourite.",
     ]:
         p = doc.add_paragraph()
-        p.paragraph_format.space_before = Pt(1)
-        p.paragraph_format.space_after = Pt(3)
-        p.paragraph_format.line_spacing = 1.2
+        p.paragraph_format.space_before = Pt(2)
+        p.paragraph_format.space_after = Pt(5)
+        p.paragraph_format.line_spacing = 1.3
         r = p.add_run(line)
         font_en(r, size=BODY)
 
-    S(doc, "九、阅读短文，完成任务。")
-    # 原卷第 3 页断在 vitamin C 附近
-    passage_a = (
-        "My family often goes to a restaurant on weekends, and it's my favourite time of the week! "
-        "The restaurant is bright and clean, and the waiters are friendly. I always order fish—the fish is yummy. "
-        "My brother loves to drink orange juice. It is cold, sweet, and full of vitamin C. My"
-    )
-    p = doc.add_paragraph()
-    p.paragraph_format.first_line_indent = Cm(0.74)
-    p.paragraph_format.space_after = Pt(2)
-    p.paragraph_format.line_spacing = 1.25
-    r = p.add_run(passage_a)
-    font_en(r, size=BODY)
-
-    # —— Page 4：短文下半 + 任务一（小图+文字填空）/ 任务二 ——
+    # —— Page 4：九 整段短文（不跨页切断）+ 任务一/二 ——
     sec4 = doc.add_section()
     apply_section_margins(sec4)
     set_page_footer(sec4, 4)
 
-    passage_b = (
-        "mum chooses cabbages and potatoes. She says they're super healthy—they're full of vitamins and fiber. "
+    S(doc, "九、阅读短文，完成任务。")
+    passage = (
+        "My family often goes to a restaurant on weekends, and it's my favourite time of the week! "
+        "The restaurant is bright and clean, and the waiters are friendly. I always order fish—the fish is yummy. "
+        "My brother loves to drink orange juice. It is cold, sweet, and full of vitamin C. "
+        "My mum chooses cabbages and potatoes. She says they're super healthy—they're full of vitamins and fiber. "
         "Dad likes to eat meatballs and jiaozi. Eating at the restaurant is always fun and enjoyable. "
         "We talk, laugh, and share our food. The delicious meals make our weekends even more special. "
         "I can't wait to go again next weekend!"
     )
     p = doc.add_paragraph()
-    p.paragraph_format.space_before = Pt(0)
-    p.paragraph_format.space_after = Pt(4)
-    p.paragraph_format.line_spacing = 1.2
-    r = p.add_run(passage_b)
+    p.paragraph_format.first_line_indent = Cm(0.74)
+    p.paragraph_format.space_before = Pt(2)
+    p.paragraph_format.space_after = Pt(8)
+    p.paragraph_format.line_spacing = 1.3
+    # keep with next so Word prefers not to orphan the block from tasks
+    p.paragraph_format.keep_together = True
+    r = p.add_run(passage)
     font_en(r, size=BODY)
 
-    P(doc, "任务一：根据短文内容，补全对话。", size=SEC, bold=True, before=2, after=3, name="黑体")
-    # 左小图（一家人吃饭）+ 右清晰文字填空
+    P(doc, "任务一：根据短文内容，补全对话。", size=SEC, bold=True, before=4, after=3, name="黑体")
+    # 左：完整场景小图（含人物头部）；右：清晰文字填空
     duo = doc.add_table(rows=1, cols=2)
     duo.autofit = True
     left, right = duo.rows[0].cells
@@ -376,9 +369,9 @@ def build_paper() -> Path:
     lp.alignment = WD_ALIGN_PARAGRAPH.CENTER
     scene = CROPS / "sec9_scene.jpg"
     if scene.exists():
-        lp.add_run().add_picture(str(scene), width=Cm(6.8))
+        lp.add_run().add_picture(str(scene), width=Cm(7.2))
     else:
-        add_pic(doc, CROPS / "sec9_task1.jpg", 6.5)
+        add_pic(doc, CROPS / "sec9_task1.jpg", 7.0)
     right.text = ""
     rp0 = right.paragraphs[0]
     rp0.paragraph_format.space_before = Pt(0)
@@ -554,4 +547,14 @@ if __name__ == "__main__":
         build_scan_pdf()
     except OSError as e:
         print("scan pdf skipped:", e)
+    # 出卷后自动检查：裁切 + 跨页硬切段落
+    import subprocess
+    import sys
+
+    qa = subprocess.run(
+        [sys.executable, str(ROOT / "_qa_paper_crops.py"), "u5"],
+        cwd=str(ROOT),
+    )
+    if qa.returncode:
+        raise SystemExit("QA failed — fix crops/pagination before publishing")
     print("done")
