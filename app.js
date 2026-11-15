@@ -3258,7 +3258,8 @@
             else if (settle.practiceKind === "phonics") startLesson(null, { mode: "phonics" });
             else if (settle.practiceKind === "minimal") startLesson(null, { mode: "minimal" });
             else if (settle.practiceKind === "listenDrill") startLesson(null, { mode: "listenDrill" });
-            else if (settle.practiceKind === "paperListen") startLesson(null, { mode: "paperListen" });
+            else if (settle.practiceKind === "paperListen")
+              startLesson(null, { mode: "paperListen", returnTo: "home" });
             else if (settle.practiceKind === "miniExam") startLesson(null, { mode: "miniExam" });
             else if (settle.practiceKind === "reviewWrite") startLesson(null, { mode: "reviewWrite" });
             else if (settle.practiceKind === "retry") startLesson(null, { mode: "retry" });
