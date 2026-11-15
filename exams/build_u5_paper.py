@@ -22,6 +22,13 @@ def font(run, name="宋体", size=11, bold=False):
     run.bold = bold
 
 
+def font_en(run, size=11, bold=False):
+    run.font.name = "Times New Roman"
+    run._element.rPr.rFonts.set(qn("w:eastAsia"), "宋体")
+    run.font.size = Pt(size)
+    run.bold = bold
+
+
 def P(doc, text, *, size=11, bold=False, center=False, before=0, after=2, indent=None):
     p = doc.add_paragraph()
     p.paragraph_format.space_before = Pt(before)
@@ -34,6 +41,62 @@ def P(doc, text, *, size=11, bold=False, center=False, before=0, after=2, indent
     r = p.add_run(text)
     font(r, size=size, bold=bold)
     return p
+
+
+def blank(n=16):
+    return "_" * n
+
+
+def dialogue_line(doc, who_zh: str, parts: list[tuple[str, bool]]):
+    """parts: (text, is_english). Leaves wide blanks for handwriting."""
+    p = doc.add_paragraph()
+    p.paragraph_format.space_before = Pt(4)
+    p.paragraph_format.space_after = Pt(8)
+    p.paragraph_format.line_spacing = 1.35
+    r = p.add_run(who_zh + "：")
+    font(r, size=12, bold=True)
+    for text, is_en in parts:
+        r = p.add_run(text)
+        if is_en:
+            font_en(r, size=12)
+        else:
+            font(r, size=12)
+    return p
+
+
+def add_menu_table(doc):
+    """Clear printable menu with checkbox + word (no tiny scan text)."""
+    title = doc.add_paragraph()
+    title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    title.paragraph_format.space_before = Pt(2)
+    title.paragraph_format.space_after = Pt(6)
+    r = title.add_run("Menu")
+    font_en(r, size=14, bold=True)
+
+    cols = [
+        ("Meat", ["fish", "chicken", "meatballs"]),
+        ("Vegetables", ["tomatoes", "potatoes", "cabbages"]),
+        ("Main Food", ["rice", "baozi", "jiaozi"]),
+        ("Drink", ["apple juice", "orange juice", "coffee"]),
+    ]
+    table = doc.add_table(rows=4, cols=4)
+    table.autofit = True
+    for c, (head, items) in enumerate(cols):
+        cell0 = table.rows[0].cells[c]
+        cell0.text = ""
+        p = cell0.paragraphs[0]
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r = p.add_run(head)
+        font_en(r, size=12, bold=True)
+        for i, word in enumerate(items):
+            cell = table.rows[i + 1].cells[c]
+            cell.text = ""
+            p = cell.paragraphs[0]
+            p.paragraph_format.space_before = Pt(4)
+            p.paragraph_format.space_after = Pt(4)
+            r = p.add_run("□  " + word)
+            font_en(r, size=12)
+    P(doc, "（在点过的食物前画 √）", size=10, center=True, before=6, after=4)
 
 
 def S(doc, text):
@@ -180,12 +243,62 @@ def build_paper() -> Path:
     footer(doc, 3)
     doc.add_page_break()
 
-    # —— Page 4: 任务一图 / 任务二菜单 ——
-    P(doc, "任务一：根据短文内容，补全对话。", size=11, bold=True, before=2, after=3)
-    add_pic(doc, CROPS / "sec9_task1.jpg", 16.0)
+    # —— Page 4: 任务一文字对话 + 任务二文字菜单（避免扫描小字看不清）——
+    P(doc, "任务一：根据短文内容，补全对话。", size=11, bold=True, before=2, after=4)
+    P(
+        doc,
+        "（场景：服务员问一家四口想点什么。请把短文里点的食物写在横线上。）",
+        size=10,
+        after=6,
+    )
+    dialogue_line(
+        doc,
+        "服务员 Waitress",
+        [("What would you like?", True)],
+    )
+    dialogue_line(
+        doc,
+        "妈妈 Mum",
+        [
+            ("I'd like some ", True),
+            (f"1. {blank(18)}", True),
+            (" and ", True),
+            (f"2. {blank(18)}", True),
+            (".", True),
+        ],
+    )
+    dialogue_line(
+        doc,
+        "弟弟 Brother",
+        [
+            ("I'd like some ", True),
+            (f"3. {blank(20)}", True),
+            (".", True),
+        ],
+    )
+    dialogue_line(
+        doc,
+        "我 I",
+        [
+            ("I'd like some ", True),
+            (f"4. {blank(20)}", True),
+            (".", True),
+        ],
+    )
+    dialogue_line(
+        doc,
+        "爸爸 Dad",
+        [
+            ("I'd like some ", True),
+            (f"5. {blank(18)}", True),
+            (" and ", True),
+            (f"6. {blank(18)}", True),
+            (".", True),
+        ],
+    )
 
-    P(doc, "任务二：在菜单上勾出（√）他们点的食物。", size=11, bold=True, before=6, after=3)
-    add_pic(doc, CROPS / "sec9_menu.jpg", 12.0)
+    P(doc, "任务二：在菜单上勾出（√）他们点的食物。", size=11, bold=True, before=10, after=4)
+    add_menu_table(doc)
 
     footer(doc, 4)
 
@@ -262,8 +375,20 @@ def build_answers() -> Path:
     P(doc, "六、看图选短语：1H  2E  3C  4D  5B  6A  7G  8F", size=10, after=3)
     P(doc, "七、补全故事：1B  2C  3D  4A  5E", size=10, after=3)
     P(doc, "八、补全对话：1C  2A  3B  4E  5D", size=10, after=3)
-    P(doc, "九·任务一：1 cabbages  2 potatoes  3 orange juice  4 fish  5 meatballs  6 jiaozi", size=10, after=2)
-    P(doc, "九·任务二：勾选 fish、meatballs、potatoes、cabbages、jiaozi、orange juice。", size=10, after=4)
+    P(
+        doc,
+        "九·任务一：1 cabbages  2 potatoes（Mum）  3 orange juice（Brother）  "
+        "4 fish（I）  5 meatballs  6 jiaozi（Dad）",
+        size=10,
+        after=2,
+    )
+    P(
+        doc,
+        "九·任务二：勾选 fish、meatballs、potatoes、cabbages、jiaozi、orange juice。",
+        size=10,
+        after=4,
+    )
+
 
     path = OUT / "U5_第五单元练习_答案.docx"
     doc.save(path)
