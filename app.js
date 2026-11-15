@@ -946,11 +946,11 @@
           paperListenBtn.type = "button";
           paperListenBtn.className = "rec-action challenge";
           paperListenBtn.innerHTML =
-            "<strong>试卷听力（配套音频）</strong><span>U1–U4 练习卷配套听力 · 边听边做卷</span>";
+            "<strong>试卷听力（配套音频）</strong><span>U1–U5 练习卷配套听力 · 边听边做卷</span>";
           paperListenBtn.addEventListener("click", () => {
             const uid = (walletStore().unitId || state.unitId || "").toLowerCase();
-            if (uid !== "u1" && uid !== "u2" && uid !== "u3" && uid !== "u4") {
-              alert("请先在设置里选择 Unit 1–4，再练试卷配套听力。");
+            if (!/^u[1-5]$/.test(uid)) {
+              alert("请先在设置里选择 Unit 1–5，再练试卷配套听力。");
               return;
             }
             startLesson(null, { mode: "paperListen" });
@@ -1027,6 +1027,27 @@
           printU4Scan.rel = "noopener";
           printU4Scan.innerHTML =
             "<strong>U4 原卷扫描 PDF</strong><span>高清单页拼接 · 对照打印</span>";
+          const printU5 = document.createElement("a");
+          printU5.className = "rec-action rec-action-soft";
+          printU5.href = "./exams/U5_Unit5_Practice.pdf";
+          printU5.target = "_blank";
+          printU5.rel = "noopener";
+          printU5.innerHTML =
+            "<strong>打印包 · U5 PDF</strong><span>第五单元练习 · 含原卷附图 · 配套听力</span>";
+          const printU5Ans = document.createElement("a");
+          printU5Ans.className = "rec-action rec-action-soft";
+          printU5Ans.href = "./exams/U5_Unit5_Practice_Answers.pdf";
+          printU5Ans.target = "_blank";
+          printU5Ans.rel = "noopener";
+          printU5Ans.innerHTML =
+            "<strong>U5 参考答案</strong><span>完整听力原文 + 全题答案</span>";
+          const printU5Scan = document.createElement("a");
+          printU5Scan.className = "rec-action rec-action-soft";
+          printU5Scan.href = "./exams/U5_Unit5_Practice_Scan.pdf";
+          printU5Scan.target = "_blank";
+          printU5Scan.rel = "noopener";
+          printU5Scan.innerHTML =
+            "<strong>U5 原卷扫描 PDF</strong><span>照片单页拼接 · 对照打印</span>";
           const challengeBtn = document.createElement("button");
           challengeBtn.type = "button";
           challengeBtn.className = "rec-action challenge";
@@ -1054,6 +1075,9 @@
           $("recordsActions").appendChild(printU4);
           $("recordsActions").appendChild(printU4Ans);
           $("recordsActions").appendChild(printU4Scan);
+          $("recordsActions").appendChild(printU5);
+          $("recordsActions").appendChild(printU5Ans);
+          $("recordsActions").appendChild(printU5Scan);
           $("recordsActions").appendChild(listenBtn);
           $("recordsActions").appendChild(extendBtn);
           $("recordsActions").appendChild(phonicsBtn);

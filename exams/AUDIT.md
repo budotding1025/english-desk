@@ -36,9 +36,17 @@
 - 听力三：1A 2B 3A 4B 5A；五：1C 2C 3A 4B；四值日连线见答案 PDF
 - 笔试：六 1A 2C 3D 4C 5B；七 1B 2D 3E 4A 5C；八 1B 2A 3C 4E 5D；九 1B 2A 3C 4A；十·一 1T 2F 3F 4T
 
+### U5 试卷（2026-11 入库）
+- 原卷：`Unit test/U5-1.jpg` `U5-2.jpg` → `source/u5-*.png`
+- 成稿：`U5_Unit5_Practice.pdf` / `U5_Unit5_Practice_Scan.pdf`
+- 答案：`U5_Unit5_Practice_Answers.pdf`（完整 Listening script + 全题）
+- 听力一：1F 2T 3F 4T 5T；二图序 A D E B C F；三：1A 2A 3B 4A 5B；四：1 eggs 2 fish 3 Dinner 4 soup 5 fruit
+- 笔试：五 Food A C F H / Tableware D G I K / Flavour B E J L；六 1H 2E 3C 4D 5B 6A 7G 8F；七 1B 2C 3D 4A 5E；八 1C 2A 3B 4E 5D；九·一 cabbages/potatoes / orange juice / fish / meatballs/jiaozi
+- 配套音频：四年级偏慢语速（`exams/_gen_u5_listening_audio.py`）
+
 ## 听力答案（据材料原文，不变）
 
 - U1 四：1√ 2√ 3× 4× 5√  
 - U2 四：1T 2F 3T 4F 5F  
-- U3/U4：详见各单元答案 PDF；Records「试卷听力」U1–U4 已接配套音频  
+- U3/U4/U5：详见各单元答案 PDF；Records「试卷听力」U1–U5 已接配套音频  
 

@@ -1965,6 +1965,26 @@ window.ENGLISH_DESK_DATA = {
             tip: "延展 ir/ur girl nurse",
             extend: true,
           },
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak:
+              "Hi, I'm Jack. Everyone needs many kinds of food. My mum tells me, \"You are what you eat.\" I like to help my family to make a healthy meal plan. Here is the plan. We have bread, milk and eggs for breakfast. We eat rice, fish and vegetables for lunch. We have chicken, soup and fruit for dinner. How is my plan?",
+            show: "判断：Breakfast has bread, milk and eggs.",
+            answer: true,
+            tip: "试卷四·表格短文",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "boyChild",
+            speak:
+              "Hi, I'm Jack. Everyone needs many kinds of food. My mum tells me, \"You are what you eat.\" I like to help my family to make a healthy meal plan. Here is the plan. We have bread, milk and eggs for breakfast. We eat rice, fish and vegetables for lunch. We have chicken, soup and fruit for dinner. How is my plan?",
+            show: "判断：Lunch has chicken and soup.",
+            answer: false,
+            tip: "陷阱：午饭是 rice, fish, vegetables",
+            paper: true,
+          },
         ],
         reply: [
           {
@@ -1990,6 +2010,66 @@ window.ENGLISH_DESK_DATA = {
             ],
             answer: "a",
             tip: "改正用餐",
+          },
+          {
+            lesson: 1,
+            role: "adultFemale",
+            speak: "What's for lunch, Mum?",
+            choices: [
+              { id: "a", text: "We have meat and rice for lunch." },
+              { id: "b", text: "Eggs are good for us." },
+            ],
+            answer: "a",
+            tip: "试卷三·1",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "adultFemale",
+            speak: "What would you like, Tom?",
+            choices: [
+              { id: "a", text: "I'd like to have fish and juice." },
+              { id: "b", text: "Yes, please." },
+            ],
+            answer: "a",
+            tip: "试卷三·2",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "adultFemale",
+            speak: "What's your favourite food?",
+            choices: [
+              { id: "a", text: "I want some milk." },
+              { id: "b", text: "My favourite food is chicken." },
+            ],
+            answer: "b",
+            tip: "试卷三·3",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "adultFemale",
+            speak: "What would you like to drink?",
+            choices: [
+              { id: "a", text: "I'd like some soup." },
+              { id: "b", text: "I'd like some meat." },
+            ],
+            answer: "a",
+            tip: "试卷三·4",
+            paper: true,
+          },
+          {
+            lesson: 1,
+            role: "adultFemale",
+            speak: "How do you use the chopsticks?",
+            choices: [
+              { id: "a", text: "We play with them." },
+              { id: "b", text: "We hold them in one hand and pick up food." },
+            ],
+            answer: "b",
+            tip: "试卷三·5",
+            paper: true,
           },
         ],
         challenge: {
@@ -2017,6 +2097,23 @@ window.ENGLISH_DESK_DATA = {
             tip: "挑战：点餐加步骤",
           },
           ],
+        },
+        pictureSentences: [
+          "I'd like a sandwich.",
+          "Some orange juice for me, please.",
+          "We always hold the knife in the right hand.",
+          "Please don't make noise when you eat.",
+          "I'd like hot dogs on our school menu.",
+        ],
+        orderDialogues: [
+          "Making fruit salad is easy and fun! Here are the things we need. We need fruits like bananas, strawberries, and grapes. We also need a big bowl, a small knife, and some yogurt. It's a healthy snack. You can make it with a little help from your parents.",
+          "We need fruits like bananas, strawberries, and grapes.",
+          "We also need a big bowl, a small knife, and some yogurt.",
+        ],
+        passage: {
+          role: "boyChild",
+          speak:
+            "Hi, I'm Jack. Everyone needs many kinds of food. My mum tells me, \"You are what you eat.\" I like to help my family to make a healthy meal plan. Here is the plan. We have bread, milk and eggs for breakfast. We eat rice, fish and vegetables for lunch. We have chicken, soup and fruit for dinner. How is my plan?",
         },
       },
       questions: [
