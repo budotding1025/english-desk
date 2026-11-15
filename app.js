@@ -647,7 +647,7 @@
           else if (state.lessonMode === "minimal") alert("易混音小站还在准备，先去上一课吧。");
           else if (state.lessonMode === "listenDrill") alert("本单元暂无听力长句，先去上一课吧。");
           else if (state.lessonMode === "paperListen")
-            alert("本单元暂无校内卷听力材料（目前 U1/U2 已配套）。请先在设置里选 Unit 1 或 Unit 2。");
+            alert("本单元暂无校内卷听力材料（目前 U1–U5 已配套）。请换一个单元再试。");
           else if (state.lessonMode === "miniExam") alert("本单元暂时组不出练习，先换一单元或去上课吧。");
           else if (state.lessonMode === "preview") alert("这一课的预习还在准备，先去「复习」上课吧。");
           else if (state.lessonMode === "reviewWrite") alert("这一课的词句默写还在准备，先去「复习」上课吧。");
@@ -942,19 +942,56 @@
           listenBtn.className = "rec-action";
           listenBtn.innerHTML = "<strong>听力加练</strong><span>对齐听力材料 · 短文判断陷阱 + 听选答语</span>";
           listenBtn.addEventListener("click", () => startLesson(null, { mode: "listenDrill" }));
+          function pickPaperListenUnitThenStart() {
+            const paperUnits = (DATA.units || []).filter((u) => /^u[1-5]$/.test(u.id));
+            if (!paperUnits.length) {
+              alert("暂无可用的试卷听力单元。");
+              return;
+            }
+            const overlay = document.createElement("div");
+            overlay.className = "overlay is-center";
+            overlay.setAttribute("role", "dialog");
+            overlay.setAttribute("aria-modal", "true");
+            overlay.innerHTML =
+              '<div class="sheet" style="max-width:22rem">' +
+              "<h2>选单元 · 试卷听力</h2>" +
+              '<p class="meta" style="margin:0 0 12px;color:var(--muted);font-weight:700">选哪一单元，就听哪一单元练习卷的配套听力</p>' +
+              '<div class="paper-listen-unit-list" style="display:grid;gap:0.45rem;margin-bottom:12px"></div>' +
+              '<div class="row"><button type="button" class="btn ghost paper-listen-cancel">取消</button></div>' +
+              "</div>";
+            const list = overlay.querySelector(".paper-listen-unit-list");
+            const cur = (walletStore().unitId || state.unitId || "").toLowerCase();
+            paperUnits.forEach((u) => {
+              const b = document.createElement("button");
+              b.type = "button";
+              b.className = "rec-action" + (u.id === cur ? " challenge" : "");
+              b.innerHTML =
+                "<strong>" +
+                (u.name || u.id.toUpperCase()) +
+                "</strong><span>" +
+                (u.id === cur ? "当前设置 · 点此开始" : "点此听这一单元试卷听力") +
+                "</span>";
+              b.addEventListener("click", () => {
+                state.unitId = u.id;
+                saveStore({ unitId: u.id });
+                if ($("unitSelect")) $("unitSelect").value = u.id;
+                overlay.remove();
+                startLesson(null, { mode: "paperListen" });
+              });
+              list.appendChild(b);
+            });
+            overlay.querySelector(".paper-listen-cancel").addEventListener("click", () => overlay.remove());
+            overlay.addEventListener("click", (e) => {
+              if (e.target === overlay) overlay.remove();
+            });
+            document.body.appendChild(overlay);
+          }
           const paperListenBtn = document.createElement("button");
           paperListenBtn.type = "button";
           paperListenBtn.className = "rec-action challenge";
           paperListenBtn.innerHTML =
-            "<strong>试卷听力（配套音频）</strong><span>U1–U5 练习卷配套听力 · 边听边做卷</span>";
-          paperListenBtn.addEventListener("click", () => {
-            const uid = (walletStore().unitId || state.unitId || "").toLowerCase();
-            if (!/^u[1-5]$/.test(uid)) {
-              alert("请先在设置里选择 Unit 1–5，再练试卷配套听力。");
-              return;
-            }
-            startLesson(null, { mode: "paperListen" });
-          });
+            "<strong>试卷听力（配套音频）</strong><span>点开后选 U1–U5 · 边听边做卷</span>";
+          paperListenBtn.addEventListener("click", () => pickPaperListenUnitThenStart());
           const phonicsBtn = document.createElement("button");
           phonicsBtn.type = "button";
           phonicsBtn.className = "rec-action";
@@ -1201,8 +1238,10 @@
           else if (state.lessonMode === "phonics") $("lessonNameTitle").textContent = "Phonics · 发音小站";
           else if (state.lessonMode === "minimal") $("lessonNameTitle").textContent = "Minimal · 易混音";
           else if (state.lessonMode === "listenDrill") $("lessonNameTitle").textContent = "Listen · 听力加练";
-          else if (state.lessonMode === "paperListen")
-            $("lessonNameTitle").textContent = "Paper · U1/U2 练习卷配套听力";
+          else if (state.lessonMode === "paperListen") {
+            const uname = (u && u.name) || (state.unitId || "").toUpperCase();
+            $("lessonNameTitle").textContent = "Paper · " + uname + " 练习卷配套听力";
+          }
           else if (state.lessonMode === "miniExam") $("lessonNameTitle").textContent = "教材为主 · 试卷题型练";
           else if (state.lessonMode === "preview") {
             $("lessonNameTitle").textContent = node
@@ -1228,8 +1267,10 @@
           } else if (state.lessonMode === "listenDrill") {
             $("lessonFocus").textContent = "官方听力材料：短文判断陷阱 + 听选答语（U1/U2 已对试卷）";
           } else if (state.lessonMode === "paperListen") {
+            const uname = (u && u.name) || "";
             $("lessonFocus").textContent =
-              "校内练习卷配套音频：听力一→四按顺序练 · 可打开 PDF 边听边做";
+              (uname ? uname + " · " : "") +
+              "校内练习卷配套音频：听力按卷面顺序练 · 可打开 PDF 边听边做 · 想换单元请返回 Records 重选";
           } else if (state.lessonMode === "miniExam") {
             $("lessonFocus").textContent =
               "教材+校内卷改编：听选答语 · 判断陷阱 · 画线音 · 分类 · 问答 · 阅读 · 仿写（约 10–15 分钟）";
