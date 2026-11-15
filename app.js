@@ -581,20 +581,16 @@
           mode === "challenge" ||
           mode === "phonics" ||
           mode === "listenDrill" ||
-          mode === "paperListen" ||
-          mode === "minimal" ||
-          mode === "miniExam";
-        state.returnTo = fromRecords ? "records" : "home";
+          mode === "minimal";
+        state.returnTo = opts.returnTo || (fromRecords ? "records" : "home");
         const store = walletStore();
         if (pathId) state.pathId = pathId;
         else state.pathId = store.currentPathId || state.pathId;
         const node = Progress.nodeById(state.pathId);
-        // 听力/试卷练跟设置里选的单元走，避免被当前课路径带跑到别的单元
-        if (
-          mode === "listenDrill" ||
-          mode === "paperListen" ||
-          mode === "miniExam"
-        ) {
+        // 听力加练跟设置里选的单元；试卷听力由 Path 入口先写入 unitId
+        if (mode === "listenDrill" || mode === "miniExam") {
+          if (store.unitId) state.unitId = store.unitId;
+        } else if (mode === "paperListen") {
           if (store.unitId) state.unitId = store.unitId;
         } else if (node) {
           state.unitId = node.unitId;
@@ -687,18 +683,102 @@
         ov.setAttribute("aria-hidden", "false");
       }
 
+      function unitPaperPack(unitId) {
+        const packs = {
+          u1: {
+            practice: "./exams/U1_Unit1_Practice.pdf",
+            answers: null,
+            scan: null,
+            listen: true,
+          },
+          u2: {
+            practice: "./exams/U2_Unit2_Practice.pdf",
+            answers: null,
+            scan: null,
+            listen: true,
+          },
+          u3: {
+            practice: "./exams/U3_Unit3_Practice.pdf",
+            answers: "./exams/U3_Unit3_Practice_Answers.pdf",
+            scan: "./exams/U3_Unit3_Practice_Scan.pdf",
+            listen: true,
+          },
+          u4: {
+            practice: "./exams/U4_Unit4_Practice.pdf",
+            answers: "./exams/U4_Unit4_Practice_Answers.pdf",
+            scan: "./exams/U4_Unit4_Practice_Scan.pdf",
+            listen: true,
+          },
+          u5: {
+            practice: "./exams/U5_Unit5_Practice.pdf",
+            answers: "./exams/U5_Unit5_Practice_Answers.pdf",
+            scan: "./exams/U5_Unit5_Practice_Scan.pdf",
+            listen: true,
+          },
+        };
+        return packs[unitId] || null;
+      }
+
+      function appendUnitPaperBlock(list, unitId, unitTitle) {
+        const pack = unitPaperPack(unitId);
+        if (!pack) return;
+        const box = document.createElement("div");
+        box.className = "path-paper-pack";
+        const title = document.createElement("p");
+        title.className = "path-paper-title";
+        title.textContent = "单元练习卷 · " + (unitTitle || unitId.toUpperCase());
+        box.appendChild(title);
+        const row = document.createElement("div");
+        row.className = "path-paper-actions";
+
+        function addLink(href, strong, span) {
+          if (!href) return;
+          const a = document.createElement("a");
+          a.className = "path-paper-btn";
+          a.href = href;
+          a.target = "_blank";
+          a.rel = "noopener";
+          a.innerHTML = "<strong>" + strong + "</strong><span>" + span + "</span>";
+          row.appendChild(a);
+        }
+
+        addLink(pack.practice, "试卷下载", "可打印练习卷 PDF");
+        if (pack.listen) {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "path-paper-btn is-listen";
+          b.innerHTML = "<strong>试卷听力</strong><span>配套音频 · 边听边做</span>";
+          b.addEventListener("click", () => {
+            state.unitId = unitId;
+            saveStore({ unitId: unitId });
+            if ($("unitSelect")) $("unitSelect").value = unitId;
+            startLesson(null, { mode: "paperListen", returnTo: "home" });
+          });
+          row.appendChild(b);
+        }
+        addLink(pack.answers, "试卷答案", "听力原文 + 全题答案");
+        addLink(pack.scan, "原卷对照", "扫描/照片页 PDF");
+
+        box.appendChild(row);
+        list.appendChild(box);
+      }
+
       function renderPath() {
         const store = walletStore();
         const path = Progress.semesterPath();
         const doneN = Progress.completedCount(store.completedLessons);
         $("pathMeta").textContent =
-          "本学期共 " + path.length + " 课 · 已学 " + doneN + " 课 · 复习/多学都有附加金币";
+          "本学期共 " + path.length + " 课 · 已学 " + doneN + " 课 · 每单元课文后有练习卷入口";
         syncWalletUI();
         const list = $("pathList");
         list.innerHTML = "";
         let lastUnit = "";
         path.forEach((node, i) => {
           if (node.unitId !== lastUnit) {
+            if (lastUnit) {
+              const prev = path[i - 1];
+              appendUnitPaperBlock(list, lastUnit, prev && (prev.unitTitle || prev.unitName));
+            }
             lastUnit = node.unitId;
             const head = document.createElement("h2");
             head.className = "path-unit";
@@ -723,6 +803,10 @@
           });
           list.appendChild(btn);
         });
+        if (lastUnit) {
+          const last = path[path.length - 1];
+          appendUnitPaperBlock(list, lastUnit, last && (last.unitTitle || last.unitName));
+        }
       }
 
       function renderRankShop(store) {
@@ -924,7 +1008,7 @@
             '<div class="rec-stat float"><strong>' + (floatAcc == null ? "—" : floatAcc + "%") + "</strong><span>浮动正确率</span><small>近 " + (recentN || Progress.FLOAT_WINDOW) + " 题</small></div>" +
             '<div class="rec-stat"><strong>' + retries.length + "</strong><span>错题待练</span><small>错词本</small></div>" +
             "</div>" +
-            '<p class="score-sub">上课和错题复习计入正确率。发音小站、易混音、听力加练、教材·试卷练、难度挑战不算。</p>';
+            '<p class="score-sub">上课和错题复习计入正确率。发音小站、易混音、听力加练、难度挑战不算。单元试卷请到 Path 各单元课文后面。</p>';
         }
         if ($("recordsActions")) {
           $("recordsActions").innerHTML = "";
@@ -942,56 +1026,12 @@
           listenBtn.className = "rec-action";
           listenBtn.innerHTML = "<strong>听力加练</strong><span>对齐听力材料 · 短文判断陷阱 + 听选答语</span>";
           listenBtn.addEventListener("click", () => startLesson(null, { mode: "listenDrill" }));
-          function pickPaperListenUnitThenStart() {
-            const paperUnits = (DATA.units || []).filter((u) => /^u[1-5]$/.test(u.id));
-            if (!paperUnits.length) {
-              alert("暂无可用的试卷听力单元。");
-              return;
-            }
-            const overlay = document.createElement("div");
-            overlay.className = "overlay is-center";
-            overlay.setAttribute("role", "dialog");
-            overlay.setAttribute("aria-modal", "true");
-            overlay.innerHTML =
-              '<div class="sheet" style="max-width:22rem">' +
-              "<h2>选单元 · 试卷听力</h2>" +
-              '<p class="meta" style="margin:0 0 12px;color:var(--muted);font-weight:700">选哪一单元，就听哪一单元练习卷的配套听力</p>' +
-              '<div class="paper-listen-unit-list" style="display:grid;gap:0.45rem;margin-bottom:12px"></div>' +
-              '<div class="row"><button type="button" class="btn ghost paper-listen-cancel">取消</button></div>' +
-              "</div>";
-            const list = overlay.querySelector(".paper-listen-unit-list");
-            const cur = (walletStore().unitId || state.unitId || "").toLowerCase();
-            paperUnits.forEach((u) => {
-              const b = document.createElement("button");
-              b.type = "button";
-              b.className = "rec-action" + (u.id === cur ? " challenge" : "");
-              b.innerHTML =
-                "<strong>" +
-                (u.name || u.id.toUpperCase()) +
-                "</strong><span>" +
-                (u.id === cur ? "当前设置 · 点此开始" : "点此听这一单元试卷听力") +
-                "</span>";
-              b.addEventListener("click", () => {
-                state.unitId = u.id;
-                saveStore({ unitId: u.id });
-                if ($("unitSelect")) $("unitSelect").value = u.id;
-                overlay.remove();
-                startLesson(null, { mode: "paperListen" });
-              });
-              list.appendChild(b);
-            });
-            overlay.querySelector(".paper-listen-cancel").addEventListener("click", () => overlay.remove());
-            overlay.addEventListener("click", (e) => {
-              if (e.target === overlay) overlay.remove();
-            });
-            document.body.appendChild(overlay);
-          }
-          const paperListenBtn = document.createElement("button");
-          paperListenBtn.type = "button";
-          paperListenBtn.className = "rec-action challenge";
-          paperListenBtn.innerHTML =
-            "<strong>试卷听力（配套音频）</strong><span>点开后选 U1–U5 · 边听边做卷</span>";
-          paperListenBtn.addEventListener("click", () => pickPaperListenUnitThenStart());
+          const extendBtn = document.createElement("button");
+          extendBtn.type = "button";
+          extendBtn.className = "rec-action";
+          extendBtn.innerHTML =
+            "<strong>扩展听力</strong><span>按单元直达 · B站优先 · 也可开 YouTube</span>";
+          extendBtn.addEventListener("click", () => openExtendListen(true));
           const phonicsBtn = document.createElement("button");
           phonicsBtn.type = "button";
           phonicsBtn.className = "rec-action";
@@ -1002,125 +1042,17 @@
           minimalBtn.className = "rec-action";
           minimalBtn.innerHTML = "<strong>易混音小站</strong><span>late/let · ship/sheep · 一对一对比</span>";
           minimalBtn.addEventListener("click", () => startLesson(null, { mode: "minimal" }));
-          const miniBtn = document.createElement("button");
-          miniBtn.type = "button";
-          miniBtn.className = "rec-action challenge";
-          miniBtn.innerHTML =
-            "<strong>教材·试卷练</strong><span>以教材为主 · U1–U2 完整卷题型 · 其它单元同型改编</span>";
-          miniBtn.addEventListener("click", () => startLesson(null, { mode: "miniExam" }));
-          const printBtn = document.createElement("a");
-          printBtn.className = "rec-action rec-action-soft";
-          printBtn.href = "./exams/U1_Unit1_Practice.pdf";
-          printBtn.target = "_blank";
-          printBtn.rel = "noopener";
-          printBtn.innerHTML =
-            "<strong>打印包 · U1 PDF</strong><span>高清插图 · 配合「试卷听力」配套音频</span>";
-          const printU2 = document.createElement("a");
-          printU2.className = "rec-action rec-action-soft";
-          printU2.href = "./exams/U2_Unit2_Practice.pdf";
-          printU2.target = "_blank";
-          printU2.rel = "noopener";
-          printU2.innerHTML =
-            "<strong>打印包 · U2 PDF</strong><span>高清插图 · 配合「试卷听力」配套音频</span>";
-          const printU3 = document.createElement("a");
-          printU3.className = "rec-action rec-action-soft";
-          printU3.href = "./exams/U3_Unit3_Practice.pdf";
-          printU3.target = "_blank";
-          printU3.rel = "noopener";
-          printU3.innerHTML =
-            "<strong>打印包 · U3 PDF</strong><span>第三单元练习 · 含原卷附图 · 配套听力</span>";
-          const printU3Ans = document.createElement("a");
-          printU3Ans.className = "rec-action rec-action-soft";
-          printU3Ans.href = "./exams/U3_Unit3_Practice_Answers.pdf";
-          printU3Ans.target = "_blank";
-          printU3Ans.rel = "noopener";
-          printU3Ans.innerHTML =
-            "<strong>U3 参考答案</strong><span>完整听力原文 + 全题答案</span>";
-          const printU3Scan = document.createElement("a");
-          printU3Scan.className = "rec-action rec-action-soft";
-          printU3Scan.href = "./exams/U3_Unit3_Practice_Scan.pdf";
-          printU3Scan.target = "_blank";
-          printU3Scan.rel = "noopener";
-          printU3Scan.innerHTML =
-            "<strong>U3 原卷扫描 PDF</strong><span>截图单页拼接 · 对照打印</span>";
-          const printU4 = document.createElement("a");
-          printU4.className = "rec-action rec-action-soft";
-          printU4.href = "./exams/U4_Unit4_Practice.pdf";
-          printU4.target = "_blank";
-          printU4.rel = "noopener";
-          printU4.innerHTML =
-            "<strong>打印包 · U4 PDF</strong><span>第四单元练习 · 含原卷附图 · 配套听力</span>";
-          const printU4Ans = document.createElement("a");
-          printU4Ans.className = "rec-action rec-action-soft";
-          printU4Ans.href = "./exams/U4_Unit4_Practice_Answers.pdf";
-          printU4Ans.target = "_blank";
-          printU4Ans.rel = "noopener";
-          printU4Ans.innerHTML =
-            "<strong>U4 参考答案</strong><span>完整听力原文 + 全题答案</span>";
-          const printU4Scan = document.createElement("a");
-          printU4Scan.className = "rec-action rec-action-soft";
-          printU4Scan.href = "./exams/U4_Unit4_Practice_Scan.pdf";
-          printU4Scan.target = "_blank";
-          printU4Scan.rel = "noopener";
-          printU4Scan.innerHTML =
-            "<strong>U4 原卷扫描 PDF</strong><span>高清单页拼接 · 对照打印</span>";
-          const printU5 = document.createElement("a");
-          printU5.className = "rec-action rec-action-soft";
-          printU5.href = "./exams/U5_Unit5_Practice.pdf";
-          printU5.target = "_blank";
-          printU5.rel = "noopener";
-          printU5.innerHTML =
-            "<strong>打印包 · U5 PDF</strong><span>第五单元练习 · 含原卷附图 · 配套听力</span>";
-          const printU5Ans = document.createElement("a");
-          printU5Ans.className = "rec-action rec-action-soft";
-          printU5Ans.href = "./exams/U5_Unit5_Practice_Answers.pdf";
-          printU5Ans.target = "_blank";
-          printU5Ans.rel = "noopener";
-          printU5Ans.innerHTML =
-            "<strong>U5 参考答案</strong><span>完整听力原文 + 全题答案</span>";
-          const printU5Scan = document.createElement("a");
-          printU5Scan.className = "rec-action rec-action-soft";
-          printU5Scan.href = "./exams/U5_Unit5_Practice_Scan.pdf";
-          printU5Scan.target = "_blank";
-          printU5Scan.rel = "noopener";
-          printU5Scan.innerHTML =
-            "<strong>U5 原卷扫描 PDF</strong><span>照片单页拼接 · 对照打印</span>";
           const challengeBtn = document.createElement("button");
           challengeBtn.type = "button";
           challengeBtn.className = "rec-action challenge";
           challengeBtn.innerHTML = "<strong>难度挑战</strong><span>约 8 题 · 听写 · 听力 · 口语</span>";
           challengeBtn.addEventListener("click", () => startLesson(null, { mode: "challenge" }));
-          const writeBtn = document.createElement("button");
-          writeBtn.type = "button";
-          writeBtn.className = "rec-action rec-action-soft";
-          writeBtn.innerHTML = "<strong>词句默写</strong><span>同首页「默写」· 本课词+句</span>";
-          writeBtn.addEventListener("click", () => startLesson(null, { mode: "reviewWrite" }));
-          const extendBtn = document.createElement("button");
-          extendBtn.type = "button";
-          extendBtn.className = "rec-action";
-          extendBtn.innerHTML =
-            "<strong>扩展听力</strong><span>按单元直达 · B站优先 · 也可开 YouTube</span>";
-          extendBtn.addEventListener("click", () => openExtendListen(true));
           $("recordsActions").appendChild(retryBtn);
-          $("recordsActions").appendChild(miniBtn);
-          $("recordsActions").appendChild(paperListenBtn);
-          $("recordsActions").appendChild(printBtn);
-          $("recordsActions").appendChild(printU2);
-          $("recordsActions").appendChild(printU3);
-          $("recordsActions").appendChild(printU3Ans);
-          $("recordsActions").appendChild(printU3Scan);
-          $("recordsActions").appendChild(printU4);
-          $("recordsActions").appendChild(printU4Ans);
-          $("recordsActions").appendChild(printU4Scan);
-          $("recordsActions").appendChild(printU5);
-          $("recordsActions").appendChild(printU5Ans);
-          $("recordsActions").appendChild(printU5Scan);
           $("recordsActions").appendChild(listenBtn);
           $("recordsActions").appendChild(extendBtn);
           $("recordsActions").appendChild(phonicsBtn);
           $("recordsActions").appendChild(minimalBtn);
           $("recordsActions").appendChild(challengeBtn);
-          $("recordsActions").appendChild(writeBtn);
           paintRetryBadge(retryBtn, retries.length);
         }
         if ($("recordsMeta")) {
@@ -1270,7 +1202,7 @@
             const uname = (u && u.name) || "";
             $("lessonFocus").textContent =
               (uname ? uname + " · " : "") +
-              "校内练习卷配套音频：听力按卷面顺序练 · 可打开 PDF 边听边做 · 想换单元请返回 Records 重选";
+              "校内练习卷配套音频：听力按卷面顺序练 · 想换单元请回 Path 点该单元「试卷听力」";
           } else if (state.lessonMode === "miniExam") {
             $("lessonFocus").textContent =
               "教材+校内卷改编：听选答语 · 判断陷阱 · 画线音 · 分类 · 问答 · 阅读 · 仿写（约 10–15 分钟）";

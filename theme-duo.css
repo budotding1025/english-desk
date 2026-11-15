@@ -1031,6 +1031,54 @@ button { cursor: pointer; border: none; background: none; }
   line-height: 1.3;
   color: #3c3c3c;
 }
+.path-paper-pack {
+  margin: 6px 0 18px;
+  padding: 12px 12px 10px;
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  background: #fffdf6;
+}
+.path-paper-title {
+  margin: 0 0 10px;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #3c3c3c;
+}
+.path-paper-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.path-paper-btn {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  text-decoration: none;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  padding: 10px 12px;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.path-paper-btn strong {
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+.path-paper-btn span {
+  font-size: 0.7rem;
+  color: var(--muted);
+  font-weight: 700;
+}
+.path-paper-btn.is-listen {
+  border-color: #ffc800;
+  background: #fff9e6;
+}
+@media (max-width: 420px) {
+  .path-paper-actions { grid-template-columns: 1fr; }
+}
 .path-copy strong { color: #3c3c3c; }
 .path-footer {
   position: sticky;
