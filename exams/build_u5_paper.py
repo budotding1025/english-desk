@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Build U5 practice Word/PDF — tight layout matching school photo pages."""
+"""Build U5 practice Word/PDF — readable type size, modest figures (no soft stretch)."""
 from __future__ import annotations
 
 import shutil
@@ -14,64 +14,75 @@ ROOT = Path(__file__).resolve().parent
 CROPS = ROOT / "source" / "crops" / "u5"
 OUT = ROOT
 
+# Body ~原卷可读字号；插图控制在约 10–12cm，避免 900px 图拉到整页发虚
+BODY = 12
+STEM = 12
+OPT = 11
+SEC = 13
+TITLE = 16
+FOOT = 10
 
-def font(run, name="宋体", size=11, bold=False):
+
+def font(run, name="宋体", size=BODY, bold=False):
     run.font.name = name
     run._element.rPr.rFonts.set(qn("w:eastAsia"), name)
     run.font.size = Pt(size)
     run.bold = bold
 
 
-def font_en(run, size=11, bold=False):
+def font_en(run, size=BODY, bold=False):
     run.font.name = "Times New Roman"
     run._element.rPr.rFonts.set(qn("w:eastAsia"), "宋体")
     run.font.size = Pt(size)
     run.bold = bold
 
 
-def P(doc, text, *, size=11, bold=False, center=False, before=0, after=2, indent=None):
+def P(doc, text, *, size=BODY, bold=False, center=False, before=0, after=3, indent=None, en=False):
     p = doc.add_paragraph()
     p.paragraph_format.space_before = Pt(before)
     p.paragraph_format.space_after = Pt(after)
     p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
+    p.paragraph_format.line_spacing = 1.15
     if indent is not None:
         p.paragraph_format.first_line_indent = Cm(indent)
     if center:
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     r = p.add_run(text)
-    font(r, size=size, bold=bold)
+    if en:
+        font_en(r, size=size, bold=bold)
+    else:
+        font(r, size=size, bold=bold)
     return p
 
 
-def blank(n=16):
+def blank(n=20):
     return "_" * n
 
 
-def dialogue_line(doc, who_zh: str, parts: list[tuple[str, bool]]):
-    """parts: (text, is_english). Leaves wide blanks for handwriting."""
-    p = doc.add_paragraph()
-    p.paragraph_format.space_before = Pt(4)
-    p.paragraph_format.space_after = Pt(8)
-    p.paragraph_format.line_spacing = 1.35
-    r = p.add_run(who_zh + "：")
-    font(r, size=12, bold=True)
-    for text, is_en in parts:
-        r = p.add_run(text)
-        if is_en:
-            font_en(r, size=12)
-        else:
-            font(r, size=12)
-    return p
+def dialogue_block(doc, who: str, lines: list[str]):
+    """Role + English lines with room to write."""
+    head = doc.add_paragraph()
+    head.paragraph_format.space_before = Pt(6)
+    head.paragraph_format.space_after = Pt(2)
+    r = head.add_run(who)
+    font(r, name="黑体", size=STEM, bold=True)
+    for line in lines:
+        p = doc.add_paragraph()
+        p.paragraph_format.space_before = Pt(1)
+        p.paragraph_format.space_after = Pt(8)
+        p.paragraph_format.line_spacing = 1.45
+        p.paragraph_format.left_indent = Cm(0.35)
+        r = p.add_run(line)
+        font_en(r, size=13)
 
 
 def add_menu_table(doc):
-    """Clear printable menu with checkbox + word (no tiny scan text)."""
     title = doc.add_paragraph()
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    title.paragraph_format.space_before = Pt(2)
-    title.paragraph_format.space_after = Pt(6)
+    title.paragraph_format.space_before = Pt(4)
+    title.paragraph_format.space_after = Pt(8)
     r = title.add_run("Menu")
-    font_en(r, size=14, bold=True)
+    font_en(r, size=16, bold=True)
 
     cols = [
         ("Meat", ["fish", "chicken", "meatballs"]),
@@ -86,46 +97,50 @@ def add_menu_table(doc):
         cell0.text = ""
         p = cell0.paragraphs[0]
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.space_before = Pt(4)
+        p.paragraph_format.space_after = Pt(6)
         r = p.add_run(head)
-        font_en(r, size=12, bold=True)
+        font_en(r, size=13, bold=True)
         for i, word in enumerate(items):
             cell = table.rows[i + 1].cells[c]
             cell.text = ""
             p = cell.paragraphs[0]
-            p.paragraph_format.space_before = Pt(4)
-            p.paragraph_format.space_after = Pt(4)
+            p.paragraph_format.space_before = Pt(6)
+            p.paragraph_format.space_after = Pt(6)
+            p.paragraph_format.line_spacing = 1.4
             r = p.add_run("□  " + word)
-            font_en(r, size=12)
-    P(doc, "（在点过的食物前画 √）", size=10, center=True, before=6, after=4)
+            font_en(r, size=13)
+    P(doc, "（在点过的食物前画 √）", size=11, center=True, before=8, after=4)
 
 
 def S(doc, text):
-    """Section title — compact like school paper."""
-    P(doc, text, size=11, bold=True, before=6, after=3)
+    P(doc, text, size=SEC, bold=True, before=8, after=4)
 
 
 def footer(doc, page, total=4):
-    P(doc, f"英语 · 四上 · 第五单元  第 {page} 页（共 {total} 页）", size=9, center=True, before=8, after=0)
+    # Compact footer so it stays with page content (avoids blank orphan pages).
+    P(doc, f"英语 · 四上 · 第五单元  第 {page} 页（共 {total} 页）", size=FOOT, center=True, before=6, after=0)
 
 
-def add_pic(doc, path: Path | None, width_cm=16.0):
+def add_pic(doc, path: Path | None, width_cm=11.0):
+    """Keep figures modest so low-res crops stay sharp on A4."""
     if not path or not path.exists():
-        P(doc, "【图缺失】", size=10, center=True)
+        P(doc, "【图缺失】", size=11, center=True)
         return
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p.paragraph_format.space_before = Pt(0)
-    p.paragraph_format.space_after = Pt(2)
+    p.paragraph_format.space_before = Pt(2)
+    p.paragraph_format.space_after = Pt(4)
     p.add_run().add_picture(str(path), width=Cm(width_cm))
 
 
 def new_doc():
     doc = Document()
     for s in doc.sections:
-        s.top_margin = Cm(1.2)
-        s.bottom_margin = Cm(1.1)
-        s.left_margin = Cm(1.5)
-        s.right_margin = Cm(1.5)
+        s.top_margin = Cm(1.4)
+        s.bottom_margin = Cm(1.2)
+        s.left_margin = Cm(1.7)
+        s.right_margin = Cm(1.7)
     return doc
 
 
@@ -133,15 +148,15 @@ def build_paper() -> Path:
     doc = new_doc()
 
     # —— Page 1: 听力 一 / 二 / 三 ——
-    P(doc, "英语 · 四上 · 第五单元练习", size=15, bold=True, center=True, after=4)
-    P(doc, "小学________ 四年级____班  姓名____________  成绩________", size=10, center=True, after=4)
-    P(doc, "听力部分", size=12, bold=True, center=True, after=4)
+    P(doc, "英语 · 四上 · 第五单元练习", size=TITLE, bold=True, center=True, after=6)
+    P(doc, "小学________ 四年级____班  姓名____________  成绩________", size=BODY, center=True, after=6)
+    P(doc, "听力部分", size=14, bold=True, center=True, after=6)
 
     S(doc, "一、听句子，判断图片与所听内容是否相符，相符的写“T”，不相符的写“F”。")
-    add_pic(doc, CROPS / "sec1.jpg", 16.0)
+    add_pic(doc, CROPS / "sec1.jpg", 10.5)
 
     S(doc, "二、听短文，根据听到的顺序，用字母 A—F 给下列图片排序。")
-    add_pic(doc, CROPS / "sec2.jpg", 12.5)
+    add_pic(doc, CROPS / "sec2.jpg", 9.5)
 
     S(doc, "三、听问句，选择正确的答语，将序号写在题前括号内。")
     reply3 = [
@@ -152,8 +167,14 @@ def build_paper() -> Path:
         [("A", "We play with them."), ("B", "We hold them in one hand and pick up food.")],
     ]
     for i, opts in enumerate(reply3, 1):
-        line = f"(  ) {i}.  " + "    ".join(f"{lab}. {t}" for lab, t in opts)
-        P(doc, line, size=10, after=2)
+        # 一行两选项，贴近原卷；字号仍保持可读
+        line = f"(     ) {i}.  " + "     ".join(f"{lab}. {t}" for lab, t in opts)
+        p = doc.add_paragraph()
+        p.paragraph_format.space_before = Pt(1)
+        p.paragraph_format.space_after = Pt(4)
+        p.paragraph_format.line_spacing = 1.2
+        r = p.add_run(line)
+        font_en(r, size=OPT)
 
     footer(doc, 1)
     doc.add_page_break()
@@ -161,72 +182,81 @@ def build_paper() -> Path:
     # —— Page 2: 四 / 笔试 五 / 六 ——
     S(doc, "四、听短文，根据短文内容，完成表格。")
     table = doc.add_table(rows=2, cols=4)
-    headers = ["Meals", "Breakfast", "Lunch", "3. ________"]
+    headers = ["Meals", "Breakfast", "Lunch", f"3. {blank(10)}"]
     for i, h in enumerate(headers):
         cell = table.rows[0].cells[i]
-        cell.text = h
-        for p in cell.paragraphs:
-            for run in p.runs:
-                font(run, size=10, bold=True)
+        cell.text = ""
+        p = cell.paragraphs[0]
+        r = p.add_run(h)
+        font_en(r, size=OPT, bold=True)
     row = [
         "Food and drinks",
-        "bread, milk, 1. ________",
-        "rice, 2. ________, vegetables",
-        "chicken, 4. ________, 5. ________",
+        f"bread, milk, 1. {blank(8)}",
+        f"rice, 2. {blank(8)}, vegetables",
+        f"chicken, 4. {blank(6)}, 5. {blank(6)}",
     ]
     for i, val in enumerate(row):
         cell = table.rows[1].cells[i]
-        cell.text = val
-        for p in cell.paragraphs:
-            for run in p.runs:
-                font(run, size=10)
+        cell.text = ""
+        p = cell.paragraphs[0]
+        p.paragraph_format.space_before = Pt(6)
+        p.paragraph_format.space_after = Pt(6)
+        r = p.add_run(val)
+        font_en(r, size=OPT)
 
-    P(doc, "笔试部分", size=12, bold=True, center=True, before=8, after=4)
+    P(doc, "笔试部分", size=14, bold=True, center=True, before=12, after=6)
 
     S(doc, "五、读单词，给下列单词分类，将序号写在横线上。")
     P(
         doc,
         "A. ham  B. sweet  C. pizza  D. knife  E. sour  F. fish  "
         "G. fork  H. steak  I. chopstick  J. salty  K. bowl  L. bitter",
-        size=10,
-        after=3,
+        size=OPT,
+        after=6,
+        en=True,
     )
-    P(doc, "1. Food: ________ ________ ________ ________", size=10, after=2)
-    P(doc, "2. Tableware: ________ ________ ________ ________", size=10, after=2)
-    P(doc, "3. Flavour: ________ ________ ________ ________", size=10, after=4)
+    for line in [
+        f"1. Food: {blank(8)}  {blank(8)}  {blank(8)}  {blank(8)}",
+        f"2. Tableware: {blank(8)}  {blank(8)}  {blank(8)}  {blank(8)}",
+        f"3. Flavour: {blank(8)}  {blank(8)}  {blank(8)}  {blank(8)}",
+    ]:
+        P(doc, line, size=BODY, after=6, en=True)
 
     S(doc, "六、看图读短语，选择与图片相符的短语，将序号写在括号内。")
-    P(
-        doc,
-        "A. a bowl of rice   B. an apple pie   C. a chicken wing   D. mushroom soup\n"
+    for line in [
+        "A. a bowl of rice   B. an apple pie   C. a chicken wing   D. mushroom soup",
         "E. some vegetables   F. an ice cream   G. a glass of milk   H. a cup of coffee",
-        size=9,
-        after=2,
-    )
-    add_pic(doc, CROPS / "sec6.jpg", 16.0)
+    ]:
+        P(doc, line, size=OPT, after=3, en=True)
+    add_pic(doc, CROPS / "sec6.jpg", 11.0)
 
     footer(doc, 2)
     doc.add_page_break()
 
     # —— Page 3: 七 / 八 / 九 短文 ——
     S(doc, "七、看图读故事，从方框中选择合适的词语补全故事，将序号写在横线上。")
-    P(doc, "A. strawberries   B. chopsticks   C. tomato soup   D. fork   E. good", size=10, after=2)
-    add_pic(doc, CROPS / "sec7.jpg", 16.0)
+    P(doc, "A. strawberries   B. chopsticks   C. tomato soup   D. fork   E. good", size=OPT, after=4, en=True)
+    add_pic(doc, CROPS / "sec7.jpg", 10.5)
 
     S(doc, "八、读对话，从方框中选择合适的句子补全对话，将序号写在横线上。")
     for line in [
         "A. I love Chinese food.   B. I'd like to try something different.",
         "C. What would you like to eat?   D. And for dessert?   E. They are good for our body.",
     ]:
-        P(doc, line, size=9, after=1)
+        P(doc, line, size=OPT, after=3, en=True)
     for line in [
-        "Maomao: Hi Sara, it's lunch time. 1. ________",
-        "Sara: I'd like to have some rice with potatoes and meatballs. 2. ________ How about you?",
-        "Maomao: 3. ________ I'd like to have some salad and mushroom soup. 4. ________",
-        "Sara: 5. ________",
+        f"Maomao: Hi Sara, it's lunch time. 1. {blank(14)}",
+        f"Sara: I'd like to have some rice with potatoes and meatballs. 2. {blank(14)} How about you?",
+        f"Maomao: 3. {blank(14)} I'd like to have some salad and mushroom soup. 4. {blank(14)}",
+        f"Sara: 5. {blank(14)}",
         "Maomao: Cake. That's my favourite.",
     ]:
-        P(doc, line, size=10, after=2)
+        p = doc.add_paragraph()
+        p.paragraph_format.space_before = Pt(2)
+        p.paragraph_format.space_after = Pt(6)
+        p.paragraph_format.line_spacing = 1.35
+        r = p.add_run(line)
+        font_en(r, size=BODY)
 
     S(doc, "九、阅读短文，完成任务。")
     passage = (
@@ -238,66 +268,47 @@ def build_paper() -> Path:
         "We talk, laugh, and share our food. The delicious meals make our weekends even more special. "
         "I can't wait to go again next weekend!"
     )
-    P(doc, passage, size=10, after=2, indent=0.6)
+    p = doc.add_paragraph()
+    p.paragraph_format.first_line_indent = Cm(0.74)
+    p.paragraph_format.space_after = Pt(6)
+    p.paragraph_format.line_spacing = 1.35
+    r = p.add_run(passage)
+    font_en(r, size=BODY)
 
     footer(doc, 3)
     doc.add_page_break()
 
-    # —— Page 4: 任务一文字对话 + 任务二文字菜单（避免扫描小字看不清）——
-    P(doc, "任务一：根据短文内容，补全对话。", size=11, bold=True, before=2, after=4)
+    # —— Page 4: 清晰文字对话 + 菜单 ——
+    P(doc, "任务一：根据短文内容，补全对话。", size=SEC, bold=True, before=2, after=4)
     P(
         doc,
-        "（场景：服务员问一家四口想点什么。请把短文里点的食物写在横线上。）",
-        size=10,
+        "（场景：服务员问一家四口想点什么。请根据短文，把他们点的食物写在横线上。）",
+        size=11,
         after=6,
     )
-    dialogue_line(
-        doc,
-        "服务员 Waitress",
-        [("What would you like?", True)],
-    )
-    dialogue_line(
+    dialogue_block(doc, "服务员 Waitress", ["What would you like?"])
+    dialogue_block(
         doc,
         "妈妈 Mum",
-        [
-            ("I'd like some ", True),
-            (f"1. {blank(18)}", True),
-            (" and ", True),
-            (f"2. {blank(18)}", True),
-            (".", True),
-        ],
+        [f"I'd like some 1. {blank(18)} and 2. {blank(18)}."],
     )
-    dialogue_line(
+    dialogue_block(
         doc,
         "弟弟 Brother",
-        [
-            ("I'd like some ", True),
-            (f"3. {blank(20)}", True),
-            (".", True),
-        ],
+        [f"I'd like some 3. {blank(22)}."],
     )
-    dialogue_line(
+    dialogue_block(
         doc,
         "我 I",
-        [
-            ("I'd like some ", True),
-            (f"4. {blank(20)}", True),
-            (".", True),
-        ],
+        [f"I'd like some 4. {blank(22)}."],
     )
-    dialogue_line(
+    dialogue_block(
         doc,
         "爸爸 Dad",
-        [
-            ("I'd like some ", True),
-            (f"5. {blank(18)}", True),
-            (" and ", True),
-            (f"6. {blank(18)}", True),
-            (".", True),
-        ],
+        [f"I'd like some 5. {blank(18)} and 6. {blank(18)}."],
     )
 
-    P(doc, "任务二：在菜单上勾出（√）他们点的食物。", size=11, bold=True, before=10, after=4)
+    P(doc, "任务二：在菜单上勾出（√）他们点的食物。", size=SEC, bold=True, before=14, after=6)
     add_menu_table(doc)
 
     footer(doc, 4)
@@ -310,12 +321,12 @@ def build_paper() -> Path:
 
 def build_answers() -> Path:
     doc = new_doc()
-    P(doc, "英语 · 四上 · 第五单元练习 · 参考答案", size=15, bold=True, center=True, after=4)
-    P(doc, "含完整英语听力原文 + 全部题目答案（听力据《四上听力材料》第五单元）", size=9, center=True, after=8)
+    P(doc, "英语 · 四上 · 第五单元练习 · 参考答案", size=TITLE, bold=True, center=True, after=6)
+    P(doc, "含完整英语听力原文 + 全部题目答案（听力据《四上听力材料》第五单元）", size=11, center=True, after=10)
 
     S(doc, "听力部分 · 原文与答案")
-    P(doc, "一、听句子判断 T/F", size=11, bold=True, after=2)
-    P(doc, "【Listening script】", size=9, bold=True, after=1)
+    P(doc, "一、听句子判断 T/F", size=STEM, bold=True, after=3)
+    P(doc, "【Listening script】", size=11, bold=True, after=2)
     for i, t in enumerate(
         [
             "I'd like a sandwich.",
@@ -326,24 +337,25 @@ def build_answers() -> Path:
         ],
         1,
     ):
-        P(doc, f"{i}. {t}", size=9, after=1)
-    P(doc, "【Answers】1F  2T  3F  4T  5T", size=11, bold=True, after=4)
+        P(doc, f"{i}. {t}", size=BODY, after=2, en=True)
+    P(doc, "【Answers】1F  2T  3F  4T  5T", size=BODY, bold=True, after=6)
 
-    P(doc, "二、听短文排序 A—F", size=11, bold=True, after=2)
-    P(doc, "【Listening script】", size=9, bold=True, after=1)
+    P(doc, "二、听短文排序 A—F", size=STEM, bold=True, after=3)
+    P(doc, "【Listening script】", size=11, bold=True, after=2)
     P(
         doc,
         "Making fruit salad is easy and fun! Here are the things we need. "
         "We need fruits like bananas, strawberries, and grapes. "
         "We also need a big bowl, a small knife, and some yogurt. "
         "It's a healthy snack. You can make it with a little help from your parents.",
-        size=9,
-        after=2,
+        size=BODY,
+        after=3,
+        en=True,
     )
-    P(doc, "【Answers】纸面图序（上排 L→R / 下排 L→R）：A  D  E  B  C  F", size=10, bold=True, after=4)
+    P(doc, "【Answers】纸面图序（上排 L→R / 下排 L→R）：A  D  E  B  C  F", size=BODY, bold=True, after=6)
 
-    P(doc, "三、听选答语", size=11, bold=True, after=2)
-    P(doc, "【Listening script】", size=9, bold=True, after=1)
+    P(doc, "三、听选答语", size=STEM, bold=True, after=3)
+    P(doc, "【Listening script】", size=11, bold=True, after=2)
     for i, t in enumerate(
         [
             "What's for lunch, Mum?",
@@ -354,41 +366,41 @@ def build_answers() -> Path:
         ],
         1,
     ):
-        P(doc, f"{i}. {t}", size=9, after=1)
-    P(doc, "【Answers】1A  2A  3B  4A  5B", size=11, bold=True, after=4)
+        P(doc, f"{i}. {t}", size=BODY, after=2, en=True)
+    P(doc, "【Answers】1A  2A  3B  4A  5B", size=BODY, bold=True, after=6)
 
-    P(doc, "四、听短文填表", size=11, bold=True, after=2)
-    P(doc, "【Listening script】", size=9, bold=True, after=1)
+    P(doc, "四、听短文填表", size=STEM, bold=True, after=3)
+    P(doc, "【Listening script】", size=11, bold=True, after=2)
     P(
         doc,
         'Hi, I\'m Jack. Everyone needs many kinds of food. My mum tells me, "You are what you eat." '
         "I like to help my family to make a healthy meal plan. Here is the plan. "
         "We have bread, milk and eggs for breakfast. We eat rice, fish and vegetables for lunch. "
         "We have chicken, soup and fruit for dinner. How is my plan?",
-        size=9,
-        after=2,
+        size=BODY,
+        after=3,
+        en=True,
     )
-    P(doc, "【Answers】1 eggs  2 fish  3 Dinner  4 soup  5 fruit", size=11, bold=True, after=6)
+    P(doc, "【Answers】1 eggs  2 fish  3 Dinner  4 soup  5 fruit", size=BODY, bold=True, after=8)
 
     S(doc, "笔试部分 · 答案")
-    P(doc, "五、分类：1 Food: A C F H；2 Tableware: D G I K；3 Flavour: B E J L", size=10, after=3)
-    P(doc, "六、看图选短语：1H  2E  3C  4D  5B  6A  7G  8F", size=10, after=3)
-    P(doc, "七、补全故事：1B  2C  3D  4A  5E", size=10, after=3)
-    P(doc, "八、补全对话：1C  2A  3B  4E  5D", size=10, after=3)
+    P(doc, "五、分类：1 Food: A C F H；2 Tableware: D G I K；3 Flavour: B E J L", size=BODY, after=4)
+    P(doc, "六、看图选短语：1H  2E  3C  4D  5B  6A  7G  8F", size=BODY, after=4)
+    P(doc, "七、补全故事：1B  2C  3D  4A  5E", size=BODY, after=4)
+    P(doc, "八、补全对话：1C  2A  3B  4E  5D", size=BODY, after=4)
     P(
         doc,
         "九·任务一：1 cabbages  2 potatoes（Mum）  3 orange juice（Brother）  "
         "4 fish（I）  5 meatballs  6 jiaozi（Dad）",
-        size=10,
-        after=2,
+        size=BODY,
+        after=3,
     )
     P(
         doc,
         "九·任务二：勾选 fish、meatballs、potatoes、cabbages、jiaozi、orange juice。",
-        size=10,
+        size=BODY,
         after=4,
     )
-
 
     path = OUT / "U5_第五单元练习_答案.docx"
     doc.save(path)
@@ -404,8 +416,8 @@ def export_pdfs(paths: list[Path]) -> None:
     try:
         for docx in paths:
             pdf = docx.with_suffix(".pdf")
-            d = word.Documents.Open(str(docx))
-            d.SaveAs(str(pdf), FileFormat=17)
+            d = word.Documents.Open(str(docx.resolve()))
+            d.SaveAs(str(pdf.resolve()), FileFormat=17)
             d.Close(False)
             print("pdf", pdf.name)
     finally:
