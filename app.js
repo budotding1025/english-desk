@@ -687,13 +687,13 @@
         const packs = {
           u1: {
             practice: "./exams/U1_Unit1_Practice.pdf",
-            answers: null,
+            answers: "./exams/U1_Unit1_Practice_Answers.pdf",
             scan: null,
             listen: true,
           },
           u2: {
             practice: "./exams/U2_Unit2_Practice.pdf",
-            answers: null,
+            answers: "./exams/U2_Unit2_Practice_Answers.pdf",
             scan: null,
             listen: true,
           },
