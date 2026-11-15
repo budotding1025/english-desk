@@ -56,4 +56,12 @@
 
 Records → **试卷听力（配套音频）**（设置里选 Unit 1–5）。  
 答案 PDF 含完整 **Listening script** 与全部题目答案。  
+
+## 排版约定（以后新卷照此）
+
+- 原卷有图 → 成稿嵌图；有表 → 带边框真表格。  
+- 页脚只留一点点；空白留给填空/行距，勿空一大块给页脚。  
+- 分页跟原卷；难读气泡旁附小图 + 清晰文字填空。  
+- 细则见 Cursor skill `exam-from-photo` 与 `reference-english-desk.md`（以 U5 `build_u5_paper.py` 为样板）。  
+
 U5 音频按小学四年级课堂语速放慢（edge-tts约 -18%）。

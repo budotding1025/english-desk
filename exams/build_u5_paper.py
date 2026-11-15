@@ -7,6 +7,7 @@ from pathlib import Path
 
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_LINE_SPACING
+from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Cm, Pt
 
@@ -74,10 +75,9 @@ def add_pic(doc, path: Path | None, width_cm=13.0):
 
 
 def set_page_footer(section, page: int, total: int = 4):
-    """Real footer — keeps page number at bottom without eating body space."""
+    """Real footer — tiny bottom margin, page number only."""
     footer = section.footer
     footer.is_linked_to_previous = False
-    # clear existing
     for p in list(footer.paragraphs):
         p.clear()
     p = footer.paragraphs[0] if footer.paragraphs else footer.add_paragraph()
@@ -85,18 +85,70 @@ def set_page_footer(section, page: int, total: int = 4):
     p.paragraph_format.space_before = Pt(0)
     p.paragraph_format.space_after = Pt(0)
     r = p.add_run(f"英语 · 四上 · 第五单元  第 {page} 页（共 {total} 页）")
-    font(r, size=9)
+    font(r, size=8)
 
 
-def dialogue_line(doc, who: str, en_line: str):
-    p = doc.add_paragraph()
-    p.paragraph_format.space_before = Pt(8)
-    p.paragraph_format.space_after = Pt(10)
-    p.paragraph_format.line_spacing = 1.65
+def apply_section_margins(section):
+    section.top_margin = Cm(1.1)
+    section.bottom_margin = Cm(0.55)  # 页脚只留一点点
+    section.left_margin = Cm(1.5)
+    section.right_margin = Cm(1.5)
+    section.footer_distance = Cm(0.25)
+
+
+def set_table_borders(table, sz: str = "12"):
+    """Visible black grid so the listening chart reads as a real table."""
+    tbl = table._tbl
+    tblPr = tbl.tblPr if tbl.tblPr is not None else OxmlElement("w:tblPr")
+    if tbl.tblPr is None:
+        tbl.insert(0, tblPr)
+    borders = OxmlElement("w:tblBorders")
+    for edge in ("top", "left", "bottom", "right", "insideH", "insideV"):
+        el = OxmlElement(f"w:{edge}")
+        el.set(qn("w:val"), "single")
+        el.set(qn("w:sz"), sz)
+        el.set(qn("w:space"), "0")
+        el.set(qn("w:color"), "000000")
+        borders.append(el)
+    # replace existing borders if any
+    old = tblPr.find(qn("w:tblBorders"))
+    if old is not None:
+        tblPr.remove(old)
+    tblPr.append(borders)
+
+
+def set_cell_text(cell, text: str, *, size=OPT, bold=False, en=True, center=False, after=2):
+    cell.text = ""
+    lines = text.split("\n")
+    for i, line in enumerate(lines):
+        p = cell.paragraphs[0] if i == 0 else cell.add_paragraph()
+        p.paragraph_format.space_before = Pt(4 if i == 0 else 1)
+        p.paragraph_format.space_after = Pt(after if i == len(lines) - 1 else 1)
+        if center:
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r = p.add_run(line)
+        if en:
+            font_en(r, size=size, bold=bold)
+        else:
+            font(r, size=size, bold=bold)
+    return cell.paragraphs[0]
+
+
+def dialogue_line(cell_or_doc, who: str, en_line: str):
+    """Add a dialogue line into a cell paragraph stream or document."""
+    add_p = cell_or_doc.add_paragraph if hasattr(cell_or_doc, "add_paragraph") else None
+    if add_p is None:
+        # cell: append new paragraph
+        p = cell_or_doc.add_paragraph()
+    else:
+        p = add_p()
+    p.paragraph_format.space_before = Pt(5)
+    p.paragraph_format.space_after = Pt(8)
+    p.paragraph_format.line_spacing = 1.5
     r = p.add_run(who + "  ")
-    font(r, name="黑体", size=12, bold=True)
+    font(r, name="黑体", size=11, bold=True)
     r2 = p.add_run(en_line)
-    font_en(r2, size=13)
+    font_en(r2, size=12)
 
 
 def add_menu_table(doc):
@@ -115,6 +167,7 @@ def add_menu_table(doc):
     ]
     table = doc.add_table(rows=4, cols=4)
     table.autofit = True
+    set_table_borders(table, sz="10")
     for c, (head, items) in enumerate(cols):
         cell0 = table.rows[0].cells[c]
         cell0.text = ""
@@ -128,22 +181,27 @@ def add_menu_table(doc):
             cell = table.rows[i + 1].cells[c]
             cell.text = ""
             p = cell.paragraphs[0]
-            p.paragraph_format.space_before = Pt(10)
-            p.paragraph_format.space_after = Pt(10)
-            p.paragraph_format.line_spacing = 1.5
+            p.paragraph_format.space_before = Pt(18)
+            p.paragraph_format.space_after = Pt(18)
+            p.paragraph_format.line_spacing = 1.6
             r = p.add_run("□  " + word)
             font_en(r, size=13)
+    for row in table.rows:
+        tr = row._tr
+        trPr = tr.get_or_add_trPr()
+        for old in trPr.findall(qn("w:trHeight")):
+            trPr.remove(old)
+        th = OxmlElement("w:trHeight")
+        th.set(qn("w:val"), "1100")
+        th.set(qn("w:hRule"), "atLeast")
+        trPr.append(th)
 
 
 def build_paper() -> Path:
     doc = Document()
     # Configure first section
     sec = doc.sections[0]
-    sec.top_margin = Cm(1.2)
-    sec.bottom_margin = Cm(1.0)
-    sec.left_margin = Cm(1.5)
-    sec.right_margin = Cm(1.5)
-    sec.footer_distance = Cm(0.5)
+    apply_section_margins(sec)
     set_page_footer(sec, 1)
 
     # —— Page 1: 听力 一 / 二 / 三（同原卷）——
@@ -178,36 +236,48 @@ def build_paper() -> Path:
     # Use page break within same section then update footer? Multi-section is cleaner.
     # Remove empty first approach: add section without prior page_break
     new_sec = doc.add_section()
-    new_sec.top_margin = Cm(1.2)
-    new_sec.bottom_margin = Cm(1.0)
-    new_sec.left_margin = Cm(1.5)
-    new_sec.right_margin = Cm(1.5)
-    new_sec.footer_distance = Cm(0.5)
+    apply_section_margins(new_sec)
     set_page_footer(new_sec, 2)
 
     S(doc, "四、听短文，根据短文内容，完成表格。")
     table = doc.add_table(rows=2, cols=4)
-    headers = ["Meals", "Breakfast", "Lunch", f"3. {blank(8)}"]
+    set_table_borders(table, sz="14")
+    # 表头行
+    headers = ["Meals", "Breakfast", "Lunch", f"3. {blank(10)}"]
     for i, h in enumerate(headers):
-        cell = table.rows[0].cells[i]
-        cell.text = ""
-        p = cell.paragraphs[0]
-        r = p.add_run(h)
-        font_en(r, size=OPT, bold=True)
-    row = [
-        "Food and drinks",
-        f"bread, milk, 1. {blank(6)}",
-        f"rice, 2. {blank(6)}, vegetables",
-        f"chicken, 4. {blank(5)}, 5. {blank(5)}",
-    ]
-    for i, val in enumerate(row):
-        cell = table.rows[1].cells[i]
-        cell.text = ""
-        p = cell.paragraphs[0]
-        p.paragraph_format.space_before = Pt(4)
-        p.paragraph_format.space_after = Pt(4)
-        r = p.add_run(val)
-        font_en(r, size=OPT)
+        set_cell_text(table.rows[0].cells[i], h, size=OPT, bold=True, center=True, after=6)
+    # 内容行：与原卷一致，Lunch 格内 vegetables 另起一行；留足填空
+    set_cell_text(table.rows[1].cells[0], "Food and drinks", size=OPT, bold=False, center=True, after=6)
+    set_cell_text(table.rows[1].cells[1], f"bread, milk,\n1. {blank(10)}", size=OPT, after=6)
+    c2 = table.rows[1].cells[2]
+    c2.text = ""
+    p = c2.paragraphs[0]
+    p.paragraph_format.space_before = Pt(4)
+    p.paragraph_format.space_after = Pt(2)
+    r = p.add_run(f"rice, 2. {blank(8)},")
+    font_en(r, size=OPT)
+    p2 = c2.add_paragraph()
+    p2.paragraph_format.space_before = Pt(2)
+    p2.paragraph_format.space_after = Pt(6)
+    r = p2.add_run("vegetables")
+    font_en(r, size=OPT)
+    set_cell_text(
+        table.rows[1].cells[3],
+        f"chicken,\n4. {blank(8)}, 5. {blank(8)}",
+        size=OPT,
+        after=6,
+    )
+    # 行高略加，方便手写
+    for row in table.rows:
+        tr = row._tr
+        trPr = tr.get_or_add_trPr()
+        # remove old trHeight
+        for old in trPr.findall(qn("w:trHeight")):
+            trPr.remove(old)
+        th = OxmlElement("w:trHeight")
+        th.set(qn("w:val"), "700")
+        th.set(qn("w:hRule"), "atLeast")
+        trPr.append(th)
 
     P(doc, "笔试部分", size=13, bold=True, center=True, before=8, after=4, name="黑体")
 
@@ -233,15 +303,11 @@ def build_paper() -> Path:
         "E. some vegetables   F. an ice cream   G. a glass of milk   H. a cup of coffee",
     ]:
         P(doc, line, size=OPT, after=2, en=True)
-    add_pic(doc, CROPS / "sec6.jpg", 15.0)
+    add_pic(doc, CROPS / "sec6.jpg", 15.4)
 
     # —— Page 3：七 / 八 / 九短文上半（同原卷在页中断开）——
     sec3 = doc.add_section()
-    sec3.top_margin = Cm(1.2)
-    sec3.bottom_margin = Cm(1.0)
-    sec3.left_margin = Cm(1.5)
-    sec3.right_margin = Cm(1.5)
-    sec3.footer_distance = Cm(0.5)
+    apply_section_margins(sec3)
     set_page_footer(sec3, 3)
 
     S(doc, "七、看图读故事，从方框中选择合适的词语补全故事，将序号写在横线上。")
@@ -282,13 +348,9 @@ def build_paper() -> Path:
     r = p.add_run(passage_a)
     font_en(r, size=BODY)
 
-    # —— Page 4：短文下半 + 任务一/二（同原卷）——
+    # —— Page 4：短文下半 + 任务一（小图+文字填空）/ 任务二 ——
     sec4 = doc.add_section()
-    sec4.top_margin = Cm(1.2)
-    sec4.bottom_margin = Cm(1.0)
-    sec4.left_margin = Cm(1.5)
-    sec4.right_margin = Cm(1.5)
-    sec4.footer_distance = Cm(0.5)
+    apply_section_margins(sec4)
     set_page_footer(sec4, 4)
 
     passage_b = (
@@ -299,26 +361,47 @@ def build_paper() -> Path:
     )
     p = doc.add_paragraph()
     p.paragraph_format.space_before = Pt(0)
-    p.paragraph_format.space_after = Pt(6)
-    p.paragraph_format.line_spacing = 1.25
+    p.paragraph_format.space_after = Pt(4)
+    p.paragraph_format.line_spacing = 1.2
     r = p.add_run(passage_b)
     font_en(r, size=BODY)
 
-    P(doc, "任务一：根据短文内容，补全对话。", size=SEC, bold=True, before=4, after=4, name="黑体")
-    # 清晰文字版对话（原卷气泡小字难读）；留足横线
-    dialogue_line(doc, "服务员 Waitress:", "What would you like?")
-    dialogue_line(doc, "妈妈 Mum:", f"I'd like some 1. {blank(18)} and 2. {blank(18)}.")
-    dialogue_line(doc, "弟弟 Brother:", f"I'd like some 3. {blank(22)}.")
-    dialogue_line(doc, "我 I:", f"I'd like some 4. {blank(22)}.")
-    dialogue_line(doc, "爸爸 Dad:", f"I'd like some 5. {blank(18)} and 6. {blank(18)}.")
+    P(doc, "任务一：根据短文内容，补全对话。", size=SEC, bold=True, before=2, after=3, name="黑体")
+    # 左小图（一家人吃饭）+ 右清晰文字填空
+    duo = doc.add_table(rows=1, cols=2)
+    duo.autofit = True
+    left, right = duo.rows[0].cells
+    left.text = ""
+    lp = left.paragraphs[0]
+    lp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    scene = CROPS / "sec9_scene.jpg"
+    if scene.exists():
+        lp.add_run().add_picture(str(scene), width=Cm(6.8))
+    else:
+        add_pic(doc, CROPS / "sec9_task1.jpg", 6.5)
+    right.text = ""
+    rp0 = right.paragraphs[0]
+    rp0.paragraph_format.space_before = Pt(0)
+    rp0.paragraph_format.space_after = Pt(4)
+    r = rp0.add_run("服务员 Waitress:  ")
+    font(r, name="黑体", size=11, bold=True)
+    r = rp0.add_run("What would you like?")
+    font_en(r, size=12)
+    for who, line in [
+        ("妈妈 Mum:", f"I'd like some 1. {blank(14)} and 2. {blank(14)}."),
+        ("弟弟 Brother:", f"I'd like some 3. {blank(18)}."),
+        ("我 I:", f"I'd like some 4. {blank(18)}."),
+        ("爸爸 Dad:", f"I'd like some 5. {blank(14)} and 6. {blank(14)}."),
+    ]:
+        dialogue_line(right, who, line)
 
     P(
         doc,
         "任务二：他们一家人都选择了哪些菜品，请在菜单中画“√”。",
         size=SEC,
         bold=True,
-        before=14,
-        after=6,
+        before=10,
+        after=4,
         name="黑体",
     )
     add_menu_table(doc)
@@ -454,11 +537,9 @@ def build_scan_pdf() -> Path | None:
 
 
 if __name__ == "__main__":
-    # Clean unused helper noise
     paper = build_paper()
     ans = build_answers()
     print("docx", paper.name, ans.name)
-    build_scan_pdf()
     export_pdfs(
         [
             paper,
@@ -469,4 +550,8 @@ if __name__ == "__main__":
     )
     shutil.copy(OUT / "U5_Unit5_Practice.pdf", OUT / "U5_第五单元练习.pdf")
     shutil.copy(OUT / "U5_Unit5_Practice_Answers.pdf", OUT / "U5_第五单元练习_答案.pdf")
+    try:
+        build_scan_pdf()
+    except OSError as e:
+        print("scan pdf skipped:", e)
     print("done")
